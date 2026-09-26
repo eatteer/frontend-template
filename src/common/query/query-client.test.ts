@@ -78,4 +78,19 @@ describe("createQueryClient", () => {
 
     expect(showErrorToast).toHaveBeenCalledTimes(1);
   });
+
+  it("never toasts a 401, which is on its way to the sign-in page", async () => {
+    const queryClient = createQueryClient();
+    const error = buildApiError({ status: 401, code: "common.unauthenticated" });
+    const mutationCache = queryClient.getMutationCache();
+
+    queryClient.setQueryData(USERS_KEY, []);
+
+    await queryClient.prefetchQuery({ queryKey: USERS_KEY, queryFn: () => Promise.reject(error) });
+
+    await expect(mutationCache.build(queryClient, { mutationFn: () => Promise.reject(error) }).execute(undefined))
+      .rejects.toBe(error);
+
+    expect(showErrorToast).not.toHaveBeenCalled();
+  });
 });

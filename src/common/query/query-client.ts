@@ -1,6 +1,6 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 
-import { ApiError } from "@/common/api/api-error";
+import { ApiError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
 import { showErrorToast } from "@/common/components/error-toast";
 
 import type { Mutation, Query } from "@tanstack/react-query";
@@ -41,6 +41,12 @@ export function shouldRetryQuery(failureCount: number, error: unknown): boolean 
   return failureCount < MAX_QUERY_RETRIES;
 }
 
+// A 401 reaches a caller only once the refresh was refused too, and by then the reader is on their
+// way to sign in again: the sign-in page is the explanation, and a toast would only cover it.
+function shouldToast(error: ApiError, meta: QueryMeta | MutationMeta | undefined): boolean {
+  return error.status !== UNAUTHORIZED_STATUS && meta?.errorToast !== false;
+}
+
 export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
@@ -53,7 +59,7 @@ export function createQueryClient(): QueryClient {
       // A query that never loaded shows its error in place of its content. Only a failed refetch
       // behind data already on screen would otherwise go unnoticed, so only that one toasts.
       onError: (error: ApiError, query: Query<unknown, unknown>): void => {
-        if (query.state.data !== undefined && query.meta?.errorToast !== false) {
+        if (query.state.data !== undefined && shouldToast(error, query.meta)) {
           showErrorToast(error);
         }
       },
@@ -65,7 +71,7 @@ export function createQueryClient(): QueryClient {
         _onMutateResult: unknown,
         mutation: Mutation<unknown, unknown, unknown>,
       ): void => {
-        if (mutation.meta?.errorToast !== false) {
+        if (shouldToast(error, mutation.meta)) {
           showErrorToast(error);
         }
       },

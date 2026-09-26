@@ -3,6 +3,7 @@ import createClient from "openapi-fetch";
 import { ApiError, NETWORK_ERROR_CODE, NO_RESPONSE_STATUS, UNEXPECTED_RESPONSE_CODE } from "@/common/api/api-error";
 import { parseProblemDetails, PROBLEM_DETAILS_MEDIA_TYPE } from "@/common/api/problem-details";
 import type { paths } from "@/common/api/schema.gen";
+import { createSessionRefreshMiddleware } from "@/common/api/session-refresh";
 import { createTraceparent, TRACEPARENT_HEADER, traceIdOf } from "@/common/api/traceparent";
 import { env } from "@/common/config/env";
 import { i18n } from "@/common/i18n/i18n";
@@ -111,6 +112,10 @@ export const apiClient = createClient<paths>({
   fetch: (request: Request): Promise<Response> => globalThis.fetch(request),
 });
 
-// Response middlewares run in reverse order of registration: one registered after these sees a
-// failed response before it is turned into an ApiError.
-apiClient.use(requestContextMiddleware, problemDetailsMiddleware);
+// Response middlewares run in reverse order of registration, so the refresh — registered last — sees
+// a 401 before it is turned into an ApiError, and can answer with the request sent again instead.
+apiClient.use(
+  requestContextMiddleware,
+  problemDetailsMiddleware,
+  createSessionRefreshMiddleware(() => apiClient.POST("/api/v1/auth/refresh", { body: {} })),
+);

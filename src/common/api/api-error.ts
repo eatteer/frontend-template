@@ -6,6 +6,10 @@ export const UNEXPECTED_RESPONSE_CODE = "client.unexpected_response";
 // No HTTP status exists for a request that never got an answer; 0 is what `fetch` itself reports.
 export const NO_RESPONSE_STATUS = 0;
 
+export const UNAUTHORIZED_STATUS = 401;
+export const FORBIDDEN_STATUS = 403;
+export const NOT_FOUND_STATUS = 404;
+
 const CLIENT_ERROR_MIN_STATUS = 400;
 const SERVER_ERROR_MIN_STATUS = 500;
 
