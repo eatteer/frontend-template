@@ -1,0 +1,44 @@
+{
+  "appName": "Plantilla de frontend",
+  "actions": {
+    "close": "Cerrar",
+    "copyError": "Copiar error",
+    "errorCopied": "Copiado",
+    "goHome": "Ir al inicio",
+    "retry": "Reintentar"
+  },
+  "errors": {
+    "generic": {
+      "title": "Algo salió mal",
+      "detail": "Ocurrió un error inesperado. Vuelve a intentarlo y copia el error si sigue pasando."
+    },
+    "network": {
+      "title": "Sin conexión",
+      "detail": "No se pudo contactar al servidor. Revisa tu conexión y vuelve a intentarlo."
+    },
+    "unexpectedResponse": {
+      "title": "Respuesta inesperada",
+      "detail": "El servidor respondió de una forma que esta aplicación no entiende."
+    }
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "detail": "La página que buscas no existe o se movió."
+  },
+  "loader": {
+    "saving": "Guardando…"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "language": {
+    "label": "Idioma"
+  },
+  "home": {
+    "title": "Bienvenido",
+    "description": "Esta aplicación está lista para crecer funcionalidad por funcionalidad."
+  }
+}

@@ -238,7 +238,7 @@ function ToastIcon({ type }: { type: string | undefined }): React.JSX.Element | 
   );
 }
 
-function ToastList(): React.JSX.Element[] {
+function ToastList({ closeLabel }: { closeLabel: string }): React.JSX.Element[] {
   const { toasts } = ToastPrimitive.useToastManager();
 
   return toasts.map((toastItem) => (
@@ -252,24 +252,26 @@ function ToastList(): React.JSX.Element[] {
         </div>
 
         <ToastAction />
-        <ToastClose />
+        <ToastClose aria-label={closeLabel} />
       </ToastContent>
     </Toast>
   ));
 }
 
+// `closeLabel` names the close button in the reader's language; the primitive's own label is English.
 function Toaster({
   children,
+  closeLabel = "Close toast",
   toastManager = toast,
   ...props
-}: ToastPrimitive.Provider.Props): React.JSX.Element {
+}: ToastPrimitive.Provider.Props & { closeLabel?: string }): React.JSX.Element {
   return (
     <ToastProvider toastManager={toastManager} {...props}>
       {children}
 
       <ToastPortal>
         <ToastViewport>
-          <ToastList />
+          <ToastList closeLabel={closeLabel} />
         </ToastViewport>
       </ToastPortal>
     </ToastProvider>

@@ -14,7 +14,8 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["eslint.config.mjs", "commitlint.config.mjs", "dist/**", "coverage/**"],
+    // Generated files: `api:types` writes the API schema and the router plugin writes the route tree.
+    ignores: ["eslint.config.mjs", "commitlint.config.mjs", "dist/**", "coverage/**", "src/**/*.gen.ts"],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -208,7 +209,31 @@ export default tseslint.config(
       ...betterTailwindcss.configs["recommended-error"].rules,
       // Marker classes the shadcn components put on their roots for a stylesheet to hook into. They
       // generate no utility, and that is what they are for.
-      "better-tailwindcss/no-unknown-classes": ["error", { ignore: ["^cn-", "^toaster$"] }],
+      "better-tailwindcss/no-unknown-classes": ["error", { ignore: ["^cn-"] }],
+
+      // Configuration is read once, validated, from the module that owns it (see the configuration
+      // skill). A raw read elsewhere skips the validation and scatters the variable names.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "MemberExpression[object.type='MetaProperty'][property.name='env']",
+          message: "Read configuration from @/common/config/env, which validates it.",
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/common/config/env.ts"],
+    rules: {
+      "no-restricted-syntax": "off",
+    },
+  },
+  {
+    // A route file exports its `Route`, which the router plugin reads; the component it names lives
+    // in the feature and is split into its own chunk.
+    files: ["src/routes/**/*.tsx"],
+    rules: {
+      "react-refresh/only-export-components": ["error", { allowExportNames: ["Route"] }],
     },
   },
   {

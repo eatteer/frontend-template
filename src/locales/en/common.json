@@ -1,0 +1,44 @@
+{
+  "appName": "Frontend template",
+  "actions": {
+    "close": "Close",
+    "copyError": "Copy error",
+    "errorCopied": "Copied",
+    "goHome": "Go to the home page",
+    "retry": "Try again"
+  },
+  "errors": {
+    "generic": {
+      "title": "Something went wrong",
+      "detail": "An unexpected error occurred. Try again, and copy the error if it keeps happening."
+    },
+    "network": {
+      "title": "No connection",
+      "detail": "The server could not be reached. Check your connection and try again."
+    },
+    "unexpectedResponse": {
+      "title": "Unexpected response",
+      "detail": "The server answered in a way this application does not understand."
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "detail": "The page you are looking for does not exist or was moved."
+  },
+  "loader": {
+    "saving": "Saving…"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language"
+  },
+  "home": {
+    "title": "Welcome",
+    "description": "This application is ready to grow feature by feature."
+  }
+}

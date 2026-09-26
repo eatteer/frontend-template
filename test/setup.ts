@@ -3,7 +3,12 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 
+import { i18n } from "@/common/i18n/i18n";
+import { DEFAULT_LANGUAGE } from "@/common/i18n/languages";
+import { toast } from "@/common/ui/toast";
+
 import { guardConsole } from "@test/console-guard";
+import { stubMatchMedia } from "@test/match-media";
 import { server } from "@test/msw/server";
 
 let consoleGuard: ReturnType<typeof guardConsole>;
@@ -15,11 +20,20 @@ beforeAll(() => {
 
 beforeEach(() => {
   consoleGuard = guardConsole();
+  stubMatchMedia();
 });
 
-afterEach(() => {
+// Everything a test can leave behind in the page: open toasts, stored preferences, the theme class,
+// the language.
+afterEach(async () => {
   cleanup();
   server.resetHandlers();
+  toast.close();
+  localStorage.clear();
+  sessionStorage.clear();
+  document.documentElement.className = "";
+
+  await i18n.changeLanguage(DEFAULT_LANGUAGE);
 
   const messages = consoleGuard.drain();
 
