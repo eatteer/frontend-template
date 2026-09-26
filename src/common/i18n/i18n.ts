@@ -36,10 +36,16 @@ function applyDocumentLanguage(language: string): void {
   document.documentElement.lang = language;
 }
 
+// Also the next visit's starting point: a reload paints in the last language applied, the account's
+// included, before the session has been read. Applying the language already in place writes nothing.
 export async function changeLanguage(language: LanguageValue): Promise<void> {
-  localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  if (localStorage.getItem(LANGUAGE_STORAGE_KEY) !== language) {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  }
 
-  await i18next.changeLanguage(language);
+  if (i18next.language !== language) {
+    await i18next.changeLanguage(language);
+  }
 }
 
 void i18next.use(initReactI18next).init({

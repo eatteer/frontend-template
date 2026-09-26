@@ -213,6 +213,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/me/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change the signed-in user's preferences
+         * @description The language is the account's: every message sent to the user is written in it, and a client applies it after sign-in. Setting the value it already has changes nothing.
+         */
+        patch: operations["updatePreferences"];
+        trace?: never;
+    };
     "/api/v1/users/{id}/roles": {
         parameters: {
             query?: never;
@@ -610,6 +630,13 @@ export type components = {
             /** @example An0ther-one! */
             newPassword: string;
         };
+        UpdatePreferencesDTO: {
+            /**
+             * @description The language every message to this account is written in
+             * @enum {string}
+             */
+            preferredLanguage: "en" | "es";
+        };
         AssignUserRolesDTO: {
             /**
              * @example [
@@ -714,6 +741,7 @@ export type CreatedDTO = components['schemas']['CreatedDTO'];
 export type CreateUserDTO = components['schemas']['CreateUserDTO'];
 export type UpdateUserDTO = components['schemas']['UpdateUserDTO'];
 export type ChangePasswordDTO = components['schemas']['ChangePasswordDTO'];
+export type UpdatePreferencesDTO = components['schemas']['UpdatePreferencesDTO'];
 export type AssignUserRolesDTO = components['schemas']['AssignUserRolesDTO'];
 export type RoleDTO = components['schemas']['RoleDTO'];
 export type CreateRoleDTO = components['schemas']['CreateRoleDTO'];
@@ -1519,6 +1547,64 @@ export interface operations {
             };
         };
     };
+    updatePreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePreferencesDTO"];
+            };
+        };
+        responses: {
+            /** @description Preferences changed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The body is not valid */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                };
+            };
+            /** @description No valid credentials were presented */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                };
+            };
+            /** @description Missing the required permission */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                };
+            };
+            /** @description The account is suspended */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                };
+            };
+        };
+    };
     assignUserRoles: {
         parameters: {
             query?: never;
@@ -2157,6 +2243,7 @@ export const sessionDTOPermissionsValues: ReadonlyArray<FlattenedDeepRequired<co
 export const userDTOStatusValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UserDTO"]["status"]> = ["active", "suspended"];
 export const userDTOPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UserDTO"]["preferredLanguage"]> = ["en", "es"];
 export const createUserDTOPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["CreateUserDTO"]["preferredLanguage"]> = ["en", "es"];
+export const updatePreferencesDTOPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UpdatePreferencesDTO"]["preferredLanguage"]> = ["en", "es"];
 export const roleDTOPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["RoleDTO"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
 export const createRoleDTOPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["CreateRoleDTO"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
 export const updateRoleDTOPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UpdateRoleDTO"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];

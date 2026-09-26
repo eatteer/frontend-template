@@ -3,10 +3,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiError } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { publishSessionEvent } from "@/common/api/session-events";
+import { changeLanguage } from "@/common/i18n/i18n";
+import type { LanguageValue } from "@/common/i18n/languages";
 import { sessionQuery } from "@/features/auth/api/session-queries";
+import type { Session } from "@/features/auth/model/session";
 import type { SignInValues } from "@/features/auth/schemas/sign-in.schema";
 
-import type { UseMutationResult } from "@tanstack/react-query";
+import type { QueryClient, UseMutationResult } from "@tanstack/react-query";
+
+// The account's language before the switch, to put back if the backend refuses it.
+type LanguageRollback = { previous: LanguageValue | undefined };
 
 // The cookie transport is the backend's default: the tokens arrive as HttpOnly cookies, out of reach
 // of any script on the page, and the body carries nothing worth keeping.
@@ -16,6 +22,19 @@ async function signIn(credentials: SignInValues): Promise<void> {
 
 async function signOut(): Promise<void> {
   await apiClient.POST("/api/v1/auth/logout", { body: {} });
+}
+
+async function updateAccountLanguage(preferredLanguage: LanguageValue): Promise<void> {
+  await apiClient.PATCH("/api/v1/users/me/preferences", { body: { preferredLanguage } });
+}
+
+function setSessionLanguage(queryClient: QueryClient, preferredLanguage: LanguageValue): void {
+  queryClient.setQueryData(
+    sessionQuery.queryKey,
+    (session: Session | null | undefined): Session | null | undefined => session
+      ? { ...session, user: { ...session.user, preferredLanguage } }
+      : session,
+  );
 }
 
 export function useSignIn(): UseMutationResult<void, ApiError, SignInValues> {
@@ -42,6 +61,39 @@ export function useSignOut(): UseMutationResult<void, ApiError, void> {
     mutationFn: signOut,
     onSuccess: (): void => {
       publishSessionEvent({ type: "signed-out", reason: "sign-out" });
+    },
+  });
+}
+
+// The screen switches at once and the backend is told after; a refusal switches it back, with the
+// toast saying why. Other tabs read the session again once the change is stored.
+export function useChangeAccountLanguage(): UseMutationResult<void, ApiError, LanguageValue, LanguageRollback> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateAccountLanguage,
+    // Nothing on screen waits for it: the new language is already showing.
+    meta: { fullscreenLoader: false },
+    onMutate: async (language: LanguageValue): Promise<LanguageRollback> => {
+      const previous = queryClient.getQueryData(sessionQuery.queryKey)?.user.preferredLanguage;
+
+      setSessionLanguage(queryClient, language);
+
+      await changeLanguage(language);
+
+      return { previous };
+    },
+    onError: async (_error: ApiError, _language: LanguageValue, rollback: LanguageRollback | undefined): Promise<void> => {
+      if (rollback?.previous === undefined) {
+        return;
+      }
+
+      setSessionLanguage(queryClient, rollback.previous);
+
+      await changeLanguage(rollback.previous);
+    },
+    onSuccess: (): void => {
+      publishSessionEvent({ type: "updated" });
     },
   });
 }

@@ -1,17 +1,18 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { LanguageMenu } from "@/common/components/language-menu";
 import { ThemeMenu } from "@/common/components/theme/theme-menu";
 
 import type { JSX, ReactNode } from "react";
 
+// Both menus are passed in by the route, since the shell is shared and they act on the account, which
+// belongs to a feature.
 type AppShellProps = {
-  // Passed in by the route, since the shell is shared and the account menu belongs to a feature.
+  languageMenu: ReactNode;
   userMenu: ReactNode;
 };
 
-export function AppShell({ userMenu }: AppShellProps): JSX.Element {
+export function AppShell({ languageMenu, userMenu }: AppShellProps): JSX.Element {
   const { t } = useTranslation();
 
   return (
@@ -20,7 +21,7 @@ export function AppShell({ userMenu }: AppShellProps): JSX.Element {
         <Link to="/" className="font-heading font-semibold">{t("appName")}</Link>
 
         <div className="ml-auto flex items-center gap-1">
-          <LanguageMenu />
+          {languageMenu}
           <ThemeMenu />
           {userMenu}
         </div>

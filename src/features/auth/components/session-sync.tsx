@@ -53,6 +53,14 @@ export function SessionSync(): null {
         void queryClient.invalidateQueries({ queryKey: sessionQuery.queryKey }, { cancelRefetch: false });
 
         return;
+      case "updated":
+        // This tab's own change is already in its cache. Not cancelling a read under way either: a
+        // route guard may be waiting on it, and it returns the stored change all the same.
+        if (isRemote) {
+          void queryClient.invalidateQueries({ queryKey: sessionQuery.queryKey }, { cancelRefetch: false });
+        }
+
+        return;
       case "signed-in":
         // This tab's own sign-in navigates by itself.
         if (isRemote) {

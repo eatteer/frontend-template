@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { buildResources, changeLanguage, i18n } from "@/common/i18n/i18n";
 
@@ -28,5 +28,19 @@ describe("changeLanguage", () => {
     expect(i18n.t("actions.retry")).toBe("Reintentar");
     expect(document.documentElement.lang).toBe("es");
     expect(localStorage.getItem("language")).toBe("es");
+  });
+
+  // The session applies the account's language on every read of it, and nearly always it is the one
+  // already showing.
+  it("writes nothing when the language is already the one in place", async () => {
+    await changeLanguage("es");
+
+    const setItem = vi.spyOn(Storage.prototype, "setItem");
+
+    await changeLanguage("es");
+
+    expect(setItem).not.toHaveBeenCalled();
+
+    setItem.mockRestore();
   });
 });

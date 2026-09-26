@@ -15,12 +15,21 @@ import {
 
 import type { JSX } from "react";
 
-export function LanguageMenu(): JSX.Element {
+type LanguageMenuProps = {
+  // Signed in, the choice also goes to the account; without a session it stays in this browser.
+  onSelect?: (language: LanguageValue) => void;
+};
+
+function applyLocally(language: LanguageValue): void {
+  void changeLanguage(language);
+}
+
+export function LanguageMenu({ onSelect = applyLocally }: LanguageMenuProps): JSX.Element {
   const { t, i18n } = useTranslation();
 
   function selectLanguage(value: unknown): void {
     if (typeof value === "string" && isLanguageValue(value)) {
-      void changeLanguage(value);
+      onSelect(value);
     }
   }
 

@@ -3,13 +3,20 @@ import { queryOptions } from "@tanstack/react-query";
 import { ApiError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { unwrap } from "@/common/api/envelope";
+import { changeLanguage } from "@/common/i18n/i18n";
 import { toSession } from "@/features/auth/api/session.mapper";
 import type { Session } from "@/features/auth/model/session";
 
 // `null` rather than `undefined` for nobody signed in: a query cannot resolve to `undefined`.
 async function fetchSession(signal: AbortSignal): Promise<Session | null> {
   try {
-    return toSession(unwrap(await apiClient.GET("/api/v1/auth/session", { signal })));
+    const session = toSession(unwrap(await apiClient.GET("/api/v1/auth/session", { signal })));
+
+    // Signed in, the language is the account's, chosen on whichever device. Applied here, where every
+    // read of the session lands, so the screens switch before anything renders against it.
+    await changeLanguage(session.user.preferredLanguage);
+
+    return session;
   } catch (error: unknown) {
     // Reached only once the refresh has been refused too, so this is an answer, not a failure.
     if (error instanceof ApiError && error.status === UNAUTHORIZED_STATUS) {

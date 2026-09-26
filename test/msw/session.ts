@@ -11,6 +11,7 @@ export const SESSION_URL = "http://api.test/api/v1/auth/session";
 export const LOGIN_URL = "http://api.test/api/v1/auth/login";
 export const REFRESH_URL = "http://api.test/api/v1/auth/refresh";
 export const LOGOUT_URL = "http://api.test/api/v1/auth/logout";
+export const PREFERENCES_URL = "http://api.test/api/v1/users/me/preferences";
 
 export function unauthenticated(): HttpResponse<ProblemDetailsDTO> {
   return HttpResponse.json(

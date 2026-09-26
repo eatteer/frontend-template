@@ -6,8 +6,11 @@ const SIGN_OUT_REASON_VALUES = ["sign-out", "expired"] as const;
 
 export type SignOutReason = (typeof SIGN_OUT_REASON_VALUES)[number];
 
+// `updated`: what the session describes changed — the account's own settings — while the tokens
+// stayed the same.
 export type SessionEvent =
   | { type: "refreshed" }
+  | { type: "updated" }
   | { type: "signed-in" }
   | { type: "signed-out"; reason: SignOutReason };
 
@@ -26,7 +29,7 @@ function isSessionEvent(value: unknown): value is SessionEvent {
     return "reason" in value && SIGN_OUT_REASON_VALUES.some((reason: SignOutReason): boolean => reason === value.reason);
   }
 
-  return value.type === "refreshed" || value.type === "signed-in";
+  return value.type === "refreshed" || value.type === "updated" || value.type === "signed-in";
 }
 
 function notify(event: SessionEvent, isRemote: boolean): void {
