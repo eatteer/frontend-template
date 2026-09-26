@@ -1,0 +1,10 @@
+{
+  "eslint.format.enable": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "[typescript]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+  "[typescriptreact]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+  "[javascript]": { "editor.defaultFormatter": "dbaeumer.vscode-eslint" },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "files.associations": { "*.css": "tailwindcss" }
+}

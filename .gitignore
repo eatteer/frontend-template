@@ -1,0 +1,41 @@
+# compiled output
+/dist
+/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/playwright-report
+/test-results
+/blob-report
+
+# IDEs and editors
+/.idea
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# dotenv environment variable files. `.env.example` is the contract and is committed; the file
+# holding real values never is.
+.env
+.env.local
+.env.*.local
+
+# temp directory
+.temp
+.tmp
+
+# Claude Code: personal settings and the session's own runtime files. `.claude/settings.json` is
+# shared and committed.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
