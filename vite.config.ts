@@ -25,6 +25,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "test/**/*.test.{ts,tsx}"],
+    // Room for a `findBy*` that waits out its whole timeout (see test/setup.ts) and the steps around it.
+    testTimeout: 10_000,
     // The configuration the tests run with, so a suite never depends on whoever's `.env` is on disk.
     env: {
       VITE_API_URL: "http://api.test",
