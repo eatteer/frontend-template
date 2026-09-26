@@ -25,6 +25,10 @@
     "title": "Página no encontrada",
     "detail": "La página que buscas no existe o se movió."
   },
+  "forbidden": {
+    "title": "No tienes acceso",
+    "detail": "Tu cuenta no tiene un permiso que esta página requiere. Pídeselo a un administrador si lo necesitas."
+  },
   "loader": {
     "saving": "Guardando…"
   },

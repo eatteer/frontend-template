@@ -30,10 +30,12 @@ export function renderWithProviders(ui: ReactNode, queryClient: QueryClient = cr
   return { ...rendered, queryClient };
 }
 
+type RenderedRoute = Rendered & { router: ReturnType<typeof createAppRouter> };
+
 // The whole application at a path, with the router it really uses.
-export function renderRoute(path: string): Rendered {
+export function renderRoute(path: string): RenderedRoute {
   const queryClient = createQueryClient();
   const router = createAppRouter(queryClient, createMemoryHistory({ initialEntries: [path] }));
 
-  return renderWithProviders(<RouterProvider router={router} />, queryClient);
+  return { ...renderWithProviders(<RouterProvider router={router} />, queryClient), router };
 }

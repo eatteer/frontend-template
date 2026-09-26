@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { handleCaughtError } from "@/common/lib/caught-error";
+import { ForbiddenError } from "@/common/lib/forbidden-error";
 
 import { buildApiError } from "@test/builders/api-error.builder";
 
@@ -14,6 +15,15 @@ describe("handleCaughtError", () => {
 
     vi.stubGlobal("reportError", report);
     handleCaughtError(buildApiError());
+
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("stays quiet about a route refusing a reader without the permission", () => {
+    const report = vi.fn();
+
+    vi.stubGlobal("reportError", report);
+    handleCaughtError(new ForbiddenError());
 
     expect(report).not.toHaveBeenCalled();
   });

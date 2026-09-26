@@ -4,9 +4,14 @@ import { useTranslation } from "react-i18next";
 import { LanguageMenu } from "@/common/components/language-menu";
 import { ThemeMenu } from "@/common/components/theme/theme-menu";
 
-import type { JSX } from "react";
+import type { JSX, ReactNode } from "react";
 
-export function AppShell(): JSX.Element {
+type AppShellProps = {
+  // Passed in by the route, since the shell is shared and the account menu belongs to a feature.
+  userMenu: ReactNode;
+};
+
+export function AppShell({ userMenu }: AppShellProps): JSX.Element {
   const { t } = useTranslation();
 
   return (
@@ -17,6 +22,7 @@ export function AppShell(): JSX.Element {
         <div className="ml-auto flex items-center gap-1">
           <LanguageMenu />
           <ThemeMenu />
+          {userMenu}
         </div>
       </header>
 
