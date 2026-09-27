@@ -11,6 +11,7 @@ import { FullscreenLoader } from "@/common/components/fullscreen-loader";
 import { applyResolvedTheme, getSystemTheme, readStoredTheme, resolveTheme } from "@/common/components/theme/theme";
 import { ThemeProvider } from "@/common/components/theme/theme-provider";
 import { handleCaughtError } from "@/common/lib/caught-error";
+import { reportUncaughtErrors } from "@/common/lib/error-reporter";
 import { reloadOnPreloadError } from "@/common/lib/preload-error";
 import { createQueryClient } from "@/common/query/query-client";
 import { createAppRouter } from "@/router";
@@ -21,6 +22,7 @@ if (!rootElement) { throw new Error("index.html has no #root element to mount th
 
 // Before the first render, so a dark theme never flashes light while React starts.
 applyResolvedTheme(resolveTheme(readStoredTheme(), getSystemTheme()));
+reportUncaughtErrors();
 reloadOnPreloadError();
 
 const queryClient = createQueryClient();

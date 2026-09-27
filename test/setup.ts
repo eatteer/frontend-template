@@ -5,6 +5,7 @@ import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 
 import { i18n } from "@/common/i18n/i18n";
 import { DEFAULT_LANGUAGE } from "@/common/i18n/languages";
+import { consoleErrorReporter, setErrorReporter } from "@/common/lib/error-reporter";
 import { toast } from "@/common/ui/toast";
 
 import { guardConsole } from "@test/console-guard";
@@ -17,13 +18,6 @@ import { server } from "@test/msw/server";
 const ASYNC_UTIL_TIMEOUT_MS = 5000;
 
 configure({ asyncUtilTimeout: ASYNC_UTIL_TIMEOUT_MS });
-
-// jsdom has no `reportError`. A browser's writes the error to the console, and so does this one, so
-// the console guard fails the test that caused it instead of the error vanishing.
-globalThis.reportError ??= (error: unknown): void => {
-  // eslint-disable-next-line no-console -- the browser's own behaviour, reproduced.
-  console.error(error);
-};
 
 let consoleGuard: ReturnType<typeof guardConsole>;
 
@@ -38,9 +32,10 @@ beforeEach(() => {
 });
 
 // Everything a test can leave behind in the page: open toasts, stored preferences, the theme class,
-// the language.
+// the language, a replaced error reporter.
 afterEach(async () => {
   cleanup();
+  setErrorReporter(consoleErrorReporter);
   server.resetHandlers();
   toast.close();
   localStorage.clear();

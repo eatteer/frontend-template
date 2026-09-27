@@ -2,6 +2,7 @@ import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 
 import { ApiError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
 import { showErrorToast } from "@/common/components/error-toast";
+import { reportUnexpectedError } from "@/common/lib/error-reporter";
 
 import type { Mutation, Query } from "@tanstack/react-query";
 
@@ -47,6 +48,9 @@ function shouldToast(error: ApiError, meta: QueryMeta | MutationMeta | undefined
   return error.status !== UNAUTHORIZED_STATUS && meta?.errorToast !== false;
 }
 
+// `defaultError` says ApiError, and that is what the transport throws. Anything else — a mapper
+// reading a field the response lacks — is a bug in the query function, and is reported as one on top
+// of the screen or toast the reader gets.
 export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
@@ -59,6 +63,8 @@ export function createQueryClient(): QueryClient {
       // A query that never loaded shows its error in place of its content. Only a failed refetch
       // behind data already on screen would otherwise go unnoticed, so only that one toasts.
       onError: (error: ApiError, query: Query<unknown, unknown>): void => {
+        reportUnexpectedError(error, "query");
+
         if (query.state.data !== undefined && shouldToast(error, query.meta)) {
           showErrorToast(error);
         }
@@ -71,6 +77,8 @@ export function createQueryClient(): QueryClient {
         _onMutateResult: unknown,
         mutation: Mutation<unknown, unknown, unknown>,
       ): void => {
+        reportUnexpectedError(error, "query");
+
         if (shouldToast(error, mutation.meta)) {
           showErrorToast(error);
         }

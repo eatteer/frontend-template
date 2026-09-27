@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { showErrorToast } from "@/common/components/error-toast";
+import { setErrorReporter } from "@/common/lib/error-reporter";
 import { createQueryClient, MAX_QUERY_RETRIES, shouldRetryQuery } from "@/common/query/query-client";
 
 import { buildApiError } from "@test/builders/api-error.builder";
@@ -92,5 +93,22 @@ describe("createQueryClient", () => {
       .rejects.toBe(error);
 
     expect(showErrorToast).not.toHaveBeenCalled();
+  });
+
+  it("reports a query or mutation that threw a bug rather than the server's answer", async () => {
+    const report = vi.fn();
+    const queryClient = createQueryClient();
+    const bug = new TypeError("Cannot read properties of undefined (reading 'items')");
+    const mutationCache = queryClient.getMutationCache();
+
+    setErrorReporter(report);
+
+    await queryClient.prefetchQuery({ queryKey: USERS_KEY, queryFn: () => Promise.reject(bug), retry: false });
+    await queryClient.prefetchQuery({ queryKey: ["user"], queryFn: () => Promise.reject(buildApiError()) });
+
+    await expect(mutationCache.build(queryClient, { mutationFn: () => Promise.reject(bug) }).execute(undefined))
+      .rejects.toBe(bug);
+
+    expect(report.mock.calls).toEqual([[bug, "query"], [bug, "query"]]);
   });
 });
