@@ -8,11 +8,9 @@ import type { APIRequestContext, Page, Request, Response, Route } from "@playwri
 // whatever else the database holds, and the clean-up knows what to delete.
 const RUN = `e2e${Date.now().toString(36)}`;
 
-// The rows the list shows per page (USERS_PAGE_SIZE in user-queries.ts).
-const USERS_PAGE_SIZE = 10;
-
-// One more than a page, so the list has a second one.
-const SEEDED_USERS = USERS_PAGE_SIZE + 1;
+// More than a page holds, so the list has a second one. The page size itself is read from the
+// request the list sends, since the suite never imports the application.
+const SEEDED_USERS = 11;
 
 // The backend's own limits, which the form leaves to it (create-user.schema.ts).
 const NAME_MAX_LENGTH = 120;
@@ -94,7 +92,18 @@ test.afterAll(async () => {
 test("the list shows a skeleton, then the users, and keeps its page and search in the URL", async ({ page }) => {
   const release = await holdRequests(page, (request: Request): boolean => request.method() === "GET" && isUsersCollection(request));
 
+  const listRequest = page.waitForRequest((request: Request): boolean => request.method() === "GET" && isUsersCollection(request));
+
   await page.goto(`/users?search=${RUN}`);
+
+  // The list states its page size rather than leaving it to the backend's default.
+  const limit = new URL((await listRequest).url()).searchParams.get("limit");
+
+  expect(limit).not.toBeNull();
+
+  const pageSize = Number(limit);
+
+  expect(pageSize, "seed more users than a page holds").toBeLessThan(SEEDED_USERS);
 
   const table = page.getByRole("table", { name: "Users" });
 
@@ -103,14 +112,14 @@ test("the list shows a skeleton, then the users, and keeps its page and search i
 
   release();
 
-  await expect(table.getByRole("link")).toHaveCount(USERS_PAGE_SIZE);
+  await expect(table.getByRole("link")).toHaveCount(pageSize);
   await expect(table).toHaveAttribute("aria-busy", "false");
-  await expect(page.getByText(`Page 1 of 2 · ${SEEDED_USERS} results`)).toBeVisible();
+  await expect(page.getByText(`Page 1 of ${Math.ceil(SEEDED_USERS / pageSize)} · ${SEEDED_USERS} results`)).toBeVisible();
 
   await page.getByRole("button", { name: "Next" }).click();
 
   await expect(page).toHaveURL(/[?&]page=2(&|$)/);
-  await expect(table.getByRole("link")).toHaveCount(1);
+  await expect(table.getByRole("link")).toHaveCount(Math.min(pageSize, SEEDED_USERS - pageSize));
   expect(new URL(page.url()).searchParams.get("search")).toBe(RUN);
 
   // A new search starts again from the first page.
