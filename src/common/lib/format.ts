@@ -29,6 +29,7 @@ function isNumericLiteral(value: string): value is Intl.StringNumericLiteral {
 export function formatMoney({ amountMinor, currency }: Money, language: string): string {
   const formatter = new Intl.NumberFormat(language, { style: "currency", currency });
   const fractionDigits = formatter.resolvedOptions().maximumFractionDigits ?? 0;
+
   const sign = amountMinor.startsWith(NEGATIVE_SIGN) ? NEGATIVE_SIGN : "";
   const digits = amountMinor.slice(sign.length).padStart(fractionDigits + 1, "0");
   const pointAt = digits.length - fractionDigits;

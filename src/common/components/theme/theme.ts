@@ -15,6 +15,7 @@ export const THEME_STORAGE_KEY = "theme";
 
 const DARK_COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
 const TRANSITION_X_PROPERTY = "--theme-transition-x";
 const TRANSITION_Y_PROPERTY = "--theme-transition-y";
 const TRANSITION_RADIUS_PROPERTY = "--theme-transition-radius";
