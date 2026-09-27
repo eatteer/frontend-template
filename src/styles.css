@@ -170,3 +170,14 @@
     clip-path: circle(var(--theme-transition-radius, 150vmax) at var(--theme-transition-x, 50%) var(--theme-transition-y, 50%));
   }
 }
+
+/* Base UI's rule for a list that scrolls without a scrollbar — a select's popup, a scroll area. It
+   ships the rule as an inline <style> element, which the Content-Security-Policy in nginx.conf
+   refuses, so main.tsx turns those elements off and the rule lives here instead. */
+.base-ui-disable-scrollbar {
+  scrollbar-width: none;
+}
+
+.base-ui-disable-scrollbar::-webkit-scrollbar {
+  display: none;
+}

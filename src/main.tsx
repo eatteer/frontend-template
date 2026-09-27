@@ -1,6 +1,7 @@
 import "@/styles.css";
 import "@/common/i18n/i18n";
 
+import { CSPProvider } from "@base-ui/react/csp-provider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
@@ -28,17 +29,21 @@ reloadOnPreloadError();
 const queryClient = createQueryClient();
 const router = createAppRouter(queryClient);
 
-// The theme outermost, since everything paints with it; the query client around the router, whose
-// loaders read through it; the toaster and the loader beside the router, so a route change never
-// unmounts them.
+// The CSP settings outermost, since any primitive may read them: Base UI renders no inline <style>
+// element, which the Content-Security-Policy would refuse, and styles.css carries its rule instead.
+// Then the theme, since everything paints with it; the query client around the router, whose loaders
+// read through it; the toaster and the loader beside the router, so a route change never unmounts
+// them.
 createRoot(rootElement, { onCaughtError: handleCaughtError }).render(
   <StrictMode>
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <FullscreenLoader />
-        <AppToaster />
-      </QueryClientProvider>
-    </ThemeProvider>
+    <CSPProvider disableStyleElements>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+          <FullscreenLoader />
+          <AppToaster />
+        </QueryClientProvider>
+      </ThemeProvider>
+    </CSPProvider>
   </StrictMode>,
 );
