@@ -47,7 +47,10 @@ describe("reportWebVitals", () => {
 
     reportWebVitals(listeners);
     setWebVitalsReporter(report);
-    reports[0]?.(metric);
+
+    if (reports[0]) {
+      reports[0](metric);
+    }
 
     expect(report).toHaveBeenCalledWith(metric);
   });
@@ -59,7 +62,9 @@ describe("reportWebVitals", () => {
     reportWebVitals(listeners);
 
     expect(() => {
-      reports[0]?.(buildMetric());
+      if (reports[0]) {
+        reports[0](buildMetric());
+      }
     }).not.toThrow();
   });
 });

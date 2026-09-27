@@ -9,7 +9,9 @@ let unsubscribe: (() => void) | undefined;
 
 describe("session events", () => {
   afterEach(() => {
-    unsubscribe?.();
+    if (unsubscribe) {
+      unsubscribe();
+    }
   });
 
   it("tells this tab's listeners about its own events", () => {

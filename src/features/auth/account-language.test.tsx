@@ -75,7 +75,9 @@ describe("the account's language", () => {
 
     expect(screen.queryByLabelText("Guardando…")).not.toBeInTheDocument();
 
-    store?.();
+    if (store) {
+      store();
+    }
 
     await waitFor(() => {
       expect(messages).toEqual([{ type: "updated" }]);

@@ -56,7 +56,9 @@ describe("creating a user", () => {
 
     expect(await screen.findByRole("status", { name: "Saving…" })).toBeInTheDocument();
 
-    answer?.();
+    if (answer) {
+      answer();
+    }
 
     expect(await screen.findByRole("heading", { name: "Ada Lovelace" })).toBeInTheDocument();
     expect(screen.queryByRole("status", { name: "Saving…" })).not.toBeInTheDocument();
@@ -214,7 +216,9 @@ describe("a user's page", () => {
       expect(container.querySelector("dl[aria-busy='true']")).toBeInTheDocument();
     }, { timeout: SKELETON_TIMEOUT_MS });
 
-    answer?.();
+    if (answer) {
+      answer();
+    }
 
     expect(await screen.findByRole("heading", { name: "Jane Doe" })).toBeInTheDocument();
     expect(container.querySelector("[aria-busy='true']")).not.toBeInTheDocument();

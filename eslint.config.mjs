@@ -15,6 +15,13 @@ import tseslint from "typescript-eslint";
 import { paddingAroundHooks } from "./eslint-rules/padding-around-hooks.mjs";
 import { paddingBetweenExpressionKinds } from "./eslint-rules/padding-between-expression-kinds.mjs";
 
+// A conditional call is a branch, and the branch is an `if` (see the code-conventions skill). It is a
+// constant because the configuration module's override has to list it again.
+const OPTIONAL_CALL = {
+  selector: "CallExpression[optional=true]",
+  message: "Write the `if`, then the call: an optional call hides the branch at the end of the line.",
+};
+
 export default tseslint.config(
   {
     // Generated files: `api:types` writes the API schema and the router plugin writes the route tree.
@@ -239,6 +246,7 @@ export default tseslint.config(
           selector: "MemberExpression[object.type='MetaProperty'][property.name='env']",
           message: "Read configuration from @/common/config/env, which validates it.",
         },
+        OPTIONAL_CALL,
       ],
     },
   },
@@ -256,9 +264,11 @@ export default tseslint.config(
     },
   },
   {
+    // The module that validates the configuration is the one place that reads it raw. An override
+    // replaces the rule's whole option list, so the selectors that still apply are listed again.
     files: ["src/common/config/env.ts"],
     rules: {
-      "no-restricted-syntax": "off",
+      "no-restricted-syntax": ["error", OPTIONAL_CALL],
     },
   },
   {

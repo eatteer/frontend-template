@@ -63,7 +63,10 @@ let unsubscribe: (() => void) | undefined;
 
 describe("the session refresh", () => {
   afterEach(() => {
-    unsubscribe?.();
+    if (unsubscribe) {
+      unsubscribe();
+    }
+
     vi.unstubAllGlobals();
   });
 
