@@ -208,8 +208,12 @@ test("an email already registered is a toast that closes itself and copies the w
   // Left alone — nothing hovers or focuses it — it goes away on its own.
   await expect(toast).toHaveCount(0, { timeout: TOAST_GONE_TIMEOUT_MS });
 
+  // The report copied is this second attempt's, with its own trace id.
+  const secondConflict = page.waitForResponse((response: Response): boolean => isUsersCreation(response));
+
   await page.getByRole("button", { name: "Create user" }).click();
 
+  const reportedTraceId = (await secondConflict).headers()[TRACE_ID_HEADER];
   const copy = toast.getByRole("button", { name: "Copy error", includeHidden: true });
 
   await copy.click();
@@ -226,7 +230,7 @@ test("an email already registered is a toast that closes itself and copies the w
     title: expect.any(String),
     detail: expect.any(String),
     errors: [],
-    traceId,
+    traceId: reportedTraceId,
     timestamp: expect.any(String),
   });
 });
