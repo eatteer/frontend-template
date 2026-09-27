@@ -1,0 +1,15 @@
+{
+  "extraKnownMarketplaces": {
+    "architecture-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "eatteer/architecture-marketplace"
+      },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "frontend-architecture@architecture-marketplace": true,
+    "engineering-workflow@architecture-marketplace": true
+  }
+}
