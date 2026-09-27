@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteError } from "@/common/components/route-error";
 import { createQueryClient } from "@/common/query/query-client";
 import { requirePermissions, requireSession } from "@/features/auth/api/session-guards";
+import type { SignedInContext } from "@/features/auth/api/session-guards";
 import { useHasPermissions } from "@/features/auth/api/use-session";
 import type { RouterContext } from "@/router";
 
@@ -14,6 +15,7 @@ import { buildSessionDTO } from "@test/builders/session.builder";
 import { server } from "@test/msw/server";
 import { signedIn } from "@test/msw/session";
 import { renderWithProviders } from "@test/render";
+import { expectRouteFailureWarning } from "@test/route-failure-warning";
 
 import type { JSX, ReactNode } from "react";
 
@@ -23,28 +25,28 @@ function renderGuardedRoute(path: string): void {
   const rootRoute = createRootRouteWithContext<RouterContext>()({ component: Outlet });
 
   const signInRoute = createRoute({
-    getParentRoute: () => rootRoute,
+    getParentRoute: (): typeof rootRoute => rootRoute,
     path: "/sign-in",
     component: (): JSX.Element => <h1>Sign in</h1>,
   });
 
   const appRoute = createRoute({
-    getParentRoute: () => rootRoute,
+    getParentRoute: (): typeof rootRoute => rootRoute,
     id: "app",
     beforeLoad: requireSession,
   });
 
   const usersRoute = createRoute({
-    getParentRoute: () => appRoute,
+    getParentRoute: (): typeof appRoute => appRoute,
     path: "/users",
-    beforeLoad: ({ context }): void => {
+    beforeLoad: ({ context }: { context: SignedInContext }): void => {
       requirePermissions(context.session, ["users:delete"]);
     },
     component: (): JSX.Element => <h1>Users</h1>,
   });
 
   const rolesRoute = createRoute({
-    getParentRoute: () => appRoute,
+    getParentRoute: (): typeof appRoute => appRoute,
     path: "/roles/$id",
     loader: (): never => {
       throw buildApiError({ status: 404 });
@@ -53,7 +55,7 @@ function renderGuardedRoute(path: string): void {
   });
 
   const filesRoute = createRoute({
-    getParentRoute: () => appRoute,
+    getParentRoute: (): typeof appRoute => appRoute,
     path: "/files",
     loader: (): never => {
       throw buildApiError({ status: 403, code: "common.forbidden" });
@@ -74,18 +76,14 @@ function renderGuardedRoute(path: string): void {
 }
 
 describe("the route guards", () => {
-  // Outside production the router warns about every route that failed, which is what a refused
-  // route is. Expected here, so it is silenced rather than left to fail the test; the console guard
-  // restores it after each test.
-  beforeEach(() => {
-    vi.spyOn(console, "warn").mockImplementation((): void => {});
-  });
-
   it("says plainly that a page needs a permission the reader lacks", async () => {
+    const warning = expectRouteFailureWarning();
+
     renderGuardedRoute("/users");
 
     expect(await screen.findByText("You don't have access")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Users" })).not.toBeInTheDocument();
+    warning.assertWarned();
   });
 
   it("opens the page to a reader who has the permission", async () => {
@@ -97,15 +95,21 @@ describe("the route guards", () => {
   });
 
   it("shows the same refusal when it is the API that refuses", async () => {
+    const warning = expectRouteFailureWarning();
+
     renderGuardedRoute("/files");
 
     expect(await screen.findByText("You don't have access")).toBeInTheDocument();
+    warning.assertWarned();
   });
 
   it("shows the not-found page for something the API says does not exist", async () => {
+    const warning = expectRouteFailureWarning();
+
     renderGuardedRoute("/roles/missing");
 
     expect(await screen.findByText("Page not found")).toBeInTheDocument();
+    warning.assertWarned();
   });
 });
 

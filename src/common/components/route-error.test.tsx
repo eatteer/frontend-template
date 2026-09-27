@@ -2,13 +2,14 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryHistory, createRootRoute, createRoute, createRouter, RouterProvider } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { RouteError } from "@/common/components/route-error";
 import { handleCaughtError } from "@/common/lib/caught-error";
 import { createQueryClient } from "@/common/query/query-client";
 
 import { buildApiError } from "@test/builders/api-error.builder";
+import { expectRouteFailureWarning } from "@test/route-failure-warning";
 
 import type { JSX } from "react";
 
@@ -18,7 +19,7 @@ function renderFailingRoute(): void {
   const rootRoute = createRootRoute();
 
   const pageRoute = createRoute({
-    getParentRoute: () => rootRoute,
+    getParentRoute: (): typeof rootRoute => rootRoute,
     path: "/",
     loader: (): void => {
       attempts += 1;
@@ -47,9 +48,7 @@ function renderFailingRoute(): void {
 describe("RouteError", () => {
   it("shows why the route failed and loads it again on retry", async () => {
     const user = userEvent.setup();
-    // Outside production the router warns about every route that failed. Expected here, so it is
-    // asserted rather than left to fail the test through the console guard.
-    const warn = vi.spyOn(console, "warn").mockImplementation((): void => {});
+    const warning = expectRouteFailureWarning();
 
     renderFailingRoute();
 
@@ -58,6 +57,6 @@ describe("RouteError", () => {
     await user.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(await screen.findByRole("heading", { name: "Loaded" })).toBeInTheDocument();
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining("Error in route match"));
+    warning.assertWarned();
   });
 });

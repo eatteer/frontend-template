@@ -9,6 +9,7 @@ import { applyFieldErrors } from "@/common/lib/field-errors";
 import { Button, buttonVariants } from "@/common/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/common/ui/field";
 import { Input } from "@/common/ui/input";
+import { Skeleton } from "@/common/ui/skeleton";
 import { useUpdateUser } from "@/features/users/api/user-mutations";
 import type { User } from "@/features/users/model/user";
 import { buildEditUserSchema, EDIT_USER_FIELDS, toEditUserFormInput } from "@/features/users/schemas/edit-user.schema";
@@ -82,7 +83,7 @@ export function EditUserForm({ user, onSaved }: EditUserFormProps): JSX.Element 
 
         <div className="flex gap-2">
           {/* Nothing changed is nothing to send. */}
-          <Button type="submit" disabled={!isDirty || updateUser.isPending}>{t("edit.submit")}</Button>
+          <Button type="submit" disabled={!isDirty || updateUser.isPending} focusableWhenDisabled>{t("edit.submit")}</Button>
 
           <Link to="/users/$id" params={{ id: user.id }} className={buttonVariants({ variant: "outline" })}>
             {t("edit.cancel")}
@@ -90,5 +91,23 @@ export function EditUserForm({ user, onSaved }: EditUserFormProps): JSX.Element 
         </div>
       </FieldGroup>
     </form>
+  );
+}
+
+// The same field and buttons, built from the same parts, so the page keeps its height when the user
+// arrives.
+export function EditUserFormSkeleton(): JSX.Element {
+  return (
+    <FieldGroup aria-busy="true">
+      <Field>
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-8 w-full" />
+      </Field>
+
+      <div className="flex gap-2">
+        <Skeleton className="h-8 w-24" />
+        <Skeleton className="h-8 w-20" />
+      </div>
+    </FieldGroup>
   );
 }

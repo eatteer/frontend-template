@@ -1,40 +1,30 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import type { ProblemDetailsDTO, SessionDTO, UserDTO } from "@/common/api/schema.gen";
 import { userQueries } from "@/features/users/api/user-queries";
 
 import { buildSessionDTO } from "@test/builders/session.builder";
 import { buildUserDTO, buildUserDTOs } from "@test/builders/user.builder";
+import { problem } from "@test/msw/api";
+import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
 import { SESSION_URL, signedIn } from "@test/msw/session";
-import { problem, USER_URL, USERS_URL, usersBackend } from "@test/msw/users";
+import { serveUsers, USER_URL, USERS_URL } from "@test/msw/users";
 import { renderRoute } from "@test/render";
+import { expectRouteFailureWarning } from "@test/route-failure-warning";
 
 import type { UserEvent } from "@testing-library/user-event";
 
 const JANE = buildUserDTO();
 
-function useUsers(users = [JANE, ...buildUserDTOs(3)], options?: Parameters<typeof usersBackend>[1]): ReturnType<typeof usersBackend> {
-  const backend = usersBackend(users, options);
+// Past the router's pending delay, which holds a skeleton back so a fast answer never flashes one.
+const SKELETON_TIMEOUT_MS = 3000;
 
-  server.use(...backend.handlers);
-
-  return backend;
-}
-
-// Outside production the router warns about every route that failed, which is what a refused or a
-// missing page is. Expected in those tests, so it is asserted rather than left to fail them.
-function expectRouteFailureWarning(): { assertWarned: () => void } {
-  const warn = vi.spyOn(console, "warn").mockImplementation((): void => {});
-
-  return {
-    assertWarned: (): void => {
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining("Error in route match"));
-    },
-  };
-}
+// The users the backend holds unless a test says otherwise: Jane, whose pages the tests open, and a few more.
+const USERS = [JANE, ...buildUserDTOs(3)];
 
 async function fillCreateForm(user: UserEvent, { name, email, password }: { name: string; email: string; password: string }): Promise<void> {
   await user.type(await screen.findByLabelText("Name"), name);
@@ -56,7 +46,7 @@ describe("creating a user", () => {
       answer = resolve;
     });
 
-    const backend = useUsers(undefined, { holdCreate: answered });
+    const backend = serveUsers(USERS, { holdCreate: answered });
 
     const { router, queryClient } = renderRoute("/users");
 
@@ -77,7 +67,7 @@ describe("creating a user", () => {
 
   it("sends the language chosen for the account", async () => {
     const user = userEvent.setup();
-    const backend = useUsers();
+    const backend = serveUsers(USERS);
 
     renderRoute("/users/new");
 
@@ -91,7 +81,7 @@ describe("creating a user", () => {
 
   it("leaves the language to the backend when the choice is taken back", async () => {
     const user = userEvent.setup();
-    const backend = useUsers();
+    const backend = serveUsers(USERS);
 
     renderRoute("/users/new");
 
@@ -108,7 +98,7 @@ describe("creating a user", () => {
 
   it("checks the fields before sending anything, and focuses the first one wrong", async () => {
     const user = userEvent.setup();
-    const backend = useUsers();
+    const backend = serveUsers(USERS);
 
     renderRoute("/users/new");
 
@@ -126,9 +116,9 @@ describe("creating a user", () => {
   it("puts the backend's field errors on their fields, without a toast", async () => {
     const user = userEvent.setup();
 
-    useUsers();
+    serveUsers(USERS);
 
-    server.use(http.post(USERS_URL, () => problem({
+    server.use(http.post(USERS_URL, (): HttpResponse<ProblemDetailsDTO> => problem({
       status: 400,
       title: "Bad Request",
       detail: "Validation failed",
@@ -150,8 +140,8 @@ describe("creating a user", () => {
   it("explains an email already registered in a toast, since no field would", async () => {
     const user = userEvent.setup();
 
-    useUsers();
-    server.use(http.post(USERS_URL, () => problem({})));
+    serveUsers(USERS);
+    server.use(http.post(USERS_URL, (): HttpResponse<ProblemDetailsDTO> => problem({})));
 
     renderRoute("/users/new");
 
@@ -168,7 +158,7 @@ describe("creating a user", () => {
     const warning = expectRouteFailureWarning();
 
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
-    useUsers();
+    serveUsers(USERS);
 
     renderRoute("/users/new");
 
@@ -180,7 +170,7 @@ describe("creating a user", () => {
 
 describe("a user's page", () => {
   it("shows the user, with a way to edit them for someone allowed to", async () => {
-    useUsers();
+    serveUsers(USERS);
 
     renderRoute(`/users/${JANE.id}`);
 
@@ -193,7 +183,7 @@ describe("a user's page", () => {
 
   it("leaves out the edit link for someone who may only read", async () => {
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
-    useUsers();
+    serveUsers(USERS);
 
     renderRoute(`/users/${JANE.id}`);
 
@@ -208,9 +198,9 @@ describe("a user's page", () => {
       answer = resolve;
     });
 
-    useUsers();
+    serveUsers(USERS);
 
-    server.use(http.get(USER_URL, async () => {
+    server.use(http.get(USER_URL, async (): Promise<HttpResponse<{ data: UserDTO }>> => {
       await answered;
 
       return HttpResponse.json({ data: JANE });
@@ -218,10 +208,11 @@ describe("a user's page", () => {
 
     const { container } = renderRoute(`/users/${JANE.id}`);
 
-    // The router holds the page back for a moment before showing it, so a fast answer never flashes one.
+    // A description list has no role to find it by, so the skeleton's is found by its element. The
+    // router holds the page back for a moment before showing it, so a fast answer never flashes one.
     await waitFor(() => {
       expect(container.querySelector("dl[aria-busy='true']")).toBeInTheDocument();
-    }, { timeout: 3000 });
+    }, { timeout: SKELETON_TIMEOUT_MS });
 
     answer?.();
 
@@ -232,7 +223,7 @@ describe("a user's page", () => {
   it("says the page does not exist when the backend has no such user", async () => {
     const warning = expectRouteFailureWarning();
 
-    useUsers();
+    serveUsers(USERS);
 
     renderRoute("/users/missing");
 
@@ -244,7 +235,7 @@ describe("a user's page", () => {
 describe("editing a user", () => {
   it("opens with the user's email, saves a change and shows the user again", async () => {
     const user = userEvent.setup();
-    const backend = useUsers();
+    const backend = serveUsers(USERS);
 
     const { router } = renderRoute(`/users/${JANE.id}`);
 
@@ -253,7 +244,7 @@ describe("editing a user", () => {
     const email = await screen.findByLabelText("Email");
 
     expect(email).toHaveValue("jane@example.com");
-    expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save changes" })).toHaveAttribute("aria-disabled", "true");
 
     await user.clear(email);
     await user.type(email, "jane.doe@example.com");
@@ -267,11 +258,11 @@ describe("editing a user", () => {
   it("puts the backend's field errors on the field, and the rest in a toast", async () => {
     const user = userEvent.setup();
 
-    useUsers();
+    serveUsers(USERS);
 
     let answer = problem({ status: 400, code: "common.validation_error", errors: [{ field: "email", message: "The email is not valid" }] });
 
-    server.use(http.patch(USER_URL, () => answer));
+    server.use(http.patch(USER_URL, (): MockedResponse => answer));
 
     renderRoute(`/users/${JANE.id}/edit`);
 
@@ -284,7 +275,7 @@ describe("editing a user", () => {
     expect(await screen.findByText("The email is not valid")).toBeInTheDocument();
     expect(email).toHaveFocus();
 
-    answer = problem({});
+    answer = problem();
     await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("The email is already registered");
@@ -296,9 +287,9 @@ describe("editing a user", () => {
     const session = buildSessionDTO();
     let sessionReads = 0;
 
-    useUsers([buildUserDTO({ id: session.user.id, name: session.user.name, email: session.user.email })]);
+    serveUsers([buildUserDTO({ id: session.user.id, name: session.user.name, email: session.user.email })]);
 
-    server.use(http.get(SESSION_URL, () => {
+    server.use(http.get(SESSION_URL, (): HttpResponse<{ data: SessionDTO }> => {
       sessionReads += 1;
 
       return HttpResponse.json({ data: session });
@@ -323,7 +314,7 @@ describe("editing a user", () => {
     const warning = expectRouteFailureWarning();
 
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
-    useUsers();
+    serveUsers(USERS);
 
     renderRoute(`/users/${JANE.id}/edit`);
 

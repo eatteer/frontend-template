@@ -1,17 +1,18 @@
-import { createUser, deleteUser } from "./support/api";
+import { createUser, deleteUser, E2E_USER_PASSWORD, TRACE_ID_HEADER } from "./support/api";
 import { ADMIN_STORAGE_STATE } from "./support/env";
 import { expect, test } from "./support/fixtures";
 
-import type { APIRequestContext, Page, Request, Route } from "@playwright/test";
+import type { APIRequestContext, Page, Request, Response, Route } from "@playwright/test";
 
 // Every user this run creates carries it in its name and email, so a search finds exactly them
 // whatever else the database holds, and the clean-up knows what to delete.
 const RUN = `e2e${Date.now().toString(36)}`;
 
-// One more than a page, so the list has a second one.
-const SEEDED_USERS = 11;
+// The rows the list shows per page (USERS_PAGE_SIZE in user-queries.ts).
+const USERS_PAGE_SIZE = 10;
 
-const PASSWORD = "e2e-password";
+// One more than a page, so the list has a second one.
+const SEEDED_USERS = USERS_PAGE_SIZE + 1;
 
 // The backend's own limits, which the form leaves to it (create-user.schema.ts).
 const NAME_MAX_LENGTH = 120;
@@ -19,6 +20,8 @@ const PASSWORD_MAX_BYTES = 72;
 
 // Long enough for ERROR_TOAST_TIMEOUT_MS and the toast's exit.
 const TOAST_GONE_TIMEOUT_MS = 12_000;
+
+const USERS_COLLECTION_PATH = "/api/v1/users";
 
 // A user's page, which `/users/new` is not.
 const USER_DETAIL_URL = /\/users\/(?!new$)[^/]+$/;
@@ -30,7 +33,11 @@ function emailOf(label: string): string {
 }
 
 function isUsersCollection(request: Request): boolean {
-  return new URL(request.url()).pathname === "/api/v1/users";
+  return new URL(request.url()).pathname === USERS_COLLECTION_PATH;
+}
+
+function isUsersCreation(response: Response): boolean {
+  return response.request().method() === "POST" && isUsersCollection(response.request());
 }
 
 // Holds every matching request until `release` is called, so a spec can see the screen that shows
@@ -42,7 +49,7 @@ async function holdRequests(page: Page, matches: (request: Request) => boolean):
     release = resolve;
   });
 
-  await page.route((url: URL): boolean => url.pathname.startsWith("/api/v1/users"), async (route: Route): Promise<void> => {
+  await page.route((url: URL): boolean => url.pathname.startsWith(USERS_COLLECTION_PATH), async (route: Route): Promise<void> => {
     if (matches(route.request())) {
       await released;
     }
@@ -85,7 +92,7 @@ test.afterAll(async () => {
 });
 
 test("the list shows a skeleton, then the users, and keeps its page and search in the URL", async ({ page }) => {
-  const release = await holdRequests(page, (request: Request) => request.method() === "GET" && isUsersCollection(request));
+  const release = await holdRequests(page, (request: Request): boolean => request.method() === "GET" && isUsersCollection(request));
 
   await page.goto(`/users?search=${RUN}`);
 
@@ -96,7 +103,7 @@ test("the list shows a skeleton, then the users, and keeps its page and search i
 
   release();
 
-  await expect(table.getByRole("link")).toHaveCount(10);
+  await expect(table.getByRole("link")).toHaveCount(USERS_PAGE_SIZE);
   await expect(table).toHaveAttribute("aria-busy", "false");
   await expect(page.getByText(`Page 1 of 2 · ${SEEDED_USERS} results`)).toBeVisible();
 
@@ -116,12 +123,12 @@ test("the list shows a skeleton, then the users, and keeps its page and search i
 });
 
 test("creating a user blocks the screen until it is saved, then edits it with a form that mounts filled", async ({ page }) => {
-  const release = await holdRequests(page, (request: Request) => request.method() === "POST" && isUsersCollection(request));
+  const release = await holdRequests(page, (request: Request): boolean => request.method() === "POST" && isUsersCollection(request));
 
   await page.goto("/users/new");
   await page.getByLabel("Name").fill(`${RUN} created`);
   await page.getByLabel("Email").fill(emailOf("created"));
-  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByLabel("Password").fill(E2E_USER_PASSWORD);
 
   // A language chosen and then taken back: the select started at `null` and returns to it.
   const language = page.getByRole("combobox", { name: "Language" });
@@ -136,12 +143,12 @@ test("creating a user blocks the screen until it is saved, then edits it with a 
 
   await expect(language).toContainText("The application's default");
 
-  const createRequest = page.waitForRequest((request: Request) => request.method() === "POST" && isUsersCollection(request));
+  const createRequest = page.waitForRequest((request: Request): boolean => request.method() === "POST" && isUsersCollection(request));
 
   await page.getByRole("button", { name: "Create user" }).click();
 
   // No choice is no property: the account gets the backend's default language.
-  expect((await createRequest).postDataJSON()).toEqual({ name: `${RUN} created`, email: emailOf("created"), password: PASSWORD });
+  expect((await createRequest).postDataJSON()).toEqual({ name: `${RUN} created`, email: emailOf("created"), password: E2E_USER_PASSWORD });
 
   await expect(page.getByRole("status", { name: "Saving…" })).toBeVisible();
 
@@ -178,18 +185,21 @@ test("an email already registered is a toast that closes itself and copies the w
   await page.goto("/users/new");
   await page.getByLabel("Name").fill(`${RUN} duplicate`);
   await page.getByLabel("Email").fill(emailOf("01"));
-  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByLabel("Password").fill(E2E_USER_PASSWORD);
 
-  const conflict = page.waitForResponse((response) => response.request().method() === "POST" && isUsersCollection(response.request()));
+  const conflict = page.waitForResponse((response: Response): boolean => isUsersCreation(response));
 
   await page.getByRole("button", { name: "Create user" }).click();
 
   const response = await conflict;
-  const traceId = response.headers()["x-trace-id"] ?? "";
+  const traceId = response.headers()[TRACE_ID_HEADER];
   const toast = page.locator("[data-slot=toast]");
 
   expect(response.status()).toBe(409);
-  expect(traceId).not.toBe("");
+
+  if (traceId === undefined) {
+    throw new Error(`The backend answered the conflict without ${TRACE_ID_HEADER}`);
+  }
 
   await expect(toast).toBeVisible();
   await expect(toast).not.toContainText(traceId);
@@ -210,14 +220,14 @@ test("an email already registered is a toast that closes itself and copies the w
 
   expect(report).toEqual({
     method: "POST",
-    url: expect.stringContaining("/api/v1/users") as unknown,
+    url: expect.stringContaining(USERS_COLLECTION_PATH),
     status: 409,
     code: "users.email_already_registered",
-    title: expect.any(String) as unknown,
-    detail: expect.any(String) as unknown,
+    title: expect.any(String),
+    detail: expect.any(String),
     errors: [],
-    traceId: expect.any(String) as unknown,
-    timestamp: expect.any(String) as unknown,
+    traceId,
+    timestamp: expect.any(String),
   });
 });
 
@@ -227,7 +237,7 @@ test("the backend's field errors land on the fields they name", async ({ page })
   await page.getByLabel("Email").fill(emailOf("too-long"));
   await page.getByLabel("Password").fill("p".repeat(PASSWORD_MAX_BYTES + 1));
 
-  const rejected = page.waitForResponse((response) => response.request().method() === "POST" && isUsersCollection(response.request()));
+  const rejected = page.waitForResponse((response: Response): boolean => isUsersCreation(response));
 
   await page.getByRole("button", { name: "Create user" }).click();
 

@@ -3,16 +3,19 @@ import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
+import type { ProblemDetailsDTO } from "@/common/api/schema.gen";
+import { SESSION_CHANNEL_NAME } from "@/common/api/session-events";
+import { LANGUAGE_STORAGE_KEY } from "@/common/i18n/i18n";
 import { sessionQuery } from "@/features/auth/api/session-queries";
 
-import { buildProblemDetails } from "@test/builders/problem-details.builder";
 import { buildSessionDTO } from "@test/builders/session.builder";
+import { problem } from "@test/msw/api";
 import { server } from "@test/msw/server";
 import { PREFERENCES_URL, signedIn } from "@test/msw/session";
 import { renderRoute } from "@test/render";
 
 // Another tab, as far as this one can tell: a second channel on the same name.
-const otherTab = new BroadcastChannel("session");
+const otherTab = new BroadcastChannel(SESSION_CHANNEL_NAME);
 
 const SPANISH_SESSION = buildSessionDTO({
   user: { ...buildSessionDTO().user, preferredLanguage: "es" },
@@ -33,7 +36,7 @@ describe("the account's language", () => {
 
     expect(await screen.findByRole("heading", { name: "Bienvenido" })).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("es");
-    expect(localStorage.getItem("language")).toBe("es");
+    expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("es");
   });
 
   it("switches at once, stores the choice on the account and tells the other tabs", async () => {
@@ -49,7 +52,7 @@ describe("the account's language", () => {
       messages.push(message.data);
     };
 
-    server.use(http.patch(PREFERENCES_URL, async ({ request }: { request: Request }) => {
+    server.use(http.patch(PREFERENCES_URL, async ({ request }: { request: Request }): Promise<HttpResponse<null>> => {
       bodies.push(await request.json());
 
       await stored;
@@ -84,10 +87,12 @@ describe("the account's language", () => {
   });
 
   it("switches back and says why when the account refuses the change", async () => {
-    server.use(http.patch(PREFERENCES_URL, () => HttpResponse.json(
-      buildProblemDetails({ status: 500, title: "Internal Server Error", detail: "Something failed", code: "common.internal_error" }),
-      { status: 500, headers: { "Content-Type": "application/problem+json" } },
-    )));
+    server.use(http.patch(PREFERENCES_URL, (): HttpResponse<ProblemDetailsDTO> => problem({
+      status: 500,
+      title: "Internal Server Error",
+      detail: "Something failed",
+      code: "common.internal_error",
+    })));
 
     const { queryClient } = renderRoute("/");
 
@@ -97,7 +102,7 @@ describe("the account's language", () => {
 
     expect(within(await screen.findByRole("alert")).getByText("Something failed")).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
-    expect(localStorage.getItem("language")).toBe("en");
+    expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("en");
     expect(queryClient.getQueryData(sessionQuery.queryKey)?.user.preferredLanguage).toBe("en");
   });
 

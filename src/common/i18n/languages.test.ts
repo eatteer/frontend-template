@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_LANGUAGE, detectLanguage, isLanguageValue } from "@/common/i18n/languages";
+import { DEFAULT_LANGUAGE, detectLanguage, isLanguage } from "@/common/i18n/languages";
 
 describe("detectLanguage", () => {
   it("keeps the language the reader chose", () => {
@@ -21,9 +21,9 @@ describe("detectLanguage", () => {
   });
 });
 
-describe("isLanguageValue", () => {
+describe("isLanguage", () => {
   it("accepts only the languages the application speaks", () => {
-    expect(isLanguageValue("en")).toBe(true);
-    expect(isLanguageValue("es-CO")).toBe(false);
+    expect(isLanguage("en")).toBe(true);
+    expect(isLanguage("es-CO")).toBe(false);
   });
 });

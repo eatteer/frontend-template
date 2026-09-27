@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+import { z } from "zod";
 
 import { e2eEnv } from "./env";
 
@@ -10,6 +11,16 @@ export function apiUrl(path: string): string {
   return `${e2eEnv.VITE_API_URL}/api/v1${path}`;
 }
 
+// The backend's names for what the suite inspects on its answers (backend-template's auth-cookies.ts
+// and resolve-trace-id.ts).
+export const ACCESS_TOKEN_COOKIE = "access_token";
+export const TRACE_ID_HEADER = "x-trace-id";
+
+// Every user a spec creates signs in with it, whether through the form or directly.
+export const E2E_USER_PASSWORD = "e2e-password";
+
+const createdSchema = z.object({ data: z.object({ id: z.string() }) });
+
 type CreatedUser = {
   id: string;
   name: string;
@@ -17,11 +28,11 @@ type CreatedUser = {
 };
 
 export async function createUser(request: APIRequestContext, name: string, email: string): Promise<CreatedUser> {
-  const response = await request.post(apiUrl("/users"), { data: { name, email, password: "e2e-password" } });
+  const response = await request.post(apiUrl("/users"), { data: { name, email, password: E2E_USER_PASSWORD } });
 
   expect(response.status(), await response.text()).toBe(201);
 
-  const { data } = await response.json() as { data: { id: string } };
+  const { data } = createdSchema.parse(await response.json());
 
   return { id: data.id, name, email };
 }

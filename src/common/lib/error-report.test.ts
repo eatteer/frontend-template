@@ -6,7 +6,7 @@ import { buildErrorReport, copyErrorReport, describeError } from "@/common/lib/e
 import { buildApiError } from "@test/builders/api-error.builder";
 
 describe("describeError", () => {
-  it("uses the server's words for an ApiError", () => {
+  it("uses the server's words for an APIError", () => {
     expect(describeError(buildApiError())).toEqual({ title: "Conflict", detail: "The email is already registered" });
   });
 
@@ -16,7 +16,7 @@ describe("describeError", () => {
 });
 
 describe("buildErrorReport", () => {
-  it("reports an ApiError in full", () => {
+  it("reports an APIError in full", () => {
     const error = buildApiError();
 
     expect(buildErrorReport(error)).toEqual(error.toReport());

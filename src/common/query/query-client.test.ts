@@ -1,14 +1,37 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-import { showErrorToast } from "@/common/components/error-toast";
 import { setErrorReporter } from "@/common/lib/error-reporter";
 import { createQueryClient, MAX_QUERY_RETRIES, shouldRetryQuery } from "@/common/query/query-client";
 
 import { buildApiError } from "@test/builders/api-error.builder";
+import { renderWithProviders } from "@test/render";
 
-vi.mock("@/common/components/error-toast", () => ({ showErrorToast: vi.fn() }));
+import type { QueryClient } from "@tanstack/react-query";
 
 const USERS_KEY = ["users"];
+
+// The toaster mounted beside nothing, so a toast the cache shows is on screen to be found.
+function renderToaster(): QueryClient {
+  return renderWithProviders(null).queryClient;
+}
+
+// The failure the cache is expected to toast, after the ones it is expected to keep quiet: if any of
+// those had toasted, it would be on screen beside this one.
+async function expectOnlyToast(detail: string): Promise<void> {
+  const alerts = await screen.findAllByRole("alert");
+
+  expect(alerts.map((alert: HTMLElement): string | null => alert.textContent)).toEqual([expect.stringContaining(detail)]);
+}
+
+async function failMutation(queryClient: QueryClient, error: Error, errorToast?: boolean): Promise<void> {
+  const mutation = queryClient.getMutationCache().build(queryClient, {
+    mutationFn: (): Promise<never> => Promise.reject(error),
+    meta: errorToast === undefined ? undefined : { errorToast },
+  });
+
+  await expect(mutation.execute(undefined)).rejects.toBe(error);
+}
 
 describe("shouldRetryQuery", () => {
   it("never repeats a request the server rejected", () => {
@@ -25,90 +48,79 @@ describe("shouldRetryQuery", () => {
 });
 
 describe("createQueryClient", () => {
-  beforeEach(() => {
-    vi.mocked(showErrorToast).mockClear();
-  });
-
-  it("leaves a query that never loaded to its own error state", async () => {
-    const queryClient = createQueryClient();
+  it("leaves a query that never loaded to its own error state, and toasts a refetch that fails behind data", async () => {
+    const queryClient = renderToaster();
 
     await queryClient.prefetchQuery({
-      queryKey: USERS_KEY,
-      queryFn: () => Promise.reject(buildApiError({ status: 404 })),
+      queryKey: ["user"],
+      queryFn: (): Promise<never> => Promise.reject(buildApiError({ status: 404, detail: "The first load failed" })),
     });
-
-    expect(showErrorToast).not.toHaveBeenCalled();
-  });
-
-  it("toasts a refetch that fails behind data already on screen", async () => {
-    const queryClient = createQueryClient();
-    const error = buildApiError({ status: 404 });
 
     queryClient.setQueryData(USERS_KEY, []);
 
-    await queryClient.prefetchQuery({ queryKey: USERS_KEY, queryFn: () => Promise.reject(error) });
+    await queryClient.prefetchQuery({
+      queryKey: USERS_KEY,
+      queryFn: (): Promise<never> => Promise.reject(buildApiError({ status: 404, detail: "The refetch failed" })),
+    });
 
-    expect(showErrorToast).toHaveBeenCalledWith(error);
+    await expectOnlyToast("The refetch failed");
   });
 
   it("stays quiet for a query that asked to", async () => {
-    const queryClient = createQueryClient();
+    const queryClient = renderToaster();
+
+    queryClient.setQueryData(["user"], {});
+
+    await queryClient.prefetchQuery({
+      queryKey: ["user"],
+      queryFn: (): Promise<never> => Promise.reject(buildApiError({ status: 404, detail: "The quiet refetch failed" })),
+      meta: { errorToast: false },
+    });
 
     queryClient.setQueryData(USERS_KEY, []);
 
     await queryClient.prefetchQuery({
       queryKey: USERS_KEY,
-      queryFn: () => Promise.reject(buildApiError({ status: 404 })),
-      meta: { errorToast: false },
+      queryFn: (): Promise<never> => Promise.reject(buildApiError({ status: 404, detail: "The refetch failed" })),
     });
 
-    expect(showErrorToast).not.toHaveBeenCalled();
+    await expectOnlyToast("The refetch failed");
   });
 
   it("toasts a failed mutation unless its caller shows the failure itself", async () => {
-    const queryClient = createQueryClient();
-    const error = buildApiError();
-    const mutationFn = (): Promise<never> => Promise.reject(error);
-    const mutationCache = queryClient.getMutationCache();
+    const queryClient = renderToaster();
 
-    await expect(mutationCache.build(queryClient, { mutationFn }).execute(undefined)).rejects.toBe(error);
+    await failMutation(queryClient, buildApiError({ detail: "The caller explains this one" }), false);
+    await failMutation(queryClient, buildApiError({ detail: "Nobody else explains this one" }));
 
-    await expect(
-      mutationCache.build(queryClient, { mutationFn, meta: { errorToast: false } }).execute(undefined),
-    ).rejects.toBe(error);
-
-    expect(showErrorToast).toHaveBeenCalledTimes(1);
+    await expectOnlyToast("Nobody else explains this one");
   });
 
   it("never toasts a 401, which is on its way to the sign-in page", async () => {
-    const queryClient = createQueryClient();
-    const error = buildApiError({ status: 401, code: "common.unauthenticated" });
-    const mutationCache = queryClient.getMutationCache();
+    const queryClient = renderToaster();
+    const unauthenticated = buildApiError({ status: 401, code: "common.unauthenticated", detail: "Authentication is required" });
 
-    queryClient.setQueryData(USERS_KEY, []);
+    queryClient.setQueryData(["user"], {});
 
-    await queryClient.prefetchQuery({ queryKey: USERS_KEY, queryFn: () => Promise.reject(error) });
+    await queryClient.prefetchQuery({ queryKey: ["user"], queryFn: (): Promise<never> => Promise.reject(unauthenticated) });
+    await failMutation(queryClient, unauthenticated);
+    await failMutation(queryClient, buildApiError({ detail: "The save failed" }));
 
-    await expect(mutationCache.build(queryClient, { mutationFn: () => Promise.reject(error) }).execute(undefined))
-      .rejects.toBe(error);
-
-    expect(showErrorToast).not.toHaveBeenCalled();
+    await expectOnlyToast("The save failed");
   });
 
   it("reports a query or mutation that threw a bug rather than the server's answer", async () => {
     const report = vi.fn();
     const queryClient = createQueryClient();
-    const bug = new TypeError("Cannot read properties of undefined (reading 'items')");
-    const mutationCache = queryClient.getMutationCache();
+    const queryBug = new TypeError("Cannot read properties of undefined (reading 'items')");
+    const mutationBug = new TypeError("Cannot read properties of undefined (reading 'id')");
 
     setErrorReporter(report);
 
-    await queryClient.prefetchQuery({ queryKey: USERS_KEY, queryFn: () => Promise.reject(bug), retry: false });
-    await queryClient.prefetchQuery({ queryKey: ["user"], queryFn: () => Promise.reject(buildApiError()) });
+    await queryClient.prefetchQuery({ queryKey: USERS_KEY, queryFn: (): Promise<never> => Promise.reject(queryBug), retry: false });
+    await queryClient.prefetchQuery({ queryKey: ["user"], queryFn: (): Promise<never> => Promise.reject(buildApiError()) });
+    await failMutation(queryClient, mutationBug);
 
-    await expect(mutationCache.build(queryClient, { mutationFn: () => Promise.reject(bug) }).execute(undefined))
-      .rejects.toBe(bug);
-
-    expect(report.mock.calls).toEqual([[bug, "query"], [bug, "query"]]);
+    expect(report.mock.calls).toEqual([[queryBug, "query"], [mutationBug, "query"]]);
   });
 });

@@ -1,6 +1,6 @@
 import createClient from "openapi-fetch";
 
-import { ApiError, NETWORK_ERROR_CODE, NO_RESPONSE_STATUS, UNEXPECTED_RESPONSE_CODE } from "@/common/api/api-error";
+import { APIError, NETWORK_ERROR_CODE, NO_RESPONSE_STATUS, UNEXPECTED_RESPONSE_CODE } from "@/common/api/api-error";
 import { parseProblemDetails, PROBLEM_DETAILS_MEDIA_TYPE } from "@/common/api/problem-details";
 import type { paths } from "@/common/api/schema.gen";
 import { createSessionRefreshMiddleware } from "@/common/api/session-refresh";
@@ -10,9 +10,9 @@ import { i18n } from "@/common/i18n/i18n";
 
 import type { Middleware } from "openapi-fetch";
 
-const LANGUAGE_HEADER = "x-lang";
-const TRACE_ID_HEADER = "x-trace-id";
-const RETRY_AFTER_HEADER = "Retry-After";
+export const LANGUAGE_HEADER = "x-lang";
+export const TRACE_ID_HEADER = "x-trace-id";
+export const RETRY_AFTER_HEADER = "Retry-After";
 const CONTENT_TYPE_HEADER = "Content-Type";
 
 // Every request says which language its messages should come back in, and starts a trace the
@@ -48,7 +48,7 @@ async function readProblemDetails(response: Response): Promise<unknown> {
   }
 }
 
-// A failed response becomes an ApiError thrown from the call, so a caller only ever sees data. An
+// A failed response becomes an APIError thrown from the call, so a caller only ever sees data. An
 // answer that is not Problem Details — a proxy's HTML error page — becomes one too, keeping the
 // status it came with.
 export const problemDetailsMiddleware: Middleware = {
@@ -70,7 +70,7 @@ export const problemDetailsMiddleware: Middleware = {
     };
 
     if (problem === undefined) {
-      throw new ApiError({
+      throw new APIError({
         ...context,
         code: UNEXPECTED_RESPONSE_CODE,
         title: i18n.t("errors.unexpected_response.title"),
@@ -79,7 +79,7 @@ export const problemDetailsMiddleware: Middleware = {
       });
     }
 
-    throw new ApiError({
+    throw new APIError({
       ...context,
       code: problem.code,
       title: problem.title,
@@ -87,7 +87,7 @@ export const problemDetailsMiddleware: Middleware = {
       fieldErrors: problem.errors,
     });
   },
-  onError: ({ request, error }: { request: Request; error: unknown }): ApiError => new ApiError(
+  onError: ({ request, error }: { request: Request; error: unknown }): APIError => new APIError(
     {
       method: request.method,
       url: request.url,
@@ -113,9 +113,9 @@ export const apiClient = createClient<paths>({
 });
 
 // Response middlewares run in reverse order of registration, so the refresh — registered last — sees
-// a 401 before it is turned into an ApiError, and can answer with the request sent again instead.
+// a 401 before it is turned into an APIError, and can answer with the request sent again instead.
 apiClient.use(
   requestContextMiddleware,
   problemDetailsMiddleware,
-  createSessionRefreshMiddleware(() => apiClient.POST("/api/v1/auth/refresh", { body: {} })),
+  createSessionRefreshMiddleware((): Promise<unknown> => apiClient.POST("/api/v1/auth/refresh", { body: {} })),
 );

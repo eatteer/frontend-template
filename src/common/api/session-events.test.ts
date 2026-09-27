@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { publishSessionEvent, subscribeToSessionEvents } from "@/common/api/session-events";
+import { publishSessionEvent, SESSION_CHANNEL_NAME, subscribeToSessionEvents } from "@/common/api/session-events";
 
 // Another tab, as far as this one can tell: a second channel on the same name.
-const otherTab = new BroadcastChannel("session");
+const otherTab = new BroadcastChannel(SESSION_CHANNEL_NAME);
 
 let unsubscribe: (() => void) | undefined;
 

@@ -1,44 +1,52 @@
 import { http, HttpResponse } from "msw";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ApiError, NETWORK_ERROR_CODE } from "@/common/api/api-error";
+import { APIError, NETWORK_ERROR_CODE } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { unwrap } from "@/common/api/envelope";
+import type { AuthTokensDTO, UserDTO } from "@/common/api/schema.gen";
 import { subscribeToSessionEvents } from "@/common/api/session-events";
 import type { SessionEvent } from "@/common/api/session-events";
+import { LAST_REFRESH_STORAGE_KEY, REFRESH_LOCK_NAME } from "@/common/api/session-refresh";
 
-import { buildProblemDetails } from "@test/builders/problem-details.builder";
+import { buildAuthTokensDTO } from "@test/builders/auth-tokens.builder";
+import { buildUserDTO } from "@test/builders/user.builder";
+import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
+import { LOGIN_URL, REFRESH_URL, unauthenticated } from "@test/msw/session";
+import { USER_URL, USERS_URL } from "@test/msw/users";
 
-const API_URL = "http://api.test/api/v1";
-const REFRESH_URL = `${API_URL}/auth/refresh`;
-const USER_ID = "01890a5d-ac96-774b-bcce-b302099a8057";
+const USER = buildUserDTO();
 
-const UNAUTHENTICATED = HttpResponse.json(
-  buildProblemDetails({ status: 401, title: "Unauthorized", code: "common.unauthenticated" }),
-  { status: 401, headers: { "Content-Type": "application/problem+json" } },
-);
+// Lands after the request that hit the expired token left, as another tab's refresh would.
+const OTHER_TAB_REFRESH_DELAY_MS = 1000;
 
-const REFRESHED = { data: { accessToken: null, refreshToken: null, expiresAt: "2026-10-26T00:00:00.000Z" } };
+function refreshed(): HttpResponse<{ data: AuthTokensDTO }> {
+  return HttpResponse.json({ data: buildAuthTokensDTO() });
+}
+
+function userFound(): HttpResponse<{ data: UserDTO }> {
+  return HttpResponse.json({ data: USER });
+}
 
 // The access token is accepted only after a refresh has happened, as the backend would.
-function useExpiringAccessToken(): { refreshes: () => number } {
+function serveExpiringAccessToken(): { refreshes: () => number } {
   let refreshCount = 0;
 
   server.use(
-    http.post(REFRESH_URL, () => {
+    http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDTO }> => {
       refreshCount += 1;
 
-      return HttpResponse.json(REFRESHED);
+      return refreshed();
     }),
-    http.get(`${API_URL}/users/:id`, () => (refreshCount === 0 ? UNAUTHENTICATED.clone() : HttpResponse.json({ data: { id: USER_ID } }))),
+    http.get(USER_URL, (): MockedResponse => (refreshCount === 0 ? unauthenticated() : userFound())),
   );
 
-  return { refreshes: () => refreshCount };
+  return { refreshes: (): number => refreshCount };
 }
 
 async function getUser(): Promise<unknown> {
-  return unwrap(await apiClient.GET("/api/v1/users/{id}", { params: { path: { id: USER_ID } } }));
+  return unwrap(await apiClient.GET("/api/v1/users/{id}", { params: { path: { id: USER.id } } }));
 }
 
 function recordSessionEvents(): SessionEvent[] {
@@ -60,28 +68,28 @@ describe("the session refresh", () => {
   });
 
   it("refreshes on a 401 and sends the request again", async () => {
-    const backend = useExpiringAccessToken();
+    const backend = serveExpiringAccessToken();
     const events = recordSessionEvents();
 
-    await expect(getUser()).resolves.toEqual({ id: USER_ID });
+    await expect(getUser()).resolves.toEqual(USER);
     expect(backend.refreshes()).toBe(1);
     expect(events).toEqual([{ type: "refreshed" }]);
   });
 
   it("sends the body of a write again, not an empty one", async () => {
-    let refreshed = false;
+    let hasRefreshed = false;
     const received: unknown[] = [];
 
     server.use(
-      http.post(REFRESH_URL, () => {
-        refreshed = true;
+      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDTO }> => {
+        hasRefreshed = true;
 
-        return HttpResponse.json(REFRESHED);
+        return refreshed();
       }),
-      http.post(`${API_URL}/users`, async ({ request }: { request: Request }) => {
+      http.post(USERS_URL, async ({ request }: { request: Request }): Promise<MockedResponse> => {
         received.push(await request.json());
 
-        return refreshed ? HttpResponse.json({ data: { id: USER_ID } }, { status: 201 }) : UNAUTHENTICATED.clone();
+        return hasRefreshed ? HttpResponse.json({ data: { id: USER.id } }, { status: 201 }) : unauthenticated();
       }),
     );
 
@@ -93,7 +101,7 @@ describe("the session refresh", () => {
   });
 
   it("refreshes once for every request that hit the expired token together", async () => {
-    const backend = useExpiringAccessToken();
+    const backend = serveExpiringAccessToken();
 
     await Promise.all([getUser(), getUser(), getUser()]);
 
@@ -101,24 +109,24 @@ describe("the session refresh", () => {
   });
 
   it("only sends the request again when another tab refreshed after it left", async () => {
-    const backend = useExpiringAccessToken();
+    const backend = serveExpiringAccessToken();
     let userRequests = 0;
 
-    server.use(http.get(`${API_URL}/users/:id`, () => {
+    server.use(http.get(USER_URL, (): MockedResponse => {
       userRequests += 1;
 
-      return userRequests === 1 ? UNAUTHENTICATED.clone() : HttpResponse.json({ data: { id: USER_ID } });
+      return userRequests === 1 ? unauthenticated() : userFound();
     }));
 
     // The other tab's refresh lands while this request is on its way.
-    localStorage.setItem("session.lastRefreshAt", String(Date.now() + 1000));
+    localStorage.setItem(LAST_REFRESH_STORAGE_KEY, String(Date.now() + OTHER_TAB_REFRESH_DELAY_MS));
 
-    await expect(getUser()).resolves.toEqual({ id: USER_ID });
+    await expect(getUser()).resolves.toEqual(USER);
     expect(backend.refreshes()).toBe(0);
   });
 
   it("takes the cross-tab lock when the browser has one", async () => {
-    useExpiringAccessToken();
+    serveExpiringAccessToken();
 
     const request = vi.fn((_name: string, task: () => Promise<unknown>): Promise<unknown> => task());
 
@@ -126,15 +134,15 @@ describe("the session refresh", () => {
 
     await getUser();
 
-    expect(request).toHaveBeenCalledWith("session-refresh", expect.any(Function));
+    expect(request).toHaveBeenCalledWith(REFRESH_LOCK_NAME, expect.any(Function));
   });
 
   it("lets the 401 stand and signs out when the refresh token is refused", async () => {
     const events = recordSessionEvents();
 
     server.use(
-      http.post(REFRESH_URL, () => UNAUTHENTICATED.clone()),
-      http.get(`${API_URL}/users/:id`, () => UNAUTHENTICATED.clone()),
+      http.post(REFRESH_URL, unauthenticated),
+      http.get(USER_URL, unauthenticated),
     );
 
     await expect(getUser()).rejects.toMatchObject({ status: 401, code: "common.unauthenticated" });
@@ -145,13 +153,13 @@ describe("the session refresh", () => {
     const events = recordSessionEvents();
 
     server.use(
-      http.post(REFRESH_URL, () => HttpResponse.error()),
-      http.get(`${API_URL}/users/:id`, () => UNAUTHENTICATED.clone()),
+      http.post(REFRESH_URL, (): Response => HttpResponse.error()),
+      http.get(USER_URL, unauthenticated),
     );
 
-    const error: unknown = await getUser().catch((caught: unknown) => caught);
+    const error: unknown = await getUser().catch((caught: unknown): unknown => caught);
 
-    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toBeInstanceOf(APIError);
     expect(error).toMatchObject({ code: NETWORK_ERROR_CODE });
     expect(events).toEqual([]);
   });
@@ -160,12 +168,12 @@ describe("the session refresh", () => {
     let refreshCount = 0;
 
     server.use(
-      http.post(REFRESH_URL, () => {
+      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDTO }> => {
         refreshCount += 1;
 
-        return HttpResponse.json(REFRESHED);
+        return refreshed();
       }),
-      http.get(`${API_URL}/users/:id`, () => UNAUTHENTICATED.clone()),
+      http.get(USER_URL, unauthenticated),
     );
 
     await expect(getUser()).rejects.toMatchObject({ status: 401 });
@@ -176,12 +184,12 @@ describe("the session refresh", () => {
     let refreshCount = 0;
 
     server.use(
-      http.post(REFRESH_URL, () => {
+      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDTO }> => {
         refreshCount += 1;
 
-        return HttpResponse.json(REFRESHED);
+        return refreshed();
       }),
-      http.post(`${API_URL}/auth/login`, () => UNAUTHENTICATED.clone()),
+      http.post(LOGIN_URL, unauthenticated),
     );
 
     await expect(apiClient.POST("/api/v1/auth/login", { body: { email: "jane@example.com", password: "wrong" } }))

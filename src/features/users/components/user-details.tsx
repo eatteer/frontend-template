@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { useFormatters } from "@/common/hooks/use-formatters";
 import { LANGUAGE_LABELS } from "@/common/i18n/languages";
-import { useFormatters } from "@/common/lib/format";
 import { Skeleton } from "@/common/ui/skeleton";
 import { UserStatusBadge } from "@/features/users/components/user-status-badge";
 import type { User } from "@/features/users/model/user";
@@ -10,7 +10,7 @@ import type { JSX, ReactNode } from "react";
 
 const DETAIL_ROWS = 5;
 
-function DetailRow({ label, children }: { label: string; children: ReactNode }): JSX.Element {
+function DetailRow({ label, children }: { label: ReactNode; children: ReactNode }): JSX.Element {
   return (
     <div className="
       grid gap-1 border-b py-3
@@ -47,22 +47,14 @@ export function UserDetails({ user }: { user: User }): JSX.Element {
   );
 }
 
-// The same rows at the same height, with the values still to come.
+// The same rows, built from the same row, with the values still to come.
 export function UserDetailsSkeleton(): JSX.Element {
   return (
     <dl aria-busy="true">
       {Array.from({ length: DETAIL_ROWS }, (_: unknown, row: number): JSX.Element => (
-        <div
-          key={row}
-          className="
-            grid gap-1 border-b py-3
-            last:border-b-0
-            sm:grid-cols-3
-          "
-        >
-          <dt><Skeleton className="h-5 w-24" /></dt>
-          <dd className="sm:col-span-2"><Skeleton className="h-5 w-48" /></dd>
-        </div>
+        <DetailRow key={row} label={<Skeleton className="h-5 w-24" />}>
+          <Skeleton className="h-5 w-48" />
+        </DetailRow>
       ))}
     </dl>
   );

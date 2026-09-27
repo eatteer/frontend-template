@@ -1,6 +1,10 @@
-import { ApiError } from "@/common/api/api-error";
+import { APIError } from "@/common/api/api-error";
 
 import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
+
+function isFieldOf<T extends FieldValues>(field: string, fields: readonly Path<T>[]): field is Path<T> {
+  return (fields as readonly string[]).includes(field);
+}
 
 // Puts each field error the backend sent on the field it names — the first one focused, so a
 // keyboard or screen-reader user lands on it — and says whether every one of them found a field.
@@ -11,15 +15,18 @@ export function applyFieldErrors<T extends FieldValues>(
   setError: UseFormSetError<T>,
   fields: readonly Path<T>[],
 ): boolean {
-  if (!(error instanceof ApiError)) {
+  if (!(error instanceof APIError)) {
     return false;
   }
 
-  const placeable = error.fieldErrors.filter(({ field }: { field: string }): boolean => fields.some((name: Path<T>): boolean => name === field));
+  let placed = 0;
 
-  placeable.forEach(({ field, message }: { field: string; message: string }, index: number): void => {
-    setError(field as Path<T>, { type: "server", message }, { shouldFocus: index === 0 });
-  });
+  for (const { field, message } of error.fieldErrors) {
+    if (isFieldOf(field, fields)) {
+      setError(field, { type: "server", message }, { shouldFocus: placed === 0 });
+      placed += 1;
+    }
+  }
 
-  return placeable.length > 0 && placeable.length === error.fieldErrors.length;
+  return placed > 0 && placed === error.fieldErrors.length;
 }

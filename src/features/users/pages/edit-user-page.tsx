@@ -3,9 +3,8 @@ import { getRouteApi } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/common/ui/card";
-import { Skeleton } from "@/common/ui/skeleton";
 import { userQueries } from "@/features/users/api/user-queries";
-import { EditUserForm } from "@/features/users/components/edit-user-form";
+import { EditUserForm, EditUserFormSkeleton } from "@/features/users/components/edit-user-form";
 
 import type { JSX, ReactNode } from "react";
 
@@ -49,18 +48,10 @@ export function EditUserPage(): JSX.Element {
   );
 }
 
-// The form's field and buttons, as tall as they will be.
 export function EditUserPageSkeleton(): JSX.Element {
   return (
     <EditUserLayout>
-      <div aria-busy="true" className="flex flex-col gap-7">
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-8 w-full" />
-        </div>
-
-        <Skeleton className="h-8 w-48" />
-      </div>
+      <EditUserFormSkeleton />
     </EditUserLayout>
   );
 }

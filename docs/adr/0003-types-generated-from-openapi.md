@@ -27,7 +27,7 @@ response of every call are checked against the document, with nothing generated 
 - The value unions the application needs — permissions, statuses, `sortBy` columns — are the arrays
   the generator emits, never retyped.
 - The client's middlewares own what every call shares: cookies, `x-lang`, `traceparent`, the
-  refresh ([0002](0002-refresh-once-across-tabs.md)), and turning every failure into an `ApiError`
+  refresh ([0002](0002-refresh-once-across-tabs.md)), and turning every failure into an `APIError`
   built from the Problem Details body.
 - A feature maps DTOs to its own model in a mapper, so a screen never depends on the wire format.
 

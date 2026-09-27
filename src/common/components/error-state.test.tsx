@@ -37,7 +37,7 @@ describe("ErrorState", () => {
     await user.click(screen.getByRole("button", { name: "Copy error" }));
 
     expect(JSON.parse(await navigator.clipboard.readText())).toEqual(error.toReport());
-    expect(screen.getByRole("button", { name: "Copied" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Copied" })).toHaveAttribute("aria-disabled", "true");
   });
 
   it("keeps offering to copy when the browser refuses the clipboard", async () => {
@@ -48,6 +48,6 @@ describe("ErrorState", () => {
 
     await user.click(screen.getByRole("button", { name: "Copy error" }));
 
-    expect(screen.getByRole("button", { name: "Copy error" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Copy error" })).not.toHaveAttribute("aria-disabled", "true");
   });
 });

@@ -1,32 +1,35 @@
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import { ApiError, NETWORK_ERROR_CODE, NO_RESPONSE_STATUS, UNEXPECTED_RESPONSE_CODE } from "@/common/api/api-error";
-import { apiClient } from "@/common/api/client";
+import { APIError, NETWORK_ERROR_CODE, NO_RESPONSE_STATUS, UNEXPECTED_RESPONSE_CODE } from "@/common/api/api-error";
+import { apiClient, LANGUAGE_HEADER, RETRY_AFTER_HEADER, TRACE_ID_HEADER } from "@/common/api/client";
 import { unwrapPage } from "@/common/api/pagination";
-import { traceIdOf } from "@/common/api/traceparent";
+import { PROBLEM_DETAILS_MEDIA_TYPE } from "@/common/api/problem-details";
+import type { ProblemDetailsDTO, UserDTO } from "@/common/api/schema.gen";
+import { TRACEPARENT_HEADER, traceIdOf } from "@/common/api/traceparent";
 import { changeLanguage } from "@/common/i18n/i18n";
 
+import { buildPageDTO } from "@test/builders/page.builder";
+import type { PageDTO } from "@test/builders/page.builder";
 import { buildProblemDetails } from "@test/builders/problem-details.builder";
+import { problem } from "@test/msw/api";
 import { server } from "@test/msw/server";
+import { USERS_URL } from "@test/msw/users";
 
-const USERS_URL = "http://api.test/api/v1/users";
 const RESPONSE_TRACE_ID = "0af7651916cd43dd8448eb211c80319c";
+const RETRY_AFTER_SECONDS = 30;
 
-const EMPTY_PAGE = {
-  data: [],
-  pagination: { total: 0, pages: 0, page: 1, limit: 10, next: null, previous: null },
-};
+const EMPTY_PAGE = buildPageDTO<UserDTO>();
 
 async function listUsers(): Promise<unknown> {
   return unwrapPage(await apiClient.GET("/api/v1/users"));
 }
 
-async function captureError(): Promise<ApiError> {
+async function captureError(): Promise<APIError> {
   try {
     await listUsers();
   } catch (error: unknown) {
-    if (error instanceof ApiError) {
+    if (error instanceof APIError) {
       return error;
     }
 
@@ -38,7 +41,7 @@ async function captureError(): Promise<ApiError> {
 
 describe("apiClient", () => {
   it("unwraps a successful answer", async () => {
-    server.use(http.get(USERS_URL, () => HttpResponse.json(EMPTY_PAGE)));
+    server.use(http.get(USERS_URL, (): HttpResponse<PageDTO<UserDTO>> => HttpResponse.json(EMPTY_PAGE)));
 
     await expect(listUsers()).resolves.toEqual({ items: [], pagination: EMPTY_PAGE.pagination });
   });
@@ -46,7 +49,7 @@ describe("apiClient", () => {
   it("sends the session cookies, the reader's language and a trace context", async () => {
     let received: Request | undefined;
 
-    server.use(http.get(USERS_URL, ({ request }: { request: Request }) => {
+    server.use(http.get(USERS_URL, ({ request }: { request: Request }): HttpResponse<PageDTO<UserDTO>> => {
       received = request;
 
       return HttpResponse.json(EMPTY_PAGE);
@@ -56,21 +59,18 @@ describe("apiClient", () => {
     await listUsers();
 
     expect(received?.credentials).toBe("include");
-    expect(received?.headers.get("x-lang")).toBe("es");
-    expect(received?.headers.get("traceparent")).toMatch(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/);
+    expect(received?.headers.get(LANGUAGE_HEADER)).toBe("es");
+    expect(received?.headers.get(TRACEPARENT_HEADER)).toMatch(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/);
   });
 
-  it("turns Problem Details into an ApiError carrying all of it", async () => {
-    const problem = buildProblemDetails({
+  it("turns Problem Details into an APIError carrying all of it", async () => {
+    const details = buildProblemDetails({
       status: 400,
       code: "common.validation_error",
       errors: [{ field: "email", message: "Invalid email" }],
     });
 
-    server.use(http.get(USERS_URL, () => HttpResponse.json(problem, {
-      status: 400,
-      headers: { "Content-Type": "application/problem+json", "x-trace-id": RESPONSE_TRACE_ID },
-    })));
+    server.use(http.get(USERS_URL, (): HttpResponse<ProblemDetailsDTO> => problem(details, { [TRACE_ID_HEADER]: RESPONSE_TRACE_ID })));
 
     const error = await captureError();
 
@@ -79,8 +79,8 @@ describe("apiClient", () => {
       url: USERS_URL,
       status: 400,
       code: "common.validation_error",
-      title: problem.title,
-      detail: problem.detail,
+      title: details.title,
+      detail: details.detail,
       fieldErrors: [{ field: "email", message: "Invalid email" }],
       traceId: RESPONSE_TRACE_ID,
       retryAfterSeconds: undefined,
@@ -88,22 +88,22 @@ describe("apiClient", () => {
   });
 
   it("reads how long to wait from a 429", async () => {
-    server.use(http.get(USERS_URL, () => HttpResponse.json(buildProblemDetails({ status: 429 }), {
-      status: 429,
-      headers: { "Content-Type": "application/problem+json", "Retry-After": "30" },
-    })));
+    server.use(http.get(USERS_URL, (): HttpResponse<ProblemDetailsDTO> => problem(
+      { status: 429 },
+      { [RETRY_AFTER_HEADER]: String(RETRY_AFTER_SECONDS) },
+    )));
 
     const error = await captureError();
 
-    expect(error.retryAfterSeconds).toBe(30);
+    expect(error.retryAfterSeconds).toBe(RETRY_AFTER_SECONDS);
     expect(error.traceId).toBe(buildProblemDetails().traceId);
   });
 
   it("keeps the status of an answer that is not Problem Details", async () => {
     let sentTraceparent: string | null = null;
 
-    server.use(http.get(USERS_URL, ({ request }: { request: Request }) => {
-      sentTraceparent = request.headers.get("traceparent");
+    server.use(http.get(USERS_URL, ({ request }: { request: Request }): HttpResponse<string> => {
+      sentTraceparent = request.headers.get(TRACEPARENT_HEADER);
 
       return new HttpResponse("<html>Bad gateway</html>", { status: 502, headers: { "Content-Type": "text/html" } });
     }));
@@ -115,16 +115,16 @@ describe("apiClient", () => {
   });
 
   it("treats a malformed Problem Details body as an unexpected answer", async () => {
-    server.use(http.get(USERS_URL, () => new HttpResponse("{not json", {
+    server.use(http.get(USERS_URL, (): HttpResponse<string> => new HttpResponse("{not json", {
       status: 500,
-      headers: { "Content-Type": "application/problem+json" },
+      headers: { "Content-Type": PROBLEM_DETAILS_MEDIA_TYPE },
     })));
 
     expect((await captureError()).code).toBe(UNEXPECTED_RESPONSE_CODE);
   });
 
-  it("turns a request that got no answer into an ApiError with the trace it started", async () => {
-    server.use(http.get(USERS_URL, () => HttpResponse.error()));
+  it("turns a request that got no answer into an APIError with the trace it started", async () => {
+    server.use(http.get(USERS_URL, (): Response => HttpResponse.error()));
 
     const error = await captureError();
 

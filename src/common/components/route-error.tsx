@@ -2,7 +2,7 @@ import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { ApiError, FORBIDDEN_STATUS, NOT_FOUND_STATUS } from "@/common/api/api-error";
+import { APIError, FORBIDDEN_STATUS, NOT_FOUND_STATUS } from "@/common/api/api-error";
 import { ErrorState } from "@/common/components/error-state";
 import { Forbidden } from "@/common/components/forbidden";
 import { NotFound } from "@/common/components/not-found";
@@ -12,7 +12,7 @@ import type { ErrorComponentProps } from "@tanstack/react-router";
 import type { JSX } from "react";
 
 function isForbidden(error: unknown): boolean {
-  return error instanceof ForbiddenError || (error instanceof ApiError && error.status === FORBIDDEN_STATUS);
+  return error instanceof ForbiddenError || (error instanceof APIError && error.status === FORBIDDEN_STATUS);
 }
 
 // A route whose guard, loader or component threw. A refusal and a missing resource get the pages
@@ -24,7 +24,7 @@ export function RouteError({ error }: ErrorComponentProps): JSX.Element {
 
   const queryErrorResetBoundary = useQueryErrorResetBoundary();
 
-  useEffect(() => {
+  useEffect((): void => {
     queryErrorResetBoundary.reset();
   }, [queryErrorResetBoundary]);
 
@@ -32,7 +32,7 @@ export function RouteError({ error }: ErrorComponentProps): JSX.Element {
     return <Forbidden />;
   }
 
-  if (error instanceof ApiError && error.status === NOT_FOUND_STATUS) {
+  if (error instanceof APIError && error.status === NOT_FOUND_STATUS) {
     return <NotFound />;
   }
 

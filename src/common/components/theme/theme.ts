@@ -11,7 +11,6 @@ export type TransitionOrigin = {
   y: number;
 };
 
-export const SYSTEM_THEME_VALUE: Theme = "system";
 export const THEME_STORAGE_KEY = "theme";
 
 const DARK_COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)";
@@ -32,7 +31,7 @@ export function isTheme(value: string | null): value is Theme {
 export function readStoredTheme(): Theme {
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
 
-  return isTheme(stored) ? stored : SYSTEM_THEME_VALUE;
+  return isTheme(stored) ? stored : "system";
 }
 
 export function getSystemTheme(): ResolvedTheme {

@@ -1,4 +1,4 @@
-import { ApiError } from "@/common/api/api-error";
+import { APIError } from "@/common/api/api-error";
 import { ForbiddenError } from "@/common/lib/forbidden-error";
 
 // Where an error surfaced: an error boundary caught it while rendering, a query or mutation threw
@@ -25,12 +25,24 @@ export function setErrorReporter(next: ErrorReporter): void {
 // A failed request is the server's answer, and a refused route is a reader without a permission: the
 // screen shows both, and neither is a bug. Everything else is one.
 export function isExpectedError(error: unknown): boolean {
-  return error instanceof ApiError || error instanceof ForbiddenError;
+  return error instanceof APIError || error instanceof ForbiddenError;
 }
+
+// The same error can surface twice — a loader's query function throws, the query cache reports it,
+// and the router rethrows it into its boundary — and is reported the first time only.
+const reportedErrors = new WeakSet<object>();
 
 export function reportUnexpectedError(error: unknown, source: ErrorSource): void {
   if (isExpectedError(error)) {
     return;
+  }
+
+  if (typeof error === "object" && error !== null) {
+    if (reportedErrors.has(error)) {
+      return;
+    }
+
+    reportedErrors.add(error);
   }
 
   reporter(error, source);

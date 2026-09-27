@@ -4,6 +4,9 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
+// Room for a `findBy*` that waits out its whole timeout (see test/setup.ts) and the steps around it.
+const TEST_TIMEOUT_MS = 10_000;
+
 export default defineConfig({
   plugins: [
     // Before the React plugin: it generates the route tree and splits each route's component into
@@ -17,7 +20,7 @@ export default defineConfig({
     tailwindcss(),
   ],
   // The aliases are declared once, in tsconfig.app.json, and every tool reads them from there: the
-  // compiler, the bundler, the test runner and the shadcn CLI.
+  // compiler, the bundler and the test runner. (The shadcn CLI reads the root tsconfig.json.)
   resolve: {
     tsconfigPaths: true,
   },
@@ -25,8 +28,7 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "test/**/*.test.{ts,tsx}"],
-    // Room for a `findBy*` that waits out its whole timeout (see test/setup.ts) and the steps around it.
-    testTimeout: 10_000,
+    testTimeout: TEST_TIMEOUT_MS,
     // The configuration the tests run with, so a suite never depends on whoever's `.env` is on disk.
     env: {
       VITE_API_URL: "http://api.test",

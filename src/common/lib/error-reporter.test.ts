@@ -21,6 +21,18 @@ describe("reportUnexpectedError", () => {
     expect(report).toHaveBeenCalledWith(bug, "query");
   });
 
+  it("reports an error once, however many places it surfaces from", () => {
+    const report = vi.fn();
+    const bug = new TypeError("y is undefined");
+
+    setErrorReporter(report);
+    reportUnexpectedError(bug, "query");
+    reportUnexpectedError(bug, "boundary");
+
+    expect(report).toHaveBeenCalledTimes(1);
+    expect(report).toHaveBeenCalledWith(bug, "query");
+  });
+
   it("leaves out the server's answers and refused routes, which the screen already shows", () => {
     const report = vi.fn();
 

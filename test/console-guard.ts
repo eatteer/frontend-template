@@ -2,6 +2,8 @@ import { format } from "node:util";
 
 import { vi } from "vitest";
 
+import type { MockInstance } from "vitest";
+
 const GUARDED_METHODS = ["error", "warn"] as const;
 
 type ConsoleGuard = {
@@ -16,7 +18,7 @@ type ConsoleGuard = {
 export function guardConsole(): ConsoleGuard {
   const messages: string[] = [];
 
-  const spies = GUARDED_METHODS.map((method: (typeof GUARDED_METHODS)[number]) => vi
+  const spies = GUARDED_METHODS.map((method: (typeof GUARDED_METHODS)[number]): MockInstance => vi
     .spyOn(console, method)
     .mockImplementation((...args: unknown[]): void => {
       messages.push(`console.${method}: ${format(...args)}`);

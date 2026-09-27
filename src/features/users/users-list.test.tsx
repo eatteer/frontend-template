@@ -1,27 +1,25 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { buildProblemDetails } from "@test/builders/problem-details.builder";
+import type { UserDTO } from "@/common/api/schema.gen";
+
+import { buildPageDTO } from "@test/builders/page.builder";
 import { buildSessionDTO } from "@test/builders/session.builder";
 import { buildUserDTO, buildUserDTOs } from "@test/builders/user.builder";
+import { problem } from "@test/msw/api";
+import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
 import { signedIn } from "@test/msw/session";
-import { USERS_URL, usersBackend } from "@test/msw/users";
+import { serveUsers, USERS_URL } from "@test/msw/users";
+import type { UsersBackend } from "@test/msw/users";
 import { renderRoute } from "@test/render";
+import { expectRouteFailureWarning } from "@test/route-failure-warning";
 
 const TWENTY_FIVE_USERS = buildUserDTOs(25);
 
-function useUsers(users = TWENTY_FIVE_USERS): ReturnType<typeof usersBackend> {
-  const backend = usersBackend(users);
-
-  server.use(...backend.handlers);
-
-  return backend;
-}
-
-function lastListQuery(backend: ReturnType<typeof usersBackend>): Record<string, string> {
+function lastListQuery(backend: UsersBackend): Record<string, string> {
   return Object.fromEntries(backend.listQueries.at(-1) ?? []);
 }
 
@@ -34,7 +32,7 @@ function rowNames(): string[] {
 
 describe("the users list", () => {
   it("shows a skeleton of the table, then the first page, newest first", async () => {
-    const backend = useUsers();
+    const backend = serveUsers(TWENTY_FIVE_USERS);
 
     renderRoute("/users");
 
@@ -49,13 +47,13 @@ describe("the users list", () => {
 
   it("pages through the backend's pages, keeping the page in the URL", async () => {
     const user = userEvent.setup();
-    const backend = useUsers();
+    const backend = serveUsers(TWENTY_FIVE_USERS);
 
     const { router } = renderRoute("/users");
 
     await screen.findByRole("link", { name: "User 25" });
 
-    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Previous" })).toHaveAttribute("aria-disabled", "true");
 
     await user.click(screen.getByRole("button", { name: "Next" }));
 
@@ -71,7 +69,7 @@ describe("the users list", () => {
 
   it("searches from the first page", async () => {
     const user = userEvent.setup();
-    const backend = useUsers();
+    const backend = serveUsers(TWENTY_FIVE_USERS);
 
     const { router } = renderRoute("/users?page=2");
 
@@ -86,17 +84,32 @@ describe("the users list", () => {
     expect(lastListQuery(backend)).toEqual({ search: "user0", limit: "10" });
   });
 
-  it("shows the search in the URL it opens with, and follows Back", async () => {
-    const user = userEvent.setup();
+  it("shows the search in the URL it opens with", async () => {
+    serveUsers(TWENTY_FIVE_USERS);
 
-    useUsers();
-
-    const { router } = renderRoute("/users?search=%22user1%22");
+    renderRoute("/users?search=%22user1%22");
 
     expect(await screen.findByRole("searchbox", { name: "Search" })).toHaveValue("user1");
+  });
 
-    // Replaced in one change, so the history holds exactly two searches however slowly keys arrive.
-    await user.tripleClick(screen.getByRole("searchbox", { name: "Search" }));
+  it("keeps one history entry for a search however it is refined, and Back leaves it", async () => {
+    const user = userEvent.setup();
+
+    serveUsers(TWENTY_FIVE_USERS);
+
+    const { router } = renderRoute("/users");
+
+    const searchbox = await screen.findByRole("searchbox", { name: "Search" });
+
+    // Each term in one change, so each commits once however slowly keys arrive.
+    await user.click(searchbox);
+    await user.paste("user1");
+
+    await waitFor(() => {
+      expect(router.state.location.search).toEqual({ search: "user1" });
+    });
+
+    await user.tripleClick(searchbox);
     await user.paste("user2");
 
     await waitFor(() => {
@@ -106,13 +119,15 @@ describe("the users list", () => {
     router.history.back();
 
     await waitFor(() => {
-      expect(screen.getByRole("searchbox", { name: "Search" })).toHaveValue("user1");
+      expect(router.state.location.search).toEqual({});
     });
+
+    expect(screen.getByRole("searchbox", { name: "Search" })).toHaveValue("");
   });
 
   it("filters by status from the first page, and clears the filter", async () => {
     const user = userEvent.setup();
-    const backend = useUsers([...buildUserDTOs(3), buildUserDTO({ id: "suspended", name: "Sam Suspended", status: "suspended" })]);
+    const backend = serveUsers([...buildUserDTOs(3), buildUserDTO({ id: "suspended", name: "Sam Suspended", status: "suspended" })]);
 
     const { router } = renderRoute("/users?page=1");
 
@@ -139,7 +154,7 @@ describe("the users list", () => {
 
   it("sorts by a column, ascending first and then the other way", async () => {
     const user = userEvent.setup();
-    const backend = useUsers();
+    const backend = serveUsers(TWENTY_FIVE_USERS);
 
     const { router } = renderRoute("/users?page=3");
 
@@ -166,8 +181,32 @@ describe("the users list", () => {
     expect(lastListQuery(backend)).toEqual({ sortBy: "name", sortOrder: "desc", limit: "10" });
   });
 
+  it("leaves the backend's default order out of the URL and the request", async () => {
+    const user = userEvent.setup();
+    const backend = serveUsers(TWENTY_FIVE_USERS);
+
+    const { router } = renderRoute("/users");
+
+    await screen.findByRole("link", { name: "User 25" });
+    await user.click(screen.getByRole("button", { name: "Created" }));
+
+    await waitFor(() => {
+      expect(rowNames()[0]).toBe("User 01");
+    });
+
+    await user.click(screen.getByRole("button", { name: "Created" }));
+
+    await waitFor(() => {
+      expect(rowNames()[0]).toBe("User 25");
+    });
+
+    expect(router.state.location.search).toEqual({});
+    expect(screen.getByRole("columnheader", { name: "Created" })).toHaveAttribute("aria-sort", "descending");
+    expect(lastListQuery(backend)).toEqual({ limit: "10" });
+  });
+
   it("drops a parameter the URL carries that does not parse, instead of sending it", async () => {
-    const backend = useUsers();
+    const backend = serveUsers(TWENTY_FIVE_USERS);
 
     renderRoute("/users?page=0&status=%22deleted%22&sortBy=%22password%22");
 
@@ -177,7 +216,7 @@ describe("the users list", () => {
   });
 
   it("says so when nothing matches", async () => {
-    useUsers();
+    serveUsers(TWENTY_FIVE_USERS);
 
     renderRoute("/users?search=%22nobody%22");
 
@@ -189,15 +228,12 @@ describe("the users list", () => {
     const user = userEvent.setup();
     let isFailing = true;
 
-    server.use(http.get(USERS_URL, () => {
+    server.use(http.get(USERS_URL, (): MockedResponse => {
       if (!isFailing) {
-        return HttpResponse.json({ data: [], pagination: { total: 0, pages: 0, page: 1, limit: 10, next: null, previous: null } });
+        return HttpResponse.json(buildPageDTO<UserDTO>());
       }
 
-      return HttpResponse.json(
-        buildProblemDetails({ status: 400, title: "Bad Request", detail: "The search is too long", code: "common.validation_error" }),
-        { status: 400, headers: { "Content-Type": "application/problem+json" } },
-      );
+      return problem({ status: 400, title: "Bad Request", detail: "The search is too long", code: "common.validation_error" });
     }));
 
     renderRoute("/users");
@@ -214,7 +250,7 @@ describe("the users list", () => {
 describe("the users list, by permission", () => {
   it("offers to create a user only to someone allowed to", async () => {
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
-    useUsers();
+    serveUsers(TWENTY_FIVE_USERS);
 
     renderRoute("/users");
 
@@ -233,26 +269,24 @@ describe("the users list, by permission", () => {
   });
 
   it("refuses the page to someone who may not read users, without asking the backend for them", async () => {
-    // Outside production the router warns about every route that failed, which is what a refused
-    // route is. Expected here, so it is asserted rather than left to fail the test.
-    const warn = vi.spyOn(console, "warn").mockImplementation((): void => {});
+    const warning = expectRouteFailureWarning();
 
     server.use(signedIn(buildSessionDTO({ permissions: [] })));
 
-    const backend = useUsers();
+    const backend = serveUsers(TWENTY_FIVE_USERS);
 
     const { router } = renderRoute("/users");
 
     expect(await screen.findByText("You don't have access")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/users");
     expect(backend.listQueries).toEqual([]);
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining("Error in route match"));
+    warning.assertWarned();
   });
 
   it("goes to the list from the navigation", async () => {
     const user = userEvent.setup();
 
-    useUsers();
+    serveUsers(TWENTY_FIVE_USERS);
     renderRoute("/");
 
     await user.click(await screen.findByRole("link", { name: "Users" }));

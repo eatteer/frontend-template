@@ -1,7 +1,7 @@
-import { apiUrl, setAccountLanguage, signIn } from "./support/api";
+import { ACCESS_TOKEN_COOKIE, apiUrl, setAccountLanguage, signIn } from "./support/api";
 import { expect, test as base } from "./support/fixtures";
 
-import type { Page, Request } from "@playwright/test";
+import type { BrowserContext, Cookie, Page, Request } from "@playwright/test";
 
 type SessionFixtures = {
   // Signs in for this test alone instead of reusing the administrator's shared cookies.
@@ -12,7 +12,10 @@ type SessionFixtures = {
 // Two tabs of one browser, on the users page.
 const test = base.extend<SessionFixtures>({
   ownSession: [false, { option: true }],
-  twoTabs: async ({ context, ownSession }, use) => {
+  twoTabs: async (
+    { context, ownSession }: { context: BrowserContext; ownSession: boolean },
+    use: (twoTabs: [Page, Page]) => Promise<void>,
+  ): Promise<void> => {
     if (ownSession) {
       await signIn(context.request);
     }
@@ -46,7 +49,7 @@ test.describe("with a session of its own", () => {
 
     // Without the access cookie the backend answers exactly as it does to an expired one: 401
     // `common.unauthenticated`.
-    await context.clearCookies({ name: "access_token" });
+    await context.clearCookies({ name: ACCESS_TOKEN_COOKIE });
     await Promise.all([first.reload(), second.reload()]);
 
     for (const tab of [first, second]) {
@@ -54,7 +57,7 @@ test.describe("with a session of its own", () => {
     }
 
     expect(refreshes).toHaveLength(1);
-    expect((await context.cookies()).some((cookie) => cookie.name === "access_token")).toBe(true);
+    expect((await context.cookies()).some((cookie: Cookie): boolean => cookie.name === ACCESS_TOKEN_COOKIE)).toBe(true);
   });
 });
 

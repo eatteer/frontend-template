@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { SortableTableHead } from "@/common/components/data-table/sortable-table-head";
 import type { Sort } from "@/common/components/data-table/sortable-table-head";
-import { useFormatters } from "@/common/lib/format";
+import { useFormatters } from "@/common/hooks/use-formatters";
 import { Skeleton } from "@/common/ui/skeleton";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/common/ui/table";
 import { USERS_PAGE_SIZE } from "@/features/users/api/user-queries";

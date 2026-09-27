@@ -2,11 +2,11 @@ import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
 
 import { detectLanguage } from "@/common/i18n/languages";
-import type { LanguageValue } from "@/common/i18n/languages";
+import type { Language } from "@/common/i18n/languages";
 
 import type { Resource, ResourceKey } from "i18next";
 
-const LANGUAGE_STORAGE_KEY = "language";
+export const LANGUAGE_STORAGE_KEY = "language";
 const DEFAULT_NAMESPACE = "common";
 
 // Bundled instead of fetched per namespace: a namespace that arrives after its consumer has mounted
@@ -38,7 +38,7 @@ function applyDocumentLanguage(language: string): void {
 
 // Also the next visit's starting point: a reload paints in the last language applied, the account's
 // included, before the session has been read. Applying the language already in place writes nothing.
-export async function changeLanguage(language: LanguageValue): Promise<void> {
+export async function changeLanguage(language: Language): Promise<void> {
   if (localStorage.getItem(LANGUAGE_STORAGE_KEY) !== language) {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   }

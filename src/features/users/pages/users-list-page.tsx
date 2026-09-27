@@ -4,15 +4,14 @@ import { SearchXIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { FIRST_PAGE } from "@/common/api/pagination";
-import { DataTablePagination } from "@/common/components/data-table/data-table-pagination";
+import { DataTablePagination, DataTablePaginationSkeleton } from "@/common/components/data-table/data-table-pagination";
 import type { Sort } from "@/common/components/data-table/sortable-table-head";
 import { ErrorState } from "@/common/components/error-state";
 import { buttonVariants } from "@/common/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/common/ui/empty";
 import { useHasPermissions } from "@/features/auth/api/use-session";
 import { userQueries } from "@/features/users/api/user-queries";
-import { UsersFiltersBar } from "@/features/users/components/users-filters";
-import type { UsersFilters } from "@/features/users/components/users-filters";
+import { UsersFilters } from "@/features/users/components/users-filters";
 import { UsersTable, UsersTableSkeleton } from "@/features/users/components/users-table";
 import { DEFAULT_USER_SORT } from "@/features/users/model/user";
 import type { UserSortBy } from "@/features/users/model/user";
@@ -36,7 +35,12 @@ function UsersListContent({ search, sort, onSort, onPageChange }: UsersListConte
   const users = useQuery(userQueries.list(search));
 
   if (users.isPending) {
-    return <UsersTableSkeleton />;
+    return (
+      <div className="flex flex-col gap-4">
+        <UsersTableSkeleton />
+        <DataTablePaginationSkeleton />
+      </div>
+    );
   }
 
   if (users.isError) {
@@ -51,6 +55,8 @@ function UsersListContent({ search, sort, onSort, onPageChange }: UsersListConte
   }
 
   if (users.data.items.length === 0) {
+    const isFiltered = search.search !== undefined || search.status !== undefined;
+
     return (
       <Empty>
         <EmptyHeader>
@@ -59,7 +65,7 @@ function UsersListContent({ search, sort, onSort, onPageChange }: UsersListConte
           </EmptyMedia>
 
           <EmptyTitle>{t("list.empty.title")}</EmptyTitle>
-          <EmptyDescription>{t("list.empty.detail")}</EmptyDescription>
+          <EmptyDescription>{t(isFiltered ? "list.empty.no_matches" : "list.empty.no_users")}</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -88,8 +94,22 @@ export function UsersListPage(): JSX.Element {
 
   // Anything but the page itself starts again from the first page: page 3 of the old results says
   // nothing about the new ones.
-  function changeList(change: Partial<UsersSearch>): void {
-    void navigate({ search: (previous: UsersSearch): UsersSearch => ({ ...previous, ...change, page: undefined }) });
+  function changeList(change: Partial<UsersSearch>, replace = false): void {
+    void navigate({ search: (previous: UsersSearch): UsersSearch => ({ ...previous, ...change, page: undefined }), replace });
+  }
+
+  // Starting a search is a step Back returns from; refining or clearing it only corrects that step,
+  // so a pause at every few keys does not pile up in the history.
+  function changeFilters(change: Partial<UsersSearch>): void {
+    changeList(change, "search" in change && search.search !== undefined);
+  }
+
+  // The backend's default order is the absence of one: spelled out, it would sit in the URL and the
+  // request for nothing, and a link to the plain list would stop matching it.
+  function changeSort(next: Sort<UserSortBy>): void {
+    const isDefault = next.sortBy === DEFAULT_USER_SORT.sortBy && next.sortOrder === DEFAULT_USER_SORT.sortOrder;
+
+    changeList(isDefault ? { sortBy: undefined, sortOrder: undefined } : next);
   }
 
   function changePage(page: number): void {
@@ -111,15 +131,16 @@ export function UsersListPage(): JSX.Element {
         )}
       </header>
 
-      <UsersFiltersBar
+      <UsersFilters
         search={search.search}
         status={search.status}
-        onChange={(change: Partial<UsersFilters>) => {
-          changeList(change);
-        }}
+        onChange={changeFilters}
       />
 
-      <UsersListContent search={search} sort={sort} onSort={changeList} onPageChange={changePage} />
+      {/* A full page of rows, reserved for every state, so switching between them never moves the page. */}
+      <div className="min-h-120">
+        <UsersListContent search={search} sort={sort} onSort={changeSort} onPageChange={changePage} />
+      </div>
     </section>
   );
 }

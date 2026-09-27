@@ -1,3 +1,4 @@
+import { APIError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
 import { i18n } from "@/common/i18n/i18n";
 import { copyErrorReport, describeError } from "@/common/lib/error-report";
 import { toast } from "@/common/ui/toast";
@@ -6,8 +7,13 @@ import { toast } from "@/common/ui/toast";
 export const ERROR_TOAST_TIMEOUT_MS = 8000;
 
 // No id or trace id on screen — they mean nothing to the reader. "Copy error" puts the whole report
-// on the clipboard instead, for whoever the reader sends it to.
+// on the clipboard instead, for whoever the reader sends it to. A 401 never toasts, whoever asks: it
+// arrives only once the refresh failed too, and the sign-in screen that follows is the explanation.
 export function showErrorToast(error: unknown): void {
+  if (error instanceof APIError && error.status === UNAUTHORIZED_STATUS) {
+    return;
+  }
+
   const { title, detail } = describeError(error);
 
   async function copyAndConfirm(): Promise<void> {
@@ -18,7 +24,8 @@ export function showErrorToast(error: unknown): void {
       return;
     }
 
-    toast.update(toastId, { actionProps: { children: i18n.t("actions.error_copied"), disabled: true } });
+    // `aria-disabled`, not `disabled`: a disabled button drops the focus of whoever just pressed it.
+    toast.update(toastId, { actionProps: { children: i18n.t("actions.error_copied"), "aria-disabled": true } });
   }
 
   const toastId = toast.add({

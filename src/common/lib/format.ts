@@ -1,5 +1,3 @@
-import { useTranslation } from "react-i18next";
-
 // The wire shape of an amount: minor units as a string, so no amount ever passes through a float.
 export type Money = {
   amountMinor: string;
@@ -44,25 +42,4 @@ export function formatMoney({ amountMinor, currency }: Money, language: string):
   }
 
   return formatter.format(decimal);
-}
-
-type Formatters = {
-  date: (isoDate: string, options?: Intl.DateTimeFormatOptions) => string;
-  dateTime: (isoDate: string) => string;
-  number: (value: number, options?: Intl.NumberFormatOptions) => string;
-  money: (money: Money) => string;
-};
-
-// The formatters bound to the language on screen, re-rendering the caller when it changes.
-export function useFormatters(): Formatters {
-  const { i18n } = useTranslation();
-
-  const { language } = i18n;
-
-  return {
-    date: (isoDate: string, options?: Intl.DateTimeFormatOptions): string => formatDate(isoDate, language, options),
-    dateTime: (isoDate: string): string => formatDateTime(isoDate, language),
-    number: (value: number, options?: Intl.NumberFormatOptions): string => formatNumber(value, language, options),
-    money: (money: Money): string => formatMoney(money, language),
-  };
 }

@@ -1,7 +1,6 @@
-import { ApiError } from "@/common/api/api-error";
+import { APIError } from "@/common/api/api-error";
 import type { ErrorReport } from "@/common/api/api-error";
 import { i18n } from "@/common/i18n/i18n";
-
 
 // What a failure that never reached the network carries: a bug, not an answer from the server.
 type UnexpectedErrorReport = {
@@ -20,7 +19,7 @@ const REPORT_INDENT = 2;
 // The server's own words when it gave them, already translated; a generic message otherwise, since
 // an unexpected error's message is written for developers.
 export function describeError(error: unknown): DescribedError {
-  if (error instanceof ApiError) {
+  if (error instanceof APIError) {
     return { title: error.title, detail: error.detail };
   }
 
@@ -28,7 +27,7 @@ export function describeError(error: unknown): DescribedError {
 }
 
 export function buildErrorReport(error: unknown): ErrorReport | UnexpectedErrorReport {
-  if (error instanceof ApiError) {
+  if (error instanceof APIError) {
     return error.toReport();
   }
 

@@ -11,12 +11,10 @@ import { Button } from "@/common/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/common/ui/field";
 import { Input } from "@/common/ui/input";
 import { useSignIn } from "@/features/auth/api/auth-mutations";
-import { buildSignInSchema, SIGN_IN_DEFAULT_VALUES } from "@/features/auth/schemas/sign-in.schema";
-import type { SignInValues } from "@/features/auth/schemas/sign-in.schema";
+import { buildSignInSchema, SIGN_IN_DEFAULT_VALUES, SIGN_IN_FIELDS } from "@/features/auth/schemas/sign-in.schema";
+import type { SignInFormInput, SignInValues } from "@/features/auth/schemas/sign-in.schema";
 
 import type { JSX } from "react";
-
-const SIGN_IN_FIELDS = ["email", "password"] as const;
 
 type SignInFormProps = {
   onSignedIn: () => void;
@@ -38,7 +36,7 @@ export function SignInForm({ onSignedIn }: SignInFormProps): JSX.Element {
   // because not every failure is an answer from the backend.
   const [formError, setFormError] = useState<unknown>();
 
-  const { register, handleSubmit, setError, formState: { errors } } = useForm<SignInValues, unknown, SignInValues>({
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<SignInFormInput, unknown, SignInValues>({
     resolver: zodResolver(buildSignInSchema(t)),
     defaultValues: SIGN_IN_DEFAULT_VALUES,
   });
@@ -112,7 +110,7 @@ export function SignInForm({ onSignedIn }: SignInFormProps): JSX.Element {
           <FieldError id={`${passwordId}-error`} errors={[errors.password]} />
         </Field>
 
-        <Button type="submit" disabled={signIn.isPending}>{t("sign_in.submit")}</Button>
+        <Button type="submit" disabled={signIn.isPending} focusableWhenDisabled>{t("sign_in.submit")}</Button>
       </FieldGroup>
     </form>
   );

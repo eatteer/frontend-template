@@ -42,7 +42,7 @@ export function useDebouncedFilter(
     }
   }
 
-  useEffect(() => (): void => {
+  useEffect((): (() => void) => (): void => {
     clearTimeout(timer.current);
   }, []);
 
@@ -50,7 +50,7 @@ export function useDebouncedFilter(
     setDraft(text);
     clearTimeout(timer.current);
 
-    timer.current = setTimeout(() => {
+    timer.current = setTimeout((): void => {
       const next = toFilterValue(text);
 
       setCommitted(next);

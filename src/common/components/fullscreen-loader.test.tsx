@@ -12,7 +12,7 @@ function startMutation(queryClient: QueryClient, meta?: MutationMeta): () => voi
   let settle = (): void => {};
 
   const mutation = queryClient.getMutationCache().build(queryClient, {
-    mutationFn: () => new Promise<void>((resolve: () => void) => {
+    mutationFn: (): Promise<void> => new Promise<void>((resolve: () => void): void => {
       settle = resolve;
     }),
     meta,

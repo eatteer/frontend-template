@@ -15,9 +15,9 @@ naming it.
 page.** It is configuration, never a secret. Today there is one: `VITE_API_URL`, where
 backend-template listens.
 
-The two `E2E_*` variables at the end of the file are read only by the end-to-end suite, and Vite
-never exposes them to the bundle: the administrator backend-template's seed created, which the suite
-signs in as.
+The `E2E_*` variables at the end of the file are read only by the end-to-end suite, and Vite never
+exposes them to the bundle: the administrator backend-template's seed created, which the suite signs
+in as, and optionally an application already served to run against.
 
 The front end and the API have to be **same-site**: the session cookies are `SameSite=strict`, and a
 cross-site page never sends them. `localhost:5173` calling `localhost:3000` is same-site; so is
@@ -54,7 +54,7 @@ npm run api:types             # writes src/common/api/schema.gen.ts, which is co
 | `npm run build` | The production bundle, in `dist/` | |
 | `npm run preview` | Serves `dist/` | `build` |
 | `npm run lint` | ESLint with `--fix`; it owns formatting | |
-| `npm run typecheck` | `tsc -b`, over the application, the tests and the tooling | |
+| `npm run typecheck` | `tsc -b`, over the application, the tests, the end-to-end suite and the tooling | |
 | `npm test` | Unit and component tests with Vitest, and the coverage floor. The network is MSW; nothing runs | |
 | `npm run test:e2e` | Builds, serves the build, and drives it with Playwright against the real backend | the backend, seeded |
 | `npm run api:types` | Regenerates the API's types from its OpenAPI document | the backend |

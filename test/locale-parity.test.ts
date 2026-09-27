@@ -2,17 +2,25 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
 import { LANGUAGE_VALUES } from "@/common/i18n/languages";
 
 type Translations = { [key: string]: string | Translations };
+
+const translationsSchema: z.ZodType<Translations> = z.record(
+  z.string(),
+  z.union([z.string(), z.lazy((): z.ZodType<Translations> => translationsSchema)]),
+);
 
 const LOCALES_DIRECTORY = join(import.meta.dirname, "..", "src", "locales");
 const REFERENCE_LANGUAGE = "en";
 const PLURAL_SEPARATOR = "_";
 
 function readNamespace(language: string, fileName: string): Translations {
-  return JSON.parse(readFileSync(join(LOCALES_DIRECTORY, language, fileName), "utf8"));
+  const parsed: unknown = JSON.parse(readFileSync(join(LOCALES_DIRECTORY, language, fileName), "utf8"));
+
+  return translationsSchema.parse(parsed);
 }
 
 function flattenKeys(translations: Translations, prefix: string = ""): string[] {

@@ -2,7 +2,7 @@ import type { SortOrder } from "@/common/api/pagination";
 import { pathsApiV1UsersGetParametersQuerySortByValues, pathsApiV1UsersGetParametersQueryStatusValues } from "@/common/api/schema.gen";
 import type { UserDTO } from "@/common/api/schema.gen";
 import type { Sort } from "@/common/components/data-table/sortable-table-head";
-import type { LanguageValue } from "@/common/i18n/languages";
+import type { Language } from "@/common/i18n/languages";
 
 // Both catalogs are the backend's, generated from its OpenAPI: a status or sort field it adds or
 // drops changes the filters and the columns at compile time.
@@ -22,7 +22,7 @@ export type User = {
   name: string;
   email: string;
   status: UserStatus;
-  preferredLanguage: LanguageValue;
+  preferredLanguage: Language;
   // ISO 8601 in UTC, as the formatters take them.
   createdAt: string;
   updatedAt: string;

@@ -15,7 +15,7 @@ const SERVER_ERROR_MIN_STATUS = 500;
 
 export type FieldError = ProblemFieldErrorDTO;
 
-export type ApiErrorInit = {
+export type APIErrorInit = {
   method: string;
   url: string;
   status: number;
@@ -43,8 +43,8 @@ export type ErrorReport = {
 // Every failed request becomes one of these: a Problem Details answer, an answer that is not one,
 // or no answer at all. A real Error, so it keeps its stack and `cause`, and one type is all the
 // query layer and the UI have to understand.
-export class ApiError extends Error {
-  public override readonly name = "ApiError";
+export class APIError extends Error {
+  public override readonly name = "APIError";
   public readonly method: string;
   public readonly url: string;
   public readonly status: number;
@@ -56,7 +56,7 @@ export class ApiError extends Error {
   public readonly retryAfterSeconds: number | undefined;
   public readonly occurredAt: Date = new Date();
 
-  public constructor(init: ApiErrorInit, options?: ErrorOptions) {
+  public constructor(init: APIErrorInit, options?: ErrorOptions) {
     super(init.detail, options);
 
     this.method = init.method;

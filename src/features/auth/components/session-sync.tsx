@@ -4,12 +4,11 @@ import { useEffect } from "react";
 
 import { subscribeToSessionEvents } from "@/common/api/session-events";
 import type { SessionEvent } from "@/common/api/session-events";
+import { ALWAYS_STALE_MS } from "@/common/query/query-client";
 import { sessionQuery } from "@/features/auth/api/session-queries";
 
 import type { QueryClient } from "@tanstack/react-query";
 import type { AnyRouter } from "@tanstack/react-router";
-
-const SIGN_IN_PATH = "/sign-in";
 
 // Every way a session ends comes through here: the reader signing out, the refresh token refused,
 // another tab signing out. The session is emptied first, so the sign-in page's guard does not send
@@ -26,7 +25,7 @@ async function leaveSession(queryClient: QueryClient, router: AnyRouter, redirec
 
   queryClient.setQueryData(sessionKey, null);
 
-  await router.navigate({ to: SIGN_IN_PATH, search: { redirect } });
+  await router.navigate({ to: "/sign-in", search: { redirect } });
 
   queryClient.clear();
   queryClient.setQueryData(sessionKey, null);
@@ -36,7 +35,7 @@ async function leaveSession(queryClient: QueryClient, router: AnyRouter, redirec
 // guard sends it where it was going. Fetched rather than reset, so a read already under way is
 // joined instead of cancelled under whoever is waiting for it.
 async function enterSession(queryClient: QueryClient, router: AnyRouter): Promise<void> {
-  await queryClient.fetchQuery({ ...sessionQuery, staleTime: 0 });
+  await queryClient.fetchQuery({ ...sessionQuery, staleTime: ALWAYS_STALE_MS });
   await router.invalidate();
 }
 
@@ -46,7 +45,7 @@ export function SessionSync(): null {
 
   const router = useRouter();
 
-  useEffect(() => subscribeToSessionEvents((event: SessionEvent, isRemote: boolean): void => {
+  useEffect((): (() => void) => subscribeToSessionEvents((event: SessionEvent, isRemote: boolean): void => {
     switch (event.type) {
       case "refreshed":
         // New permissions and a new expiry. Not cancelling a fetch already under way: that one is

@@ -23,7 +23,7 @@ export function ThemeProvider({ children }: { children: ReactNode }): JSX.Elemen
   const resolvedTheme = resolveTheme(theme, systemTheme);
 
   // Keeps the class in step when the system theme changes under a reader who follows it.
-  useEffect(() => {
+  useEffect((): void => {
     applyResolvedTheme(resolvedTheme);
   }, [resolvedTheme]);
 
@@ -32,8 +32,8 @@ export function ThemeProvider({ children }: { children: ReactNode }): JSX.Elemen
 
     // The view transition snapshots the page when the callback returns, so the new theme has to be
     // on the DOM by then — rendered synchronously, and the class applied without waiting for effects.
-    startThemeTransition(() => {
-      flushSync(() => {
+    startThemeTransition((): void => {
+      flushSync((): void => {
         setThemeState(nextTheme);
       });
 

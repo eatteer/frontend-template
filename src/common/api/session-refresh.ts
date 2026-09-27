@@ -1,19 +1,19 @@
-import { ApiError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
+import { APIError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
 import type { paths } from "@/common/api/schema.gen";
 import { publishSessionEvent } from "@/common/api/session-events";
 
 import type { Middleware } from "openapi-fetch";
 
-const REFRESH_LOCK_NAME = "session-refresh";
-const LAST_REFRESH_STORAGE_KEY = "session.lastRefreshAt";
+export const REFRESH_LOCK_NAME = "session-refresh";
+export const LAST_REFRESH_STORAGE_KEY = "session.lastRefreshAt";
 
 // A 401 from these is the answer itself — wrong credentials, a refresh token refused, a sign-out —
 // and refreshing to repeat them would loop or undo the very thing they did.
-const NON_REFRESHING_PATHS = new Set<keyof paths>([
+const NON_REFRESHING_PATHS: ReadonlySet<string> = new Set([
   "/api/v1/auth/login",
   "/api/v1/auth/refresh",
   "/api/v1/auth/logout",
-]);
+] satisfies (keyof paths)[]);
 
 export type RefreshOutcome = "refreshed" | "ended";
 
@@ -58,7 +58,7 @@ export function createRefreshCoordinator(refresh: () => Promise<unknown>): (sent
     try {
       await refresh();
     } catch (error: unknown) {
-      if (error instanceof ApiError && error.status === UNAUTHORIZED_STATUS) {
+      if (error instanceof APIError && error.status === UNAUTHORIZED_STATUS) {
         publishSessionEvent({ type: "signed-out", reason: "expired" });
 
         return "ended";
@@ -76,7 +76,7 @@ export function createRefreshCoordinator(refresh: () => Promise<unknown>): (sent
   }
 
   return (sentAt: number): Promise<RefreshOutcome> => {
-    inFlight ??= runExclusively(() => refreshUnlessDone(sentAt)).finally((): void => {
+    inFlight ??= runExclusively((): Promise<RefreshOutcome> => refreshUnlessDone(sentAt)).finally((): void => {
       inFlight = undefined;
     });
 
@@ -84,7 +84,7 @@ export function createRefreshCoordinator(refresh: () => Promise<unknown>): (sent
   };
 }
 
-// Registered after the middleware that turns failures into ApiError: response middlewares run in
+// Registered after the middleware that turns failures into APIError: response middlewares run in
 // reverse, so this one sees the raw 401 first, and whatever it answers with — the request sent again,
 // or the 401 itself — goes on to be turned into data or an error as usual.
 export function createSessionRefreshMiddleware(refresh: () => Promise<unknown>): Middleware {
@@ -93,7 +93,7 @@ export function createSessionRefreshMiddleware(refresh: () => Promise<unknown>):
 
   return {
     onRequest: ({ request, schemaPath }: { request: Request; schemaPath: string }): undefined => {
-      if (!NON_REFRESHING_PATHS.has(schemaPath as keyof paths)) {
+      if (!NON_REFRESHING_PATHS.has(schemaPath)) {
         sentRequests.set(request, { replay: request.clone(), sentAt: Date.now() });
       }
 

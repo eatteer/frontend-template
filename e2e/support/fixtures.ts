@@ -33,7 +33,7 @@ export function guardConsole(context: BrowserContext): ConsoleGuard {
 
 export const test = base.extend<{ consoleGuard: ConsoleGuard }>({
   consoleGuard: [
-    async ({ context }, use): Promise<void> => {
+    async ({ context }: { context: BrowserContext }, use: (guard: ConsoleGuard) => Promise<void>): Promise<void> => {
       const guard = guardConsole(context);
 
       await use(guard);

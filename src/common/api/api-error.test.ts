@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { ApiError } from "@/common/api/api-error";
+import { APIError } from "@/common/api/api-error";
 
 import { buildApiError, buildApiErrorInit } from "@test/builders/api-error.builder";
+import { USERS_URL } from "@test/msw/users";
 
-describe("ApiError", () => {
+describe("APIError", () => {
   it("is an Error, so it keeps a stack and a cause", () => {
     const cause = new TypeError("Failed to fetch");
-    const error = new ApiError(buildApiErrorInit(), { cause });
+    const error = new APIError(buildApiErrorInit(), { cause });
 
     expect(error).toBeInstanceOf(Error);
-    expect(error.name).toBe("ApiError");
+    expect(error.name).toBe("APIError");
     expect(error.message).toBe(error.detail);
     expect(error.stack).toBeDefined();
     expect(error.cause).toBe(cause);
@@ -32,7 +33,7 @@ describe("ApiError", () => {
 
     expect(error.toReport()).toEqual({
       method: "POST",
-      url: "http://api.test/api/v1/users",
+      url: USERS_URL,
       status: 409,
       code: "users.email_already_registered",
       title: "Conflict",

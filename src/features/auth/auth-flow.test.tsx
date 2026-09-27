@@ -3,35 +3,38 @@ import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import { publishSessionEvent } from "@/common/api/session-events";
+import type { AuthTokensDTO, ProblemDetailsDTO } from "@/common/api/schema.gen";
+import { publishSessionEvent, SESSION_CHANNEL_NAME } from "@/common/api/session-events";
 import { sessionQuery } from "@/features/auth/api/session-queries";
 
-import { buildProblemDetails } from "@test/builders/problem-details.builder";
+import { buildAuthTokensDTO } from "@test/builders/auth-tokens.builder";
 import { buildSessionDTO } from "@test/builders/session.builder";
+import { problem } from "@test/msw/api";
+import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
 import { LOGIN_URL, LOGOUT_URL, REFRESH_URL, SESSION_URL, signedIn, signedOut, unauthenticated } from "@test/msw/session";
 import { renderRoute } from "@test/render";
 
 // Another tab, as far as this one can tell: a second channel on the same name.
-const otherTab = new BroadcastChannel("session");
+const otherTab = new BroadcastChannel(SESSION_CHANNEL_NAME);
 
 // `server.use` gives precedence to the first handler for a route, so a test's own session handler
 // goes before anything else answering the session.
 
 // The backend after a successful sign-in: the session answers once the login has set the cookies.
-function useBackendThatSignsIn(): { loginBodies: unknown[] } {
+function serveBackendThatSignsIn(): { loginBodies: unknown[] } {
   const loginBodies: unknown[] = [];
   let isSignedIn = false;
 
   server.use(
     http.post(REFRESH_URL, unauthenticated),
-    http.post(LOGIN_URL, async ({ request }: { request: Request }) => {
+    http.post(LOGIN_URL, async ({ request }: { request: Request }): Promise<HttpResponse<{ data: AuthTokensDTO }>> => {
       loginBodies.push(await request.json());
       isSignedIn = true;
 
-      return HttpResponse.json({ data: { accessToken: null, refreshToken: null, expiresAt: "2026-10-26T00:00:00.000Z" } });
+      return HttpResponse.json({ data: buildAuthTokensDTO() });
     }),
-    http.get(SESSION_URL, () => (isSignedIn ? HttpResponse.json({ data: buildSessionDTO() }) : unauthenticated())),
+    http.get(SESSION_URL, (): MockedResponse => (isSignedIn ? HttpResponse.json({ data: buildSessionDTO() }) : unauthenticated())),
   );
 
   return { loginBodies };
@@ -57,7 +60,7 @@ describe("signing in", () => {
   });
 
   it("signs in and goes on to the page that was asked for", async () => {
-    const backend = useBackendThatSignsIn();
+    const backend = serveBackendThatSignsIn();
 
     const { router } = renderRoute("/sign-in?redirect=%2F%3Ftab%3Drecent");
 
@@ -70,7 +73,7 @@ describe("signing in", () => {
   });
 
   it("goes home instead of following a redirect to another site", async () => {
-    useBackendThatSignsIn();
+    serveBackendThatSignsIn();
 
     const { router } = renderRoute("/sign-in?redirect=%2F%2Fevil.example");
 
@@ -81,7 +84,7 @@ describe("signing in", () => {
   });
 
   it("checks the fields before sending anything", async () => {
-    const backend = useBackendThatSignsIn();
+    const backend = serveBackendThatSignsIn();
     const user = userEvent.setup();
 
     renderRoute("/sign-in");
@@ -99,10 +102,12 @@ describe("signing in", () => {
   it("explains wrong credentials in the form, not in a toast", async () => {
     server.use(
       ...signedOut(),
-      http.post(LOGIN_URL, () => HttpResponse.json(
-        buildProblemDetails({ status: 401, title: "Unauthorized", detail: "Invalid credentials", code: "auth.invalid_credentials" }),
-        { status: 401, headers: { "Content-Type": "application/problem+json" } },
-      )),
+      http.post(LOGIN_URL, (): HttpResponse<ProblemDetailsDTO> => problem({
+        status: 401,
+        title: "Unauthorized",
+        detail: "Invalid credentials",
+        code: "auth.invalid_credentials",
+      })),
     );
 
     renderRoute("/sign-in");
@@ -116,14 +121,11 @@ describe("signing in", () => {
   it("puts the backend's field errors on their fields and focuses the first", async () => {
     server.use(
       ...signedOut(),
-      http.post(LOGIN_URL, () => HttpResponse.json(
-        buildProblemDetails({
-          status: 400,
-          code: "common.validation_error",
-          errors: [{ field: "email", message: "The email is not valid" }],
-        }),
-        { status: 400, headers: { "Content-Type": "application/problem+json" } },
-      )),
+      http.post(LOGIN_URL, (): HttpResponse<ProblemDetailsDTO> => problem({
+        status: 400,
+        code: "common.validation_error",
+        errors: [{ field: "email", message: "The email is not valid" }],
+      })),
     );
 
     renderRoute("/sign-in");
@@ -147,7 +149,7 @@ describe("signing in", () => {
 
     server.use(
       http.post(REFRESH_URL, unauthenticated),
-      http.get(SESSION_URL, () => (isSignedIn ? HttpResponse.json({ data: buildSessionDTO() }) : unauthenticated())),
+      http.get(SESSION_URL, (): MockedResponse => (isSignedIn ? HttpResponse.json({ data: buildSessionDTO() }) : unauthenticated())),
     );
 
     const { router } = renderRoute("/sign-in?redirect=%2F");
@@ -167,7 +169,7 @@ describe("signing out", () => {
     const user = userEvent.setup();
     let signedOutCalls = 0;
 
-    server.use(http.post(LOGOUT_URL, () => {
+    server.use(http.post(LOGOUT_URL, (): HttpResponse<undefined> => {
       signedOutCalls += 1;
       server.use(...signedOut());
 

@@ -31,7 +31,7 @@ export function CreateUserPage(): JSX.Element {
 
         <CardContent>
           <CreateUserForm
-            onCreated={(id: string) => {
+            onCreated={(id) => {
               // Replacing the form, so Back does not return to it for a user that now exists.
               void navigate({ to: "/users/$id", params: { id }, replace: true });
             }}

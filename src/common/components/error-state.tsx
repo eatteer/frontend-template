@@ -52,6 +52,7 @@ export function ErrorState({ error, onRetry }: ErrorStateProps): JSX.Element {
         <Button
           variant="outline"
           disabled={isCopied}
+          focusableWhenDisabled
           onClick={() => {
             void copyError();
           }}

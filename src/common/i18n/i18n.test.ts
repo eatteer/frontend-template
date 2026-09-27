@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { buildResources, changeLanguage, i18n } from "@/common/i18n/i18n";
+import { buildResources, changeLanguage, i18n, LANGUAGE_STORAGE_KEY } from "@/common/i18n/i18n";
 
 describe("buildResources", () => {
   it("files each locale file under its language and namespace", () => {
@@ -27,7 +27,7 @@ describe("changeLanguage", () => {
 
     expect(i18n.t("actions.retry")).toBe("Reintentar");
     expect(document.documentElement.lang).toBe("es");
-    expect(localStorage.getItem("language")).toBe("es");
+    expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("es");
   });
 
   // The session applies the account's language on every read of it, and nearly always it is the one

@@ -95,38 +95,56 @@ function ChartContainer({
   );
 }
 
-const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }): React.JSX.Element | null => {
+function chartStyleRules(id: string, config: ChartConfig): string | undefined {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme ?? config.color,
   );
 
   if (!colorConfig.length) {
-    return null;
+    return undefined;
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
+  return Object.entries(THEMES)
+    .map(
+      ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
-      .map(([key, itemConfig]) => {
-        const color =
-          itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
-      itemConfig.color;
+  .map(([key, itemConfig]) => {
+    const color =
+      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
+        itemConfig.color;
 
-        return color ? `  --color-${key}: ${color};` : null;
-      })
-      .join("\n")}
+    return color ? `  --color-${key}: ${color};` : null;
+  })
+  .join("\n")}
 }
 `,
-          )
-          .join("\n"),
-      }}
-    />
-  );
+    )
+    .join("\n");
+}
+
+// Changed from the registry, which renders these rules in an inline `<style>`: the policy's
+// `style-src 'self'` blocks that element, and the chart would lose its colours in production. A
+// constructed stylesheet goes through the CSSOM, which the policy does not restrict.
+const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }): null => {
+  const rules = chartStyleRules(id, config);
+
+  React.useInsertionEffect(() => {
+    if (rules === undefined) {
+      return undefined;
+    }
+
+    const sheet = new CSSStyleSheet();
+
+    sheet.replaceSync(rules);
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+
+    return (): void => {
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter((adopted) => adopted !== sheet);
+    };
+  }, [rules]);
+
+  return null;
 };
 
 const ChartTooltip = RechartsPrimitive.Tooltip;

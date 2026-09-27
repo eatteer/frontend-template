@@ -41,14 +41,10 @@
   "language": {
     "label": "Language"
   },
-  "home": {
-    "title": "Welcome",
-    "description": "This application is ready to grow feature by feature."
-  },
   "pagination": {
     "label": "Pagination",
-    "summary_one": "Page {{page}} of {{pages}} · {{count}} result",
-    "summary_other": "Page {{page}} of {{pages}} · {{count}} results",
+    "summary_one": "Page {{page}} of {{pages}} · {{total}} result",
+    "summary_other": "Page {{page}} of {{pages}} · {{total}} results",
     "previous": "Previous",
     "next": "Next"
   },

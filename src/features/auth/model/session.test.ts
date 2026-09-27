@@ -19,7 +19,12 @@ describe("hasPermissions", () => {
 });
 
 describe("toSession", () => {
-  it("reads the expiry as a date", () => {
-    expect(toSession(buildSessionDTO()).accessTokenExpiresAt).toEqual(new Date("2026-09-26T12:15:00.000Z"));
+  it("keeps what the application shows of the account and its permissions, and nothing else", () => {
+    const dto = buildSessionDTO();
+
+    expect(toSession(dto)).toEqual({
+      user: { id: dto.user.id, name: dto.user.name, email: dto.user.email, preferredLanguage: dto.user.preferredLanguage },
+      permissions: dto.permissions,
+    });
   });
 });

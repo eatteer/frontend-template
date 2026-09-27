@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup, configure } from "@testing-library/react";
-import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
 
 import { i18n } from "@/common/i18n/i18n";
 import { DEFAULT_LANGUAGE } from "@/common/i18n/languages";
@@ -27,9 +27,12 @@ beforeAll(() => {
   server.listen({ onUnhandledRequest: "error" });
 });
 
+// jsdom has no scrolling, and says so on its own console every time the router restores a position —
+// a line that is not the application's and that the console guard never sees.
 beforeEach(() => {
   consoleGuard = guardConsole();
   stubMatchMedia();
+  vi.stubGlobal("scrollTo", (): void => {});
 });
 
 // Everything a test can leave behind in the page: open toasts, stored preferences, the theme class,

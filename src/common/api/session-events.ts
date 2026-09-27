@@ -1,4 +1,4 @@
-const CHANNEL_NAME = "session";
+export const SESSION_CHANNEL_NAME = "session";
 
 // Why a session ended: the reader asked to leave, or the refresh token was refused — expired,
 // revoked, or already used by a request that lost a race.
@@ -40,7 +40,7 @@ function notify(event: SessionEvent, isRemote: boolean): void {
 
 // A browser without BroadcastChannel keeps every tab to itself: each finds out about a change in
 // another on its next request, through a 401.
-const channel = typeof BroadcastChannel === "undefined" ? undefined : new BroadcastChannel(CHANNEL_NAME);
+const channel = typeof BroadcastChannel === "undefined" ? undefined : new BroadcastChannel(SESSION_CHANNEL_NAME);
 
 channel?.addEventListener("message", (message: MessageEvent<unknown>): void => {
   if (isSessionEvent(message.data)) {

@@ -21,7 +21,8 @@
     },
     "empty": {
       "title": "No hay usuarios",
-      "detail": "Ningún usuario coincide con estos filtros. Prueba con otra búsqueda u otro estado."
+      "no_users": "Todavía no hay usuarios.",
+      "no_matches": "Ningún usuario coincide con estos filtros. Prueba con otra búsqueda u otro estado."
     }
   },
   "detail": {
@@ -37,7 +38,8 @@
   "create": {
     "title": "Crear usuario",
     "description": "El usuario nuevo inicia sesión con este email y esta contraseña.",
-    "submit": "Crear usuario"
+    "submit": "Crear usuario",
+    "cancel": "Cancelar"
   },
   "edit": {
     "title": "Editar usuario",

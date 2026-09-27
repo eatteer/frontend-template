@@ -1,20 +1,17 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { z } from "zod";
 
 import { sessionQuery } from "@/features/auth/api/session-queries";
 import { resolveRedirect } from "@/features/auth/model/redirect";
 import { SignInPage } from "@/features/auth/pages/sign-in-page";
-
-const signInSearchSchema = z.object({
-  // Where the reader was going when they were sent here.
-  redirect: z.string().optional(),
-});
+import { signInSearchSchema } from "@/features/auth/schemas/sign-in-search.schema";
+import type { SignInSearch } from "@/features/auth/schemas/sign-in-search.schema";
+import type { RouterContext } from "@/router";
 
 // Outside the signed-in layout. Someone already signed in has nothing to do here and goes on to
 // where they were headed.
 export const Route = createFileRoute("/sign-in")({
   validateSearch: signInSearchSchema,
-  beforeLoad: async ({ context, search }) => {
+  beforeLoad: async ({ context, search }: { context: RouterContext; search: SignInSearch }): Promise<void> => {
     const session = await context.queryClient.ensureQueryData(sessionQuery);
 
     if (session !== null) {

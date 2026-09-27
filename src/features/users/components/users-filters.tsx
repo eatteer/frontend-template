@@ -12,20 +12,25 @@ import { USER_SEARCH_MAX_LENGTH } from "@/features/users/schemas/users-search.sc
 
 import type { JSX } from "react";
 
-export type UsersFilters = {
+export type UsersFilterValues = {
   search: string | undefined;
   status: UserStatus | undefined;
 };
 
-type UsersFiltersProps = UsersFilters & {
-  onChange: (change: Partial<UsersFilters>) => void;
+type StatusItem = {
+  value: UserStatus | null;
+  label: string;
+};
+
+type UsersFiltersProps = UsersFilterValues & {
+  onChange: (change: Partial<UsersFilterValues>) => void;
 };
 
 function isUserStatus(value: unknown): value is UserStatus {
   return USER_STATUS_VALUES.some((status: UserStatus): boolean => status === value);
 }
 
-export function UsersFiltersBar({ search, status, onChange }: UsersFiltersProps): JSX.Element {
+export function UsersFilters({ search, status, onChange }: UsersFiltersProps): JSX.Element {
   const { t } = useTranslation("users");
 
   const searchId = useId();
@@ -37,9 +42,9 @@ export function UsersFiltersBar({ search, status, onChange }: UsersFiltersProps)
 
   // The URL's "no filter" is an absent parameter; Base UI's "nothing selected" is `null`. The two
   // meet here, and nowhere else.
-  const statusItems = [
+  const statusItems: StatusItem[] = [
     { value: null, label: t("list.all_statuses") },
-    ...USER_STATUS_VALUES.map((value: UserStatus): { value: UserStatus; label: string } => ({ value, label: t(`status.${value}`) })),
+    ...USER_STATUS_VALUES.map((value: UserStatus): StatusItem => ({ value, label: t(`status.${value}`) })),
   ];
 
   return (
@@ -75,7 +80,7 @@ export function UsersFiltersBar({ search, status, onChange }: UsersFiltersProps)
         <Select
           items={statusItems}
           value={status ?? null}
-          onValueChange={(value: unknown) => {
+          onValueChange={(value) => {
             onChange({ status: isUserStatus(value) ? value : undefined });
           }}
         >
@@ -84,7 +89,7 @@ export function UsersFiltersBar({ search, status, onChange }: UsersFiltersProps)
           </SelectTrigger>
 
           <SelectContent>
-            {statusItems.map(({ value, label }): JSX.Element => (
+            {statusItems.map(({ value, label }: StatusItem): JSX.Element => (
               <SelectItem key={value ?? "all"} value={value}>{label}</SelectItem>
             ))}
           </SelectContent>

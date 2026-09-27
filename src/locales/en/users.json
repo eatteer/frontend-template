@@ -21,7 +21,8 @@
     },
     "empty": {
       "title": "No users found",
-      "detail": "No user matches these filters. Try a different search or status."
+      "no_users": "There are no users yet.",
+      "no_matches": "No user matches these filters. Try a different search or status."
     }
   },
   "detail": {
@@ -37,7 +38,8 @@
   "create": {
     "title": "Create user",
     "description": "The new user signs in with this email and password.",
-    "submit": "Create user"
+    "submit": "Create user",
+    "cancel": "Cancel"
   },
   "edit": {
     "title": "Edit user",

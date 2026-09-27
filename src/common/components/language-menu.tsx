@@ -2,8 +2,8 @@ import { LanguagesIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { changeLanguage } from "@/common/i18n/i18n";
-import { isLanguageValue, LANGUAGE_LABELS, LANGUAGE_VALUES } from "@/common/i18n/languages";
-import type { LanguageValue } from "@/common/i18n/languages";
+import { isLanguage, LANGUAGE_LABELS, LANGUAGE_VALUES } from "@/common/i18n/languages";
+import type { Language } from "@/common/i18n/languages";
 import { Button } from "@/common/ui/button";
 import {
   DropdownMenu,
@@ -17,10 +17,10 @@ import type { JSX } from "react";
 
 type LanguageMenuProps = {
   // Signed in, the choice also goes to the account; without a session it stays in this browser.
-  onSelect?: (language: LanguageValue) => void;
+  onSelect?: (language: Language) => void;
 };
 
-function applyLocally(language: LanguageValue): void {
+function applyLocally(language: Language): void {
   void changeLanguage(language);
 }
 
@@ -28,7 +28,7 @@ export function LanguageMenu({ onSelect = applyLocally }: LanguageMenuProps): JS
   const { t, i18n } = useTranslation();
 
   function selectLanguage(value: unknown): void {
-    if (typeof value === "string" && isLanguageValue(value)) {
+    if (typeof value === "string" && isLanguage(value)) {
       onSelect(value);
     }
   }
@@ -41,7 +41,7 @@ export function LanguageMenu({ onSelect = applyLocally }: LanguageMenuProps): JS
 
       <DropdownMenuContent align="end" className="w-auto">
         <DropdownMenuRadioGroup value={i18n.language} onValueChange={selectLanguage}>
-          {LANGUAGE_VALUES.map((language: LanguageValue): JSX.Element => (
+          {LANGUAGE_VALUES.map((language: Language): JSX.Element => (
             <DropdownMenuRadioItem key={language} value={language} lang={language}>
               {LANGUAGE_LABELS[language]}
             </DropdownMenuRadioItem>

@@ -1,41 +1,39 @@
 import { http, HttpResponse } from "msw";
 
-import type { ProblemDetailsDTO, UserDTO } from "@/common/api/schema.gen";
+import type { CreateUserDTO, ProblemDetailsDTO, UpdateUserDTO, UserDTO } from "@/common/api/schema.gen";
 
-import { buildProblemDetails } from "@test/builders/problem-details.builder";
+import { buildPageDTO, DEFAULT_PAGE_LIMIT } from "@test/builders/page.builder";
 import { buildUserDTO } from "@test/builders/user.builder";
+import { API_URL, problem } from "@test/msw/api";
+import type { MockedResponse } from "@test/msw/api";
+import { server } from "@test/msw/server";
 
-import type { HttpHandler } from "msw";
+import type { HttpHandler, StrictRequest } from "msw";
 
-export const USERS_URL = "http://api.test/api/v1/users";
-export const USER_URL = "http://api.test/api/v1/users/:id";
+export const USERS_URL = `${API_URL}/users`;
+export const USER_URL = `${API_URL}/users/:id`;
 
-const DEFAULT_LIMIT = 10;
 const CREATED_ID = "01890a5d-ac96-774b-bcce-b3020990ffff";
 
-export function problem(overrides: Partial<ProblemDetailsDTO>): HttpResponse<ProblemDetailsDTO> {
-  const body = buildProblemDetails(overrides);
-
-  return HttpResponse.json(body, { status: body.status, headers: { "Content-Type": "application/problem+json" } });
-}
+type UserParams = { id: string };
 
 export function userNotFound(): HttpResponse<ProblemDetailsDTO> {
   return problem({ status: 404, title: "Not Found", detail: "The user was not found", code: "users.user_not_found" });
 }
 
-type UsersBackend = {
+export type UsersBackend = {
   handlers: HttpHandler[];
   // Every list request's query, as the backend received it.
   listQueries: URLSearchParams[];
-  createBodies: unknown[];
-  updateBodies: unknown[];
+  createBodies: CreateUserDTO[];
+  updateBodies: UpdateUserDTO[];
 };
 
-function compareBy(sortBy: string, sortOrder: string): (a: UserDTO, b: UserDTO) => number {
+function compareBy(sortBy: string, sortOrder: string): (left: UserDTO, right: UserDTO) => number {
   const field = sortBy === "name" || sortBy === "email" ? sortBy : "createdAt";
   const direction = sortOrder === "asc" ? 1 : -1;
 
-  return (a: UserDTO, b: UserDTO): number => a[field].localeCompare(b[field]) * direction;
+  return (left: UserDTO, right: UserDTO): number => left[field].localeCompare(right[field]) * direction;
 }
 
 type UsersBackendOptions = {
@@ -50,13 +48,13 @@ export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOpt
   const backend: UsersBackend = { handlers: [], listQueries: [], createBodies: [], updateBodies: [] };
 
   backend.handlers = [
-    http.get(USERS_URL, ({ request }: { request: Request }) => {
+    http.get(USERS_URL, ({ request }: { request: Request }): MockedResponse => {
       const query = new URL(request.url).searchParams;
 
       backend.listQueries.push(query);
 
       const page = Number(query.get("page") ?? 1);
-      const limit = Number(query.get("limit") ?? DEFAULT_LIMIT);
+      const limit = Number(query.get("limit") ?? DEFAULT_PAGE_LIMIT);
       const search = query.get("search")?.toLowerCase();
       const status = query.get("status");
 
@@ -67,25 +65,22 @@ export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOpt
 
       const pages = Math.ceil(matching.length / limit);
 
-      return HttpResponse.json({
-        data: matching.slice((page - 1) * limit, page * limit),
-        pagination: {
-          total: matching.length,
-          pages,
-          page,
-          limit,
-          next: page < pages ? page + 1 : null,
-          previous: page > 1 ? page - 1 : null,
-        },
-      });
+      return HttpResponse.json(buildPageDTO(matching.slice((page - 1) * limit, page * limit), {
+        total: matching.length,
+        pages,
+        page,
+        limit,
+        next: page < pages ? page + 1 : null,
+        previous: page > 1 ? page - 1 : null,
+      }));
     }),
-    http.get(USER_URL, ({ params }: { params: Record<string, string | readonly string[] | undefined> }) => {
+    http.get<UserParams>(USER_URL, ({ params }: { params: UserParams }): MockedResponse => {
       const user = users.find((candidate: UserDTO): boolean => candidate.id === params.id);
 
       return user === undefined ? userNotFound() : HttpResponse.json({ data: user });
     }),
-    http.post(USERS_URL, async ({ request }: { request: Request }) => {
-      const body = await request.json() as { name: string; email: string };
+    http.post<never, CreateUserDTO>(USERS_URL, async ({ request }: { request: StrictRequest<CreateUserDTO> }): Promise<MockedResponse> => {
+      const body = await request.json();
 
       await holdCreate;
 
@@ -94,22 +89,34 @@ export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOpt
 
       return HttpResponse.json({ data: { id: CREATED_ID } }, { status: 201 });
     }),
-    http.patch(USER_URL, async ({ request, params }: { request: Request; params: Record<string, string | readonly string[] | undefined> }) => {
-      const body = await request.json() as { email: string };
-      const index = users.findIndex((candidate: UserDTO): boolean => candidate.id === params.id);
-      const user = users[index];
+    http.patch<UserParams, UpdateUserDTO>(
+      USER_URL,
+      async ({ request, params }: { request: StrictRequest<UpdateUserDTO>; params: UserParams }): Promise<MockedResponse> => {
+        const body = await request.json();
+        const index = users.findIndex((candidate: UserDTO): boolean => candidate.id === params.id);
+        const user = users[index];
 
-      backend.updateBodies.push(body);
+        backend.updateBodies.push(body);
 
-      if (user === undefined) {
-        return userNotFound();
-      }
+        if (user === undefined) {
+          return userNotFound();
+        }
 
-      users[index] = { ...user, email: body.email };
+        users[index] = { ...user, email: body.email ?? user.email };
 
-      return new HttpResponse(null, { status: 204 });
-    }),
+        return new HttpResponse(null, { status: 204 });
+      },
+    ),
   ];
+
+  return backend;
+}
+
+// The users endpoints over `users`, in front of every other handler for the rest of the test.
+export function serveUsers(users: UserDTO[], options?: UsersBackendOptions): UsersBackend {
+  const backend = usersBackend(users, options);
+
+  server.use(...backend.handlers);
 
   return backend;
 }

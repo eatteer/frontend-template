@@ -1,8 +1,6 @@
-import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { changeLanguage } from "@/common/i18n/i18n";
-import { formatDate, formatDateTime, formatMoney, formatNumber, useFormatters } from "@/common/lib/format";
+import { formatDate, formatDateTime, formatMoney, formatNumber } from "@/common/lib/format";
 
 const UTC = { timeZone: "UTC" } as const;
 const ISO_DATE = "2026-03-05T14:30:00.000Z";
@@ -48,21 +46,5 @@ describe("formatMoney", () => {
 
   it("refuses something that is not an amount", () => {
     expect(() => formatMoney({ amountMinor: "12a", currency: "USD" }, "en")).toThrow("Not an amount in minor units");
-  });
-});
-
-describe("useFormatters", () => {
-  it("formats in the language on screen and follows it when it changes", async () => {
-    const { result, rerender } = renderHook(useFormatters);
-
-    expect(result.current.number(1.5)).toBe("1.5");
-
-    await changeLanguage("es");
-    rerender();
-
-    expect(result.current.number(1.5)).toBe("1,5");
-    expect(normalizeSpaces(result.current.money({ amountMinor: "150", currency: "EUR" }))).toBe("1,50 €");
-    expect(result.current.date(ISO_DATE, { dateStyle: "long", ...UTC })).toBe("5 de marzo de 2026");
-    expect(result.current.dateTime(ISO_DATE)).toContain("2026");
   });
 });

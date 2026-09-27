@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { ApiError } from "@/common/api/api-error";
+import type { APIError } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { unwrap } from "@/common/api/envelope";
+import { publishSessionEvent } from "@/common/api/session-events";
 import { sessionQuery } from "@/features/auth/api/session-queries";
 import { userQueries } from "@/features/users/api/user-queries";
 import type { CreateUserValues } from "@/features/users/schemas/create-user.schema";
@@ -20,7 +21,7 @@ async function updateUser(id: string, values: EditUserValues): Promise<void> {
 
 // Resolves to the new user's id. Both forms show their own failures — on the fields when the
 // backend names them, in a toast when it does not — so the default toast is off.
-export function useCreateUser(): UseMutationResult<string, ApiError, CreateUserValues> {
+export function useCreateUser(): UseMutationResult<string, APIError, CreateUserValues> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -32,15 +33,20 @@ export function useCreateUser(): UseMutationResult<string, ApiError, CreateUserV
   });
 }
 
-export function useUpdateUser(id: string): UseMutationResult<void, ApiError, EditUserValues> {
+export function useUpdateUser(id: string): UseMutationResult<void, APIError, EditUserValues> {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (values: EditUserValues): Promise<void> => updateUser(id, values),
     meta: { errorToast: false },
     onSuccess: async (): Promise<void> => {
-      // An administrator editing their own account changes what the account menu shows.
+      // An administrator editing their own account changes what the account menu shows, in this tab
+      // and in every other one.
       const isOwnAccount = queryClient.getQueryData(sessionQuery.queryKey)?.user.id === id;
+
+      if (isOwnAccount) {
+        publishSessionEvent({ type: "updated" });
+      }
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: userQueries.all() }),

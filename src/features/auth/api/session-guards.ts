@@ -8,6 +8,9 @@ import type { RouterContext } from "@/router";
 
 import type { ParsedLocation } from "@tanstack/react-router";
 
+// What every route below the signed-in layout reads from its context: the guard put the session there.
+export type SignedInContext = RouterContext & { session: Session };
+
 type GuardInput = {
   context: RouterContext;
   location: ParsedLocation;

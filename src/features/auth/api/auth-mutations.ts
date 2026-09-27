@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { ApiError } from "@/common/api/api-error";
+import type { APIError } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { publishSessionEvent } from "@/common/api/session-events";
 import { changeLanguage } from "@/common/i18n/i18n";
-import type { LanguageValue } from "@/common/i18n/languages";
+import type { Language } from "@/common/i18n/languages";
+import { ALWAYS_STALE_MS } from "@/common/query/query-client";
 import { sessionQuery } from "@/features/auth/api/session-queries";
 import type { Session } from "@/features/auth/model/session";
 import type { SignInValues } from "@/features/auth/schemas/sign-in.schema";
@@ -12,7 +13,7 @@ import type { SignInValues } from "@/features/auth/schemas/sign-in.schema";
 import type { QueryClient, UseMutationResult } from "@tanstack/react-query";
 
 // The account's language before the switch, to put back if the backend refuses it.
-type LanguageRollback = { previous: LanguageValue | undefined };
+type LanguageRollback = { previous: Language | undefined };
 
 // The cookie transport is the backend's default: the tokens arrive as HttpOnly cookies, out of reach
 // of any script on the page, and the body carries nothing worth keeping.
@@ -24,11 +25,11 @@ async function signOut(): Promise<void> {
   await apiClient.POST("/api/v1/auth/logout", { body: {} });
 }
 
-async function updateAccountLanguage(preferredLanguage: LanguageValue): Promise<void> {
+async function updateAccountLanguage(preferredLanguage: Language): Promise<void> {
   await apiClient.PATCH("/api/v1/users/me/preferences", { body: { preferredLanguage } });
 }
 
-function setSessionLanguage(queryClient: QueryClient, preferredLanguage: LanguageValue): void {
+function setSessionLanguage(queryClient: QueryClient, preferredLanguage: Language): void {
   queryClient.setQueryData(
     sessionQuery.queryKey,
     (session: Session | null | undefined): Session | null | undefined => session
@@ -37,7 +38,7 @@ function setSessionLanguage(queryClient: QueryClient, preferredLanguage: Languag
   );
 }
 
-export function useSignIn(): UseMutationResult<void, ApiError, SignInValues> {
+export function useSignIn(): UseMutationResult<void, APIError, SignInValues> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -47,7 +48,7 @@ export function useSignIn(): UseMutationResult<void, ApiError, SignInValues> {
     // Awaited, so the mutation settles only once the session is in the cache, and the page the
     // reader goes to next finds it there.
     onSuccess: async (): Promise<void> => {
-      await queryClient.fetchQuery({ ...sessionQuery, staleTime: 0 });
+      await queryClient.fetchQuery({ ...sessionQuery, staleTime: ALWAYS_STALE_MS });
 
       publishSessionEvent({ type: "signed-in" });
     },
@@ -56,7 +57,7 @@ export function useSignIn(): UseMutationResult<void, ApiError, SignInValues> {
 
 // Leaving the page and emptying the cache happen in one place for every way a session ends — see
 // SessionSync.
-export function useSignOut(): UseMutationResult<void, ApiError, void> {
+export function useSignOut(): UseMutationResult<void, APIError, void> {
   return useMutation({
     mutationFn: signOut,
     onSuccess: (): void => {
@@ -67,14 +68,14 @@ export function useSignOut(): UseMutationResult<void, ApiError, void> {
 
 // The screen switches at once and the backend is told after; a refusal switches it back, with the
 // toast saying why. Other tabs read the session again once the change is stored.
-export function useChangeAccountLanguage(): UseMutationResult<void, ApiError, LanguageValue, LanguageRollback> {
+export function useChangeAccountLanguage(): UseMutationResult<void, APIError, Language, LanguageRollback> {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: updateAccountLanguage,
     // Nothing on screen waits for it: the new language is already showing.
     meta: { fullscreenLoader: false },
-    onMutate: async (language: LanguageValue): Promise<LanguageRollback> => {
+    onMutate: async (language: Language): Promise<LanguageRollback> => {
       const previous = queryClient.getQueryData(sessionQuery.queryKey)?.user.preferredLanguage;
 
       setSessionLanguage(queryClient, language);
@@ -83,7 +84,7 @@ export function useChangeAccountLanguage(): UseMutationResult<void, ApiError, La
 
       return { previous };
     },
-    onError: async (_error: ApiError, _language: LanguageValue, rollback: LanguageRollback | undefined): Promise<void> => {
+    onError: async (_error: APIError, _language: Language, rollback: LanguageRollback | undefined): Promise<void> => {
       if (rollback?.previous === undefined) {
         return;
       }

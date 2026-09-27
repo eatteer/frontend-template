@@ -25,9 +25,19 @@ function BackToUsers(): JSX.Element {
   );
 }
 
-function UserDetailLayout({ title, action, children }: { title: ReactNode; action?: ReactNode; children: ReactNode }): JSX.Element {
+type UserDetailLayoutProps = {
+  title: ReactNode;
+  action?: ReactNode;
+  isBusy?: boolean;
+  children: ReactNode;
+};
+
+function UserDetailLayout({ title, action, isBusy, children }: UserDetailLayoutProps): JSX.Element {
   return (
-    <section className="mx-auto flex max-w-2xl flex-col gap-4">
+    <section aria-busy={isBusy} className="
+      mx-auto flex max-w-2xl flex-col gap-4
+    "
+    >
       <BackToUsers />
 
       <header className="
@@ -71,7 +81,7 @@ export function UserDetailPage(): JSX.Element {
 
 export function UserDetailPageSkeleton(): JSX.Element {
   return (
-    <UserDetailLayout title={<Skeleton className="h-8 w-48" />}>
+    <UserDetailLayout title={<Skeleton className="h-8 w-48" />} isBusy>
       <UserDetailsSkeleton />
     </UserDetailLayout>
   );
