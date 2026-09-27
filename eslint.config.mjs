@@ -232,6 +232,19 @@ export default tseslint.config(
     },
   },
   {
+    // The end-to-end suite is Node driving a browser, not React: a Playwright fixture hands its value
+    // over by calling `use`, which the hooks rules would read as React's.
+    files: ["e2e/**/*.ts"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+    },
+  },
+  {
     files: ["src/common/config/env.ts"],
     rules: {
       "no-restricted-syntax": "off",
