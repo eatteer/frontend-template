@@ -202,6 +202,7 @@ export default tseslint.config(
       "@stylistic/no-multi-spaces": "error",
       "@stylistic/no-trailing-spaces": "error",
       "@stylistic/no-multiple-empty-lines": ["error", { max: 1, maxBOF: 0, maxEOF: 0 }],
+      "@stylistic/padded-blocks": ["error", { blocks: "never", classes: "never", switches: "never" }],
       "@stylistic/space-before-blocks": "error",
       "@stylistic/space-infix-ops": "error",
       "@stylistic/eol-last": ["error", "always"],
