@@ -19,6 +19,7 @@ describe("useFormatters", () => {
     expect(result.current.number(1.5)).toBe("1.5");
 
     await changeLanguage("es");
+
     rerender();
 
     expect(result.current.number(1.5)).toBe("1,5");

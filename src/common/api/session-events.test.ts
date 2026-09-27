@@ -16,6 +16,7 @@ describe("session events", () => {
     const listener = vi.fn();
 
     unsubscribe = subscribeToSessionEvents(listener);
+
     publishSessionEvent({ type: "signed-out", reason: "sign-out" });
 
     expect(listener).toHaveBeenCalledWith({ type: "signed-out", reason: "sign-out" }, false);
@@ -25,6 +26,7 @@ describe("session events", () => {
     const listener = vi.fn();
 
     unsubscribe = subscribeToSessionEvents(listener);
+
     otherTab.postMessage({ type: "signed-in" });
 
     await vi.waitFor(() => {
@@ -36,6 +38,7 @@ describe("session events", () => {
     const listener = vi.fn();
 
     unsubscribe = subscribeToSessionEvents(listener);
+
     otherTab.postMessage({ type: "signed-out", reason: "bored" });
     otherTab.postMessage("refreshed");
     otherTab.postMessage({ type: "refreshed" });

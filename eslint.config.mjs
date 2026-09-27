@@ -13,6 +13,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 import { paddingAroundHooks } from "./eslint-rules/padding-around-hooks.mjs";
+import { paddingBetweenExpressionKinds } from "./eslint-rules/padding-between-expression-kinds.mjs";
 
 export default tseslint.config(
   {
@@ -32,7 +33,12 @@ export default tseslint.config(
       "better-tailwindcss": betterTailwindcss,
       "import-x": importX,
       // The project's own rules, in eslint-rules/.
-      local: { rules: { "padding-around-hooks": paddingAroundHooks } },
+      local: {
+        rules: {
+          "padding-around-hooks": paddingAroundHooks,
+          "padding-between-expression-kinds": paddingBetweenExpressionKinds,
+        },
+      },
     },
   },
   {
@@ -184,12 +190,19 @@ export default tseslint.config(
       "@stylistic/space-infix-ops": "error",
       "@stylistic/eol-last": ["error", "always"],
       "@stylistic/linebreak-style": ["error", "unix"],
-      // Anything spanning more than one line gets a blank line on each side (code-conventions).
+      // Anything spanning more than one line gets a blank line on each side, and a declaration is
+      // apart from the bare statement beside it (code-conventions).
       "@stylistic/padding-line-between-statements": [
         "error",
         { blankLine: "always", prev: ["multiline-const", "multiline-let", "multiline-expression", "multiline-block-like", "multiline-return", "multiline-export", "multiline-type"], next: "*" },
         { blankLine: "always", prev: "*", next: ["multiline-const", "multiline-let", "multiline-expression", "multiline-block-like", "multiline-return", "multiline-export", "multiline-type"] },
+        { blankLine: "always", prev: ["const", "let"], next: "expression" },
+        { blankLine: "always", prev: "expression", next: ["const", "let"] },
       ],
+
+      // One-line statements that do different kinds of work are apart: an assignment and a call, and
+      // an awaited step and one that is not (code-conventions).
+      "local/padding-between-expression-kinds": "error",
 
       // The paragraph rule for hooks (code-conventions): a blank line between a statement that reads
       // a hook and one that does not, and between two hooks unless they read the same thing — the

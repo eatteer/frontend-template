@@ -24,6 +24,7 @@ export function applyFieldErrors<T extends FieldValues>(
   for (const { field, message } of error.fieldErrors) {
     if (isFieldOf(field, fields)) {
       setError(field, { type: "server", message }, { shouldFocus: placed === 0 });
+
       placed += 1;
     }
   }

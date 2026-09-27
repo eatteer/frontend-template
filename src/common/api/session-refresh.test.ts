@@ -72,6 +72,7 @@ describe("the session refresh", () => {
     const events = recordSessionEvents();
 
     await expect(getUser()).resolves.toEqual(USER);
+
     expect(backend.refreshes()).toBe(1);
     expect(events).toEqual([{ type: "refreshed" }]);
   });
@@ -122,6 +123,7 @@ describe("the session refresh", () => {
     localStorage.setItem(LAST_REFRESH_STORAGE_KEY, String(Date.now() + OTHER_TAB_REFRESH_DELAY_MS));
 
     await expect(getUser()).resolves.toEqual(USER);
+
     expect(backend.refreshes()).toBe(0);
   });
 
@@ -146,6 +148,7 @@ describe("the session refresh", () => {
     );
 
     await expect(getUser()).rejects.toMatchObject({ status: 401, code: "common.unauthenticated" });
+
     expect(events).toEqual([{ type: "signed-out", reason: "expired" }]);
   });
 
@@ -177,6 +180,7 @@ describe("the session refresh", () => {
     );
 
     await expect(getUser()).rejects.toMatchObject({ status: 401 });
+
     expect(refreshCount).toBe(1);
   });
 

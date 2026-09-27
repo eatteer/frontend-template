@@ -33,6 +33,7 @@ beforeAll(() => {
 // a line that is not the application's and that the console guard never sees.
 beforeEach(() => {
   consoleGuard = guardConsole();
+
   stubMatchMedia();
   vi.stubGlobal("scrollTo", (): void => {});
 });
@@ -47,6 +48,7 @@ afterEach(async () => {
   toast.close();
   localStorage.clear();
   sessionStorage.clear();
+
   document.documentElement.className = "";
 
   await i18n.changeLanguage(DEFAULT_LANGUAGE);

@@ -30,6 +30,7 @@ function serveBackendThatSignsIn(): { loginBodies: unknown[] } {
     http.post(REFRESH_URL, unauthenticated),
     http.post(LOGIN_URL, async ({ request }: { request: Request }): Promise<HttpResponse<{ data: AuthTokensDTO }>> => {
       loginBodies.push(await request.json());
+
       isSignedIn = true;
 
       return HttpResponse.json({ data: buildAuthTokensDTO() });
@@ -157,6 +158,7 @@ describe("signing in", () => {
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
 
     isSignedIn = true;
+
     otherTab.postMessage({ type: "signed-in" });
 
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
@@ -177,6 +179,7 @@ describe("signing in", () => {
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
 
     isSignedIn = true;
+
     otherTab.postMessage({ type: "signed-in" });
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Try again in a minute");
@@ -191,6 +194,7 @@ describe("signing out", () => {
 
     server.use(http.post(LOGOUT_URL, (): HttpResponse<undefined> => {
       signedOutCalls += 1;
+
       server.use(...signedOut());
 
       return new HttpResponse(undefined, { status: 204 });

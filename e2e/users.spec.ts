@@ -120,6 +120,7 @@ test("the list shows a skeleton, then the users, and keeps its page and search i
 
   await expect(page).toHaveURL(/[?&]page=2(&|$)/);
   await expect(table.getByRole("link")).toHaveCount(Math.min(pageSize, SEEDED_USERS - pageSize));
+
   expect(new URL(page.url()).searchParams.get("search")).toBe(RUN);
 
   // A new search starts again from the first page.
@@ -127,6 +128,7 @@ test("the list shows a skeleton, then the users, and keeps its page and search i
 
   await expect(table.getByRole("link")).toHaveCount(1);
   await expect(table.getByRole("link", { name: `${RUN} user 03` })).toBeVisible();
+
   expect(new URL(page.url()).searchParams.get("search")).toBe(emailOf("03"));
   expect(new URL(page.url()).searchParams.has("page")).toBe(false);
 });

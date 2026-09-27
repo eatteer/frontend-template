@@ -80,6 +80,7 @@ describe("showErrorToast", () => {
   // hidden that way has no accessible name to query by, even among hidden elements.
   it("names its close button in the reader's language", async () => {
     await changeLanguage("es");
+
     renderWithProviders(null);
     showErrorToast(buildApiError());
 

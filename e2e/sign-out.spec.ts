@@ -49,6 +49,7 @@ test("signing out leaves every tab on sign-in, and nothing the account saw survi
   // lost its session without choosing, so it keeps where it was.
   await expect(first).toHaveURL("/sign-in");
   await expect(second).toHaveURL("/sign-in?redirect=%2Fusers");
+
   expect((await context.cookies()).map((cookie: Cookie): string => cookie.name)).toEqual([]);
 
   await first.getByLabel("Email").fill(account.email);

@@ -241,6 +241,7 @@ describe("the users list", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("The search is too long");
 
     isFailing = false;
+
     await user.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(await screen.findByText("No users found")).toBeInTheDocument();

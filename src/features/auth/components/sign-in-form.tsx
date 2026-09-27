@@ -49,6 +49,7 @@ export function SignInForm({ onSignedIn }: SignInFormProps): JSX.Element {
     }
 
     isSubmitting.current = true;
+
     setFormError(undefined);
 
     signIn.mutate(values, {

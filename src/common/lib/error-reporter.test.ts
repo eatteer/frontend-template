@@ -68,7 +68,9 @@ describe("reportUncaughtErrors", () => {
     const event = new ErrorEvent("error", { error: bug, message: bug.message, cancelable: true });
 
     setErrorReporter(report);
+
     stop = reportUncaughtErrors();
+
     window.dispatchEvent(event);
 
     expect(report).toHaveBeenCalledWith(bug, "uncaught");
@@ -79,7 +81,9 @@ describe("reportUncaughtErrors", () => {
     const report = vi.fn();
 
     setErrorReporter(report);
+
     stop = reportUncaughtErrors();
+
     window.dispatchEvent(new ErrorEvent("error", { message: "Script error." }));
 
     expect(report).toHaveBeenCalledWith("Script error.", "uncaught");
@@ -92,7 +96,9 @@ describe("reportUncaughtErrors", () => {
 
     Object.assign(event, { reason: bug });
     setErrorReporter(report);
+
     stop = reportUncaughtErrors();
+
     window.dispatchEvent(event);
 
     expect(report).toHaveBeenCalledWith(bug, "unhandled-rejection");

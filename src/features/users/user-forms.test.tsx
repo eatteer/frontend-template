@@ -276,6 +276,7 @@ describe("editing a user", () => {
     expect(email).toHaveFocus();
 
     answer = problem();
+
     await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("The email is already registered");

@@ -137,6 +137,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }): null =
     const sheet = new CSSStyleSheet();
 
     sheet.replaceSync(rules);
+
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
 
     return (): void => {

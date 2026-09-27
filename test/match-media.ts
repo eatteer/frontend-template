@@ -28,6 +28,7 @@ export function stubMatchMedia({ prefersDark = false, prefersReducedMotion = fal
   return {
     setPrefersDark: (nextPrefersDark: boolean): void => {
       darkQuery.matches = nextPrefersDark;
+
       darkQuery.dispatchEvent(new Event("change"));
     },
   };
