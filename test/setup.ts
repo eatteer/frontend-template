@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { i18n } from "@/common/i18n/i18n";
 import { DEFAULT_LANGUAGE } from "@/common/i18n/languages";
 import { consoleErrorReporter, setErrorReporter } from "@/common/lib/error-reporter";
+import { ignoreWebVitals, setWebVitalsReporter } from "@/common/lib/web-vitals";
 import { toast } from "@/common/ui/toast";
 
 import { guardConsole } from "@test/console-guard";
@@ -32,10 +33,11 @@ beforeEach(() => {
 });
 
 // Everything a test can leave behind in the page: open toasts, stored preferences, the theme class,
-// the language, a replaced error reporter.
+// the language, a replaced reporter.
 afterEach(async () => {
   cleanup();
   setErrorReporter(consoleErrorReporter);
+  setWebVitalsReporter(ignoreWebVitals);
   server.resetHandlers();
   toast.close();
   localStorage.clear();

@@ -105,6 +105,13 @@ also what fails the test suites. To send them to Sentry, Datadog or an endpoint 
 `setErrorReporter` in `main.tsx` before the first render. A failed request is not reported — the
 screen shows it, and the backend logged it under the trace id the "Copy error" report carries.
 
+**Web Vitals go through a port of their own**, `src/common/lib/web-vitals.ts`: how long the main
+content took to appear, how much the layout moved, how long an interaction waited, measured in the
+reader's browser. With no provider nothing is sent. To collect them, call `setWebVitalsReporter` in
+`main.tsx` before the first render. A provider on another origin also needs that origin in the
+`connect-src` of `nginx.conf`, or the Content-Security-Policy refuses its requests — the same holds
+for an error reporter.
+
 ## Layout
 
 ```text
@@ -177,7 +184,7 @@ server errors land on its fields, a detail page and an edit form that mounts alr
 3. Keep `users` if your product manages accounts from the browser, or delete it like any other
    feature. `auth` stays: it is how the application signs in.
 4. Replace `features/home` with your first screen.
-5. Install an error reporter (see "Deploying").
+5. Install an error reporter and a Web Vitals reporter (see "Deploying").
 6. Add continuous integration. There is none here, because a template deploys nothing, and the
    commands it needs are already the scripts above: `lint`, `typecheck`, `test`, `test:e2e`. Until
    it exists the only gate is the pre-commit hook, which anyone can skip with `--no-verify`.

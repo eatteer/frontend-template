@@ -14,6 +14,7 @@ import { ThemeProvider } from "@/common/components/theme/theme-provider";
 import { handleCaughtError } from "@/common/lib/caught-error";
 import { reportUncaughtErrors } from "@/common/lib/error-reporter";
 import { reloadOnPreloadError } from "@/common/lib/preload-error";
+import { reportWebVitals } from "@/common/lib/web-vitals";
 import { createQueryClient } from "@/common/query/query-client";
 import { createAppRouter } from "@/router";
 
@@ -24,6 +25,7 @@ if (!rootElement) { throw new Error("index.html has no #root element to mount th
 // Before the first render, so a dark theme never flashes light while React starts.
 applyResolvedTheme(resolveTheme(readStoredTheme(), getSystemTheme()));
 reportUncaughtErrors();
+reportWebVitals();
 reloadOnPreloadError();
 
 const queryClient = createQueryClient();
