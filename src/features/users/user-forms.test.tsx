@@ -3,11 +3,11 @@ import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { ProblemDetailsDTO, SessionDTO, UserDTO } from "@/common/api/schema.gen";
+import type { ProblemDetailsDto, SessionDto, UserDto } from "@/common/api/schema.gen";
 import { userQueries } from "@/features/users/api/user-queries";
 
-import { buildSessionDTO } from "@test/builders/session.builder";
-import { buildUserDTO, buildUserDTOs } from "@test/builders/user.builder";
+import { buildSessionDto } from "@test/builders/session.builder";
+import { buildUserDto, buildUserDtos } from "@test/builders/user.builder";
 import { problem } from "@test/msw/api";
 import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
@@ -18,13 +18,13 @@ import { expectRouteFailureWarning } from "@test/route-failure-warning";
 
 import type { UserEvent } from "@testing-library/user-event";
 
-const JANE = buildUserDTO();
+const JANE = buildUserDto();
 
 // Past the router's pending delay, which holds a skeleton back so a fast answer never flashes one.
 const SKELETON_TIMEOUT_MS = 3000;
 
 // The users the backend holds unless a test says otherwise: Jane, whose pages the tests open, and a few more.
-const USERS = [JANE, ...buildUserDTOs(3)];
+const USERS = [JANE, ...buildUserDtos(3)];
 
 async function fillCreateForm(user: UserEvent, { name, email, password }: { name: string; email: string; password: string }): Promise<void> {
   await user.type(await screen.findByLabelText("Name"), name);
@@ -135,7 +135,7 @@ describe("creating a user", () => {
 
     serveUsers(USERS);
 
-    server.use(http.post(USERS_URL, (): HttpResponse<ProblemDetailsDTO> => problem({
+    server.use(http.post(USERS_URL, (): HttpResponse<ProblemDetailsDto> => problem({
       status: 400,
       title: "Bad Request",
       detail: "Validation failed",
@@ -160,7 +160,7 @@ describe("creating a user", () => {
 
     serveUsers(USERS);
 
-    server.use(http.post(USERS_URL, (): HttpResponse<ProblemDetailsDTO> => problem({})));
+    server.use(http.post(USERS_URL, (): HttpResponse<ProblemDetailsDto> => problem({})));
 
     renderRoute("/users/new");
 
@@ -177,7 +177,7 @@ describe("creating a user", () => {
   it("refuses the page to someone who may not create users", async () => {
     const warning = expectRouteFailureWarning();
 
-    server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+    server.use(signedIn(buildSessionDto({ permissions: ["users:read"] })));
 
     serveUsers(USERS);
 
@@ -204,7 +204,7 @@ describe("a user's page", () => {
   });
 
   it("leaves out the edit link for someone who may only read", async () => {
-    server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+    server.use(signedIn(buildSessionDto({ permissions: ["users:read"] })));
 
     serveUsers(USERS);
 
@@ -223,7 +223,7 @@ describe("a user's page", () => {
 
     serveUsers(USERS);
 
-    server.use(http.get(USER_URL, async (): Promise<HttpResponse<{ data: UserDTO }>> => {
+    server.use(http.get(USER_URL, async (): Promise<HttpResponse<{ data: UserDto }>> => {
       await answered;
 
       return HttpResponse.json({ data: JANE });
@@ -317,12 +317,12 @@ describe("editing a user", () => {
   it("reads the session again after an administrator edits their own account", async () => {
     const user = userEvent.setup();
 
-    const session = buildSessionDTO();
+    const session = buildSessionDto();
     let sessionReads = 0;
 
-    serveUsers([buildUserDTO({ id: session.user.id, name: session.user.name, email: session.user.email })]);
+    serveUsers([buildUserDto({ id: session.user.id, name: session.user.name, email: session.user.email })]);
 
-    server.use(http.get(SESSION_URL, (): HttpResponse<{ data: SessionDTO }> => {
+    server.use(http.get(SESSION_URL, (): HttpResponse<{ data: SessionDto }> => {
       sessionReads += 1;
 
       return HttpResponse.json({ data: session });
@@ -347,7 +347,7 @@ describe("editing a user", () => {
   it("refuses the page to someone who may not edit users", async () => {
     const warning = expectRouteFailureWarning();
 
-    server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+    server.use(signedIn(buildSessionDto({ permissions: ["users:read"] })));
 
     serveUsers(USERS);
 

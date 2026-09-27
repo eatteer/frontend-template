@@ -22,6 +22,15 @@ const OPTIONAL_CALL = {
   message: "Write the `if`, then the call: an optional call hides the branch at the end of the line.",
 };
 
+// Abbreviations a name spells as a word (see the code-conventions skill): `ApiError`, `CreateUserDto`,
+// `userId`.
+const ABBREVIATIONS = [
+  "Ai", "Api", "Cors", "Csp", "Css", "Csv", "Dto", "E2e", "Html", "Http", "Id", "Ip", "Iso", "Json", "Jwt",
+  "Otp", "Pdf", "Seo", "Sms", "Sql", "Svg", "Ui", "Uri", "Url", "Utc", "Uuid", "Xml",
+];
+
+const IN_CAPITALS = ABBREVIATIONS.map((word) => word.toUpperCase()).join("|");
+
 export default tseslint.config(
   {
     // Generated files: `api:types` writes the API schema and the router plugin writes the route tree.
@@ -238,6 +247,18 @@ export default tseslint.config(
       // generate no utility, and that is what they are for.
       "better-tailwindcss/no-unknown-classes": ["error", { ignore: ["^cn-"] }],
 
+      // An abbreviation is written as a word (see the code-conventions skill). Declarations only: a
+      // property's name is often a contract, and a destructured binding repeats one.
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          selector: ["variableLike", "typeLike", "classMethod", "typeMethod"],
+          format: null,
+          custom: { regex: `^(?![A-Z0-9_]+$).*(?<![A-Z])(?:${IN_CAPITALS})s?(?![a-z])`, match: false },
+        },
+        { selector: ["variable", "parameter"], modifiers: ["destructured"], format: null },
+      ],
+
       // Configuration is read once, validated, from the module that owns it (see the configuration
       // skill). A raw read elsewhere skips the validation and scatters the variable names.
       "no-restricted-syntax": [
@@ -311,6 +332,14 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+  {
+    // The catalog keeps the registry's names (`InputOTP`), so an update from the registry lands
+    // without a rename (see the ui-components skill). This is the one rule the catalog turns off.
+    files: ["src/common/ui/**"],
+    rules: {
+      "@typescript-eslint/naming-convention": "off",
     },
   },
 );

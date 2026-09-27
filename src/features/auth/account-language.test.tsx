@@ -3,12 +3,12 @@ import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { ProblemDetailsDTO } from "@/common/api/schema.gen";
+import type { ProblemDetailsDto } from "@/common/api/schema.gen";
 import { SESSION_CHANNEL_NAME } from "@/common/api/session-events";
 import { LANGUAGE_STORAGE_KEY } from "@/common/i18n/i18n";
 import { sessionQuery } from "@/features/auth/api/session-queries";
 
-import { buildSessionDTO } from "@test/builders/session.builder";
+import { buildSessionDto } from "@test/builders/session.builder";
 import { problem } from "@test/msw/api";
 import { server } from "@test/msw/server";
 import { PREFERENCES_URL, signedIn } from "@test/msw/session";
@@ -17,8 +17,8 @@ import { renderRoute } from "@test/render";
 // Another tab, as far as this one can tell: a second channel on the same name.
 const otherTab = new BroadcastChannel(SESSION_CHANNEL_NAME);
 
-const SPANISH_SESSION = buildSessionDTO({
-  user: { ...buildSessionDTO().user, preferredLanguage: "es" },
+const SPANISH_SESSION = buildSessionDto({
+  user: { ...buildSessionDto().user, preferredLanguage: "es" },
 });
 
 async function pickSpanish(): Promise<void> {
@@ -91,7 +91,7 @@ describe("the account's language", () => {
   });
 
   it("switches back and says why when the account refuses the change", async () => {
-    server.use(http.patch(PREFERENCES_URL, (): HttpResponse<ProblemDetailsDTO> => problem({
+    server.use(http.patch(PREFERENCES_URL, (): HttpResponse<ProblemDetailsDto> => problem({
       status: 500,
       title: "Internal Server Error",
       detail: "Something failed",

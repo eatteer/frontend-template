@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { toSession } from "@/features/auth/api/session.mapper";
 import { hasPermissions } from "@/features/auth/model/session";
 
-import { buildSessionDTO } from "@test/builders/session.builder";
+import { buildSessionDto } from "@test/builders/session.builder";
 
 describe("hasPermissions", () => {
-  const session = toSession(buildSessionDTO({ permissions: ["users:read", "users:create"] }));
+  const session = toSession(buildSessionDto({ permissions: ["users:read", "users:create"] }));
 
   it("needs every permission it names, not any of them", () => {
     expect(hasPermissions(session, ["users:read", "users:create"])).toBe(true);
@@ -20,7 +20,7 @@ describe("hasPermissions", () => {
 
 describe("toSession", () => {
   it("keeps what the application shows of the account and its permissions, and nothing else", () => {
-    const dto = buildSessionDTO();
+    const dto = buildSessionDto();
 
     expect(toSession(dto)).toEqual({
       user: { id: dto.user.id, name: dto.user.name, email: dto.user.email, preferredLanguage: dto.user.preferredLanguage },

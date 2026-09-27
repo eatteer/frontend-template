@@ -1,6 +1,6 @@
 import createClient from "openapi-fetch";
 
-import { APIError, NETWORK_ERROR_CODE, NO_RESPONSE_STATUS, UNEXPECTED_RESPONSE_CODE } from "@/common/api/api-error";
+import { ApiError, NETWORK_ERROR_CODE, NO_RESPONSE_STATUS, UNEXPECTED_RESPONSE_CODE } from "@/common/api/api-error";
 import { parseProblemDetails, PROBLEM_DETAILS_MEDIA_TYPE } from "@/common/api/problem-details";
 import type { paths } from "@/common/api/schema.gen";
 import { createSessionRefreshMiddleware } from "@/common/api/session-refresh";
@@ -48,7 +48,7 @@ async function readProblemDetails(response: Response): Promise<unknown> {
   }
 }
 
-// A failed response becomes an APIError thrown from the call, so a caller only ever sees data. An
+// A failed response becomes an ApiError thrown from the call, so a caller only ever sees data. An
 // answer that is not Problem Details — a proxy's HTML error page — becomes one too, keeping the
 // status it came with.
 export const problemDetailsMiddleware: Middleware = {
@@ -70,7 +70,7 @@ export const problemDetailsMiddleware: Middleware = {
     };
 
     if (problem === undefined) {
-      throw new APIError({
+      throw new ApiError({
         ...context,
         code: UNEXPECTED_RESPONSE_CODE,
         title: i18n.t("errors.unexpected_response.title"),
@@ -79,7 +79,7 @@ export const problemDetailsMiddleware: Middleware = {
       });
     }
 
-    throw new APIError({
+    throw new ApiError({
       ...context,
       code: problem.code,
       title: problem.title,
@@ -87,7 +87,7 @@ export const problemDetailsMiddleware: Middleware = {
       fieldErrors: problem.errors,
     });
   },
-  onError: ({ request, error }: { request: Request; error: unknown }): APIError => new APIError(
+  onError: ({ request, error }: { request: Request; error: unknown }): ApiError => new ApiError(
     {
       method: request.method,
       url: request.url,
@@ -113,7 +113,7 @@ export const apiClient = createClient<paths>({
 });
 
 // Response middlewares run in reverse order of registration, so the refresh — registered last — sees
-// a 401 before it is turned into an APIError, and can answer with the request sent again instead.
+// a 401 before it is turned into an ApiError, and can answer with the request sent again instead.
 apiClient.use(
   requestContextMiddleware,
   problemDetailsMiddleware,

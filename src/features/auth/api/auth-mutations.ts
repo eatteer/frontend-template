@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { APIError } from "@/common/api/api-error";
+import type { ApiError } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { publishSessionEvent } from "@/common/api/session-events";
 import { changeLanguage } from "@/common/i18n/i18n";
@@ -38,7 +38,7 @@ function setSessionLanguage(queryClient: QueryClient, preferredLanguage: Languag
   );
 }
 
-export function useSignIn(): UseMutationResult<void, APIError, SignInValues> {
+export function useSignIn(): UseMutationResult<void, ApiError, SignInValues> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -57,7 +57,7 @@ export function useSignIn(): UseMutationResult<void, APIError, SignInValues> {
 
 // Leaving the page and emptying the cache happen in one place for every way a session ends — see
 // SessionSync.
-export function useSignOut(): UseMutationResult<void, APIError, void> {
+export function useSignOut(): UseMutationResult<void, ApiError, void> {
   return useMutation({
     mutationFn: signOut,
     onSuccess: (): void => {
@@ -68,7 +68,7 @@ export function useSignOut(): UseMutationResult<void, APIError, void> {
 
 // The screen switches at once and the backend is told after; a refusal switches it back, with the
 // toast saying why. Other tabs read the session again once the change is stored.
-export function useChangeAccountLanguage(): UseMutationResult<void, APIError, Language, LanguageRollback> {
+export function useChangeAccountLanguage(): UseMutationResult<void, ApiError, Language, LanguageRollback> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -84,7 +84,7 @@ export function useChangeAccountLanguage(): UseMutationResult<void, APIError, La
 
       return { previous };
     },
-    onError: async (_error: APIError, _language: Language, rollback: LanguageRollback | undefined): Promise<void> => {
+    onError: async (_error: ApiError, _language: Language, rollback: LanguageRollback | undefined): Promise<void> => {
       if (rollback?.previous === undefined) {
         return;
       }

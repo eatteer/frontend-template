@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { APIError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
+import { ApiError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { unwrap } from "@/common/api/envelope";
 import { changeLanguage } from "@/common/i18n/i18n";
@@ -19,7 +19,7 @@ async function fetchSession(signal: AbortSignal): Promise<Session | null> {
     return session;
   } catch (error: unknown) {
     // Reached only once the refresh has been refused too, so this is an answer, not a failure.
-    if (error instanceof APIError && error.status === UNAUTHORIZED_STATUS) {
+    if (error instanceof ApiError && error.status === UNAUTHORIZED_STATUS) {
       return null;
     }
 

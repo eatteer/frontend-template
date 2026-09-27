@@ -1,9 +1,9 @@
 import { http, HttpResponse } from "msw";
 
-import type { CreateUserDTO, ProblemDetailsDTO, UpdateUserDTO, UserDTO } from "@/common/api/schema.gen";
+import type { CreateUserDto, ProblemDetailsDto, UpdateUserDto, UserDto } from "@/common/api/schema.gen";
 
-import { buildPageDTO, DEFAULT_PAGE_LIMIT } from "@test/builders/page.builder";
-import { buildUserDTO } from "@test/builders/user.builder";
+import { buildPageDto, DEFAULT_PAGE_LIMIT } from "@test/builders/page.builder";
+import { buildUserDto } from "@test/builders/user.builder";
 import { API_URL, problem } from "@test/msw/api";
 import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
@@ -17,7 +17,7 @@ const CREATED_ID = "01890a5d-ac96-774b-bcce-b3020990ffff";
 
 type UserParams = { id: string };
 
-export function userNotFound(): HttpResponse<ProblemDetailsDTO> {
+export function userNotFound(): HttpResponse<ProblemDetailsDto> {
   return problem({ status: 404, title: "Not Found", detail: "The user was not found", code: "users.user_not_found" });
 }
 
@@ -25,15 +25,15 @@ export type UsersBackend = {
   handlers: HttpHandler[];
   // Every list request's query, as the backend received it.
   listQueries: URLSearchParams[];
-  createBodies: CreateUserDTO[];
-  updateBodies: UpdateUserDTO[];
+  createBodies: CreateUserDto[];
+  updateBodies: UpdateUserDto[];
 };
 
-function compareBy(sortBy: string, sortOrder: string): (left: UserDTO, right: UserDTO) => number {
+function compareBy(sortBy: string, sortOrder: string): (left: UserDto, right: UserDto) => number {
   const field = sortBy === "name" || sortBy === "email" ? sortBy : "createdAt";
   const direction = sortOrder === "asc" ? 1 : -1;
 
-  return (left: UserDTO, right: UserDTO): number => left[field].localeCompare(right[field]) * direction;
+  return (left: UserDto, right: UserDto): number => left[field].localeCompare(right[field]) * direction;
 }
 
 type UsersBackendOptions = {
@@ -43,7 +43,7 @@ type UsersBackendOptions = {
 
 // The users endpoints over an in-memory list, filtering, sorting and paging the way the backend
 // does — enough for a screen to behave as it would against the real one.
-export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOptions = {}): UsersBackend {
+export function usersBackend(initial: UserDto[], { holdCreate }: UsersBackendOptions = {}): UsersBackend {
   const users = [...initial];
   const backend: UsersBackend = { handlers: [], listQueries: [], createBodies: [], updateBodies: [] };
 
@@ -59,13 +59,13 @@ export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOpt
       const status = query.get("status");
 
       const matching = users
-        .filter((user: UserDTO): boolean => search === undefined || `${user.name} ${user.email}`.toLowerCase().includes(search))
-        .filter((user: UserDTO): boolean => status === null || user.status === status)
+        .filter((user: UserDto): boolean => search === undefined || `${user.name} ${user.email}`.toLowerCase().includes(search))
+        .filter((user: UserDto): boolean => status === null || user.status === status)
         .sort(compareBy(query.get("sortBy") ?? "createdAt", query.get("sortOrder") ?? "desc"));
 
       const pages = Math.ceil(matching.length / limit);
 
-      return HttpResponse.json(buildPageDTO(matching.slice((page - 1) * limit, page * limit), {
+      return HttpResponse.json(buildPageDto(matching.slice((page - 1) * limit, page * limit), {
         total: matching.length,
         pages,
         page,
@@ -75,27 +75,27 @@ export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOpt
       }));
     }),
     http.get<UserParams>(USER_URL, ({ params }: { params: UserParams }): MockedResponse => {
-      const user = users.find((candidate: UserDTO): boolean => candidate.id === params.id);
+      const user = users.find((candidate: UserDto): boolean => candidate.id === params.id);
 
       return user === undefined ? userNotFound() : HttpResponse.json({ data: user });
     }),
-    http.post<never, CreateUserDTO>(USERS_URL, async ({ request }: { request: StrictRequest<CreateUserDTO> }): Promise<MockedResponse> => {
+    http.post<never, CreateUserDto>(USERS_URL, async ({ request }: { request: StrictRequest<CreateUserDto> }): Promise<MockedResponse> => {
       const body = await request.json();
 
       await holdCreate;
 
       backend.createBodies.push(body);
 
-      users.push(buildUserDTO({ id: CREATED_ID, name: body.name, email: body.email, createdAt: new Date().toISOString() }));
+      users.push(buildUserDto({ id: CREATED_ID, name: body.name, email: body.email, createdAt: new Date().toISOString() }));
 
       return HttpResponse.json({ data: { id: CREATED_ID } }, { status: 201 });
     }),
-    http.patch<UserParams, UpdateUserDTO>(
+    http.patch<UserParams, UpdateUserDto>(
       USER_URL,
-      async ({ request, params }: { request: StrictRequest<UpdateUserDTO>; params: UserParams }): Promise<MockedResponse> => {
+      async ({ request, params }: { request: StrictRequest<UpdateUserDto>; params: UserParams }): Promise<MockedResponse> => {
         const body = await request.json();
 
-        const index = users.findIndex((candidate: UserDTO): boolean => candidate.id === params.id);
+        const index = users.findIndex((candidate: UserDto): boolean => candidate.id === params.id);
         const user = users[index];
 
         backend.updateBodies.push(body);
@@ -115,7 +115,7 @@ export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOpt
 }
 
 // The users endpoints over `users`, in front of every other handler for the rest of the test.
-export function serveUsers(users: UserDTO[], options?: UsersBackendOptions): UsersBackend {
+export function serveUsers(users: UserDto[], options?: UsersBackendOptions): UsersBackend {
   const backend = usersBackend(users, options);
 
   server.use(...backend.handlers);

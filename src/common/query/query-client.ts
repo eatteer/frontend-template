@@ -1,6 +1,6 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 
-import { APIError } from "@/common/api/api-error";
+import { ApiError } from "@/common/api/api-error";
 import { showErrorToast } from "@/common/components/error-toast";
 import { reportUnexpectedError } from "@/common/lib/error-reporter";
 
@@ -20,7 +20,7 @@ export type MutationMeta = {
 
 declare module "@tanstack/react-query" {
   interface Register {
-    defaultError: APIError;
+    defaultError: ApiError;
     queryMeta: QueryMeta;
     mutationMeta: MutationMeta;
   }
@@ -33,14 +33,14 @@ export const MAX_QUERY_RETRIES = 2;
 
 // A 4xx describes the request, so repeating it only delays the same answer.
 export function shouldRetryQuery(failureCount: number, error: unknown): boolean {
-  if (error instanceof APIError && error.isClientError) {
+  if (error instanceof ApiError && error.isClientError) {
     return false;
   }
 
   return failureCount < MAX_QUERY_RETRIES;
 }
 
-// `defaultError` says APIError, and that is what the transport throws. Anything else — a mapper
+// `defaultError` says ApiError, and that is what the transport throws. Anything else — a mapper
 // reading a field the response lacks — is a bug in the query function, and is reported as one on top
 // of the screen or toast the reader gets.
 export function createQueryClient(): QueryClient {
@@ -57,7 +57,7 @@ export function createQueryClient(): QueryClient {
     queryCache: new QueryCache({
       // A query that never loaded shows its error in place of its content. Only a failed refetch
       // behind data already on screen would otherwise go unnoticed, so only that one toasts.
-      onError: (error: APIError, query: Query<unknown, unknown>): void => {
+      onError: (error: ApiError, query: Query<unknown, unknown>): void => {
         reportUnexpectedError(error, "query");
 
         if (query.state.data !== undefined && query.meta?.errorToast !== false) {
@@ -67,7 +67,7 @@ export function createQueryClient(): QueryClient {
     }),
     mutationCache: new MutationCache({
       onError: (
-        error: APIError,
+        error: ApiError,
         _variables: unknown,
         _onMutateResult: unknown,
         mutation: Mutation<unknown, unknown, unknown>,

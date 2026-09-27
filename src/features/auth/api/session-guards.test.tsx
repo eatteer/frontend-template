@@ -11,7 +11,7 @@ import { useHasPermissions } from "@/features/auth/api/use-session";
 import type { RouterContext } from "@/router";
 
 import { buildApiError } from "@test/builders/api-error.builder";
-import { buildSessionDTO } from "@test/builders/session.builder";
+import { buildSessionDto } from "@test/builders/session.builder";
 import { server } from "@test/msw/server";
 import { signedIn } from "@test/msw/session";
 import { renderWithProviders } from "@test/render";
@@ -88,7 +88,7 @@ describe("the route guards", () => {
   });
 
   it("opens the page to a reader who has the permission", async () => {
-    server.use(signedIn(buildSessionDTO({ permissions: ["users:delete"] })));
+    server.use(signedIn(buildSessionDto({ permissions: ["users:delete"] })));
 
     renderGuardedRoute("/users");
 

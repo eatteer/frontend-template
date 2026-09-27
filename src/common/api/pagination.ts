@@ -1,7 +1,7 @@
 import { MISSING_DATA_MESSAGE } from "@/common/api/envelope";
-import type { APIPagination } from "@/common/api/schema.gen";
+import type { ApiPagination } from "@/common/api/schema.gen";
 
-export type Pagination = APIPagination;
+export type Pagination = ApiPagination;
 
 export type Paginated<T> = {
   items: T[];

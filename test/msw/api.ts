@@ -1,7 +1,7 @@
 import { HttpResponse } from "msw";
 
 import { PROBLEM_DETAILS_MEDIA_TYPE } from "@/common/api/problem-details";
-import type { ProblemDetailsDTO } from "@/common/api/schema.gen";
+import type { ProblemDetailsDto } from "@/common/api/schema.gen";
 import { env } from "@/common/config/env";
 
 import { buildProblemDetails } from "@test/builders/problem-details.builder";
@@ -17,7 +17,7 @@ export type MockedResponse = HttpResponse<DefaultBodyType>;
 
 // A failure as the backend answers it: Problem Details, with its content type and any other header
 // the answer carries.
-export function problem(overrides: Partial<ProblemDetailsDTO> = {}, headers: Record<string, string> = {}): HttpResponse<ProblemDetailsDTO> {
+export function problem(overrides: Partial<ProblemDetailsDto> = {}, headers: Record<string, string> = {}): HttpResponse<ProblemDetailsDto> {
   const body = buildProblemDetails(overrides);
 
   return HttpResponse.json(body, { status: body.status, headers: { ...headers, "Content-Type": PROBLEM_DETAILS_MEDIA_TYPE } });

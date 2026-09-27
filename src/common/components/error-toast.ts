@@ -1,4 +1,4 @@
-import { APIError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
+import { ApiError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
 import { i18n } from "@/common/i18n/i18n";
 import { copyErrorReport, describeError } from "@/common/lib/error-report";
 import { toast } from "@/common/ui/toast";
@@ -10,7 +10,7 @@ export const ERROR_TOAST_TIMEOUT_MS = 8000;
 // on the clipboard instead, for whoever the reader sends it to. A 401 never toasts, whoever asks: it
 // arrives only once the refresh failed too, and the sign-in screen that follows is the explanation.
 export function showErrorToast(error: unknown): void {
-  if (error instanceof APIError && error.status === UNAUTHORIZED_STATUS) {
+  if (error instanceof ApiError && error.status === UNAUTHORIZED_STATUS) {
     return;
   }
 

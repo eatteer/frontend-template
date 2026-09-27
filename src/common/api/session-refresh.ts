@@ -1,4 +1,4 @@
-import { APIError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
+import { ApiError, UNAUTHORIZED_STATUS } from "@/common/api/api-error";
 import type { paths } from "@/common/api/schema.gen";
 import { publishSessionEvent } from "@/common/api/session-events";
 
@@ -58,7 +58,7 @@ export function createRefreshCoordinator(refresh: () => Promise<unknown>): (sent
     try {
       await refresh();
     } catch (error: unknown) {
-      if (error instanceof APIError && error.status === UNAUTHORIZED_STATUS) {
+      if (error instanceof ApiError && error.status === UNAUTHORIZED_STATUS) {
         publishSessionEvent({ type: "signed-out", reason: "expired" });
 
         return "ended";
@@ -85,7 +85,7 @@ export function createRefreshCoordinator(refresh: () => Promise<unknown>): (sent
   };
 }
 
-// Registered after the middleware that turns failures into APIError: response middlewares run in
+// Registered after the middleware that turns failures into ApiError: response middlewares run in
 // reverse, so this one sees the raw 401 first, and whatever it answers with — the request sent again,
 // or the 401 itself — goes on to be turned into data or an error as usual.
 export function createSessionRefreshMiddleware(refresh: () => Promise<unknown>): Middleware {

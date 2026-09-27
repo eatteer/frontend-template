@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ProblemDetailsDTO } from "@/common/api/schema.gen";
+import type { ProblemDetailsDto } from "@/common/api/schema.gen";
 
 export const PROBLEM_DETAILS_MEDIA_TYPE = "application/problem+json";
 
@@ -15,9 +15,9 @@ const problemDetailsSchema = z.object({
   code: z.string(),
   traceId: z.string(),
   errors: z.array(z.object({ field: z.string(), message: z.string() })),
-}) satisfies z.ZodType<ProblemDetailsDTO>;
+}) satisfies z.ZodType<ProblemDetailsDto>;
 
-export function parseProblemDetails(body: unknown): ProblemDetailsDTO | undefined {
+export function parseProblemDetails(body: unknown): ProblemDetailsDto | undefined {
   const result = problemDetailsSchema.safeParse(body);
 
   return result.success ? result.data : undefined;

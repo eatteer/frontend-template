@@ -3,11 +3,11 @@ import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { UserDTO } from "@/common/api/schema.gen";
+import type { UserDto } from "@/common/api/schema.gen";
 
-import { buildPageDTO } from "@test/builders/page.builder";
-import { buildSessionDTO } from "@test/builders/session.builder";
-import { buildUserDTO, buildUserDTOs } from "@test/builders/user.builder";
+import { buildPageDto } from "@test/builders/page.builder";
+import { buildSessionDto } from "@test/builders/session.builder";
+import { buildUserDto, buildUserDtos } from "@test/builders/user.builder";
 import { problem } from "@test/msw/api";
 import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
@@ -17,7 +17,7 @@ import type { UsersBackend } from "@test/msw/users";
 import { renderRoute } from "@test/render";
 import { expectRouteFailureWarning } from "@test/route-failure-warning";
 
-const TWENTY_FIVE_USERS = buildUserDTOs(25);
+const TWENTY_FIVE_USERS = buildUserDtos(25);
 
 function lastListQuery(backend: UsersBackend): Record<string, string> {
   return Object.fromEntries(backend.listQueries.at(-1) ?? []);
@@ -136,7 +136,7 @@ describe("the users list", () => {
   it("filters by status from the first page, and clears the filter", async () => {
     const user = userEvent.setup();
 
-    const backend = serveUsers([...buildUserDTOs(3), buildUserDTO({ id: "suspended", name: "Sam Suspended", status: "suspended" })]);
+    const backend = serveUsers([...buildUserDtos(3), buildUserDto({ id: "suspended", name: "Sam Suspended", status: "suspended" })]);
 
     const { router } = renderRoute("/users?page=1");
 
@@ -248,7 +248,7 @@ describe("the users list", () => {
 
     server.use(http.get(USERS_URL, (): MockedResponse => {
       if (!isFailing) {
-        return HttpResponse.json(buildPageDTO<UserDTO>());
+        return HttpResponse.json(buildPageDto<UserDto>());
       }
 
       return problem({ status: 400, title: "Bad Request", detail: "The search is too long", code: "common.validation_error" });
@@ -268,7 +268,7 @@ describe("the users list", () => {
 
 describe("the users list, by permission", () => {
   it("offers to create a user only to someone allowed to", async () => {
-    server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+    server.use(signedIn(buildSessionDto({ permissions: ["users:read"] })));
 
     serveUsers(TWENTY_FIVE_USERS);
 
@@ -280,7 +280,7 @@ describe("the users list, by permission", () => {
   });
 
   it("links to the list from the navigation only for someone who may read it", async () => {
-    server.use(signedIn(buildSessionDTO({ permissions: [] })));
+    server.use(signedIn(buildSessionDto({ permissions: [] })));
 
     renderRoute("/");
 
@@ -291,7 +291,7 @@ describe("the users list, by permission", () => {
   it("refuses the page to someone who may not read users, without asking the backend for them", async () => {
     const warning = expectRouteFailureWarning();
 
-    server.use(signedIn(buildSessionDTO({ permissions: [] })));
+    server.use(signedIn(buildSessionDto({ permissions: [] })));
 
     const backend = serveUsers(TWENTY_FIVE_USERS);
 

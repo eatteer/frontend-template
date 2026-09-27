@@ -1,7 +1,7 @@
-import type { SessionDTO } from "@/common/api/schema.gen";
+import type { SessionDto } from "@/common/api/schema.gen";
 
 // The seeded administrator, as the backend describes them.
-export function buildSessionDTO(overrides: Partial<SessionDTO> = {}): SessionDTO {
+export function buildSessionDto(overrides: Partial<SessionDto> = {}): SessionDto {
   return {
     user: {
       id: "01890a5d-ac96-774b-bcce-b302099a8057",

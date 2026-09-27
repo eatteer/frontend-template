@@ -409,7 +409,7 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
-        ProblemFieldErrorDTO: {
+        ProblemFieldErrorDto: {
             /**
              * @description The rejected field, as a dotted path for a nested one
              * @example price.amountMinor
@@ -421,7 +421,7 @@ export type components = {
              */
             message: string;
         };
-        ProblemDetailsDTO: {
+        ProblemDetailsDto: {
             /** @example about:blank */
             type: string;
             /**
@@ -452,9 +452,9 @@ export type components = {
              */
             traceId: string;
             /** @description Every rejected field; empty unless validation failed */
-            errors: components["schemas"]["ProblemFieldErrorDTO"][];
+            errors: components["schemas"]["ProblemFieldErrorDto"][];
         };
-        AuthTokensDTO: {
+        AuthTokensDto: {
             /**
              * @description Present only for a header client
              * @example null
@@ -471,7 +471,7 @@ export type components = {
              */
             expiresAt: string;
         };
-        LoginDTO: {
+        LoginDto: {
             /** @example admin@example.com */
             email: string;
             /** @example Change-me-1! */
@@ -482,15 +482,15 @@ export type components = {
              */
             transport?: "cookie" | "header";
         };
-        RefreshTokenDTO: {
+        RefreshTokenDto: {
             /** @description Required only when the refresh token is not in a cookie */
             refreshToken?: string;
         };
-        LogoutDTO: {
+        LogoutDto: {
             /** @description Required only when the refresh token is not in a cookie */
             refreshToken?: string;
         };
-        SessionUserDTO: {
+        SessionUserDto: {
             /** @example 01890a5d-ac96-774b-bcce-b302099a8057 */
             id: string;
             /** @example Jane Doe */
@@ -506,8 +506,8 @@ export type components = {
              */
             preferredLanguage: "en" | "es";
         };
-        SessionDTO: {
-            user: components["schemas"]["SessionUserDTO"];
+        SessionDto: {
+            user: components["schemas"]["SessionUserDto"];
             /**
              * @description The permissions the access token carries: what the API allows until the next refresh
              * @example [
@@ -522,14 +522,14 @@ export type components = {
              */
             accessTokenExpiresAt: string;
         };
-        PruneResultDTO: {
+        PruneResultDto: {
             /**
              * @description How many expired records were removed
              * @example 42
              */
             deleted: number;
         };
-        UserDTO: {
+        UserDto: {
             /** @example 01890a5d-ac96-774b-bcce-b302099a8057 */
             id: string;
             /** @example Jane Doe */
@@ -571,7 +571,7 @@ export type components = {
              */
             deletedAt: string | null;
         };
-        APIPagination: {
+        ApiPagination: {
             /**
              * @description Total number of items across all pages
              * @example 100
@@ -603,11 +603,11 @@ export type components = {
              */
             previous: number | null;
         };
-        CreatedDTO: {
+        CreatedDto: {
             /** @example 01890a5d-ac96-774b-bcce-b302099a8057 */
             id: string;
         };
-        CreateUserDTO: {
+        CreateUserDto: {
             /** @example Jane Doe */
             name: string;
             /** @example jane@example.com */
@@ -620,24 +620,24 @@ export type components = {
             /** @enum {string} */
             preferredLanguage?: "en" | "es";
         };
-        UpdateUserDTO: {
+        UpdateUserDto: {
             /** @example jane@example.com */
             email?: string;
         };
-        ChangePasswordDTO: {
+        ChangePasswordDto: {
             /** @example Change-me-1! */
             currentPassword: string;
             /** @example An0ther-one! */
             newPassword: string;
         };
-        UpdatePreferencesDTO: {
+        UpdatePreferencesDto: {
             /**
              * @description The language every message to this account is written in
              * @enum {string}
              */
             preferredLanguage: "en" | "es";
         };
-        AssignUserRolesDTO: {
+        AssignUserRolesDto: {
             /**
              * @example [
              *       "01890a5d-ac96-774b-bcce-b302099a8057"
@@ -645,7 +645,7 @@ export type components = {
              */
             roleIds: string[];
         };
-        RoleDTO: {
+        RoleDto: {
             /** @example 01890a5d-ac96-774b-bcce-b302099a8057 */
             id: string;
             /** @example Support Agent */
@@ -669,7 +669,7 @@ export type components = {
              */
             updatedAt: string;
         };
-        CreateRoleDTO: {
+        CreateRoleDto: {
             /** @example Support Agent */
             name: string;
             /** @example Reads and updates users */
@@ -681,7 +681,7 @@ export type components = {
              */
             permissions: ("users:read" | "users:create" | "users:update" | "users:delete" | "users:assign_roles" | "users:suspend" | "roles:read" | "roles:create" | "roles:update" | "roles:delete" | "files:create" | "files:read")[];
         };
-        UpdateRoleDTO: {
+        UpdateRoleDto: {
             /** @example Support Agent */
             name?: string;
             /**
@@ -696,7 +696,7 @@ export type components = {
              */
             permissions?: ("users:read" | "users:create" | "users:update" | "users:delete" | "users:assign_roles" | "users:suspend" | "roles:read" | "roles:create" | "roles:update" | "roles:delete" | "files:create" | "files:read")[];
         };
-        RequestedUploadDTO: {
+        RequestedUploadDto: {
             /** @example 01890a5d-ac96-774b-bcce-b302099a8057 */
             fileId: string;
             /** @description Upload the bytes here with a PUT. It expires. */
@@ -707,7 +707,7 @@ export type components = {
              */
             declaredBytes: number;
         };
-        RequestUploadDTO: {
+        RequestUploadDto: {
             /** @enum {string} */
             contentType: "image/png" | "image/jpeg" | "application/pdf";
             /** @example 204800 */
@@ -715,7 +715,7 @@ export type components = {
             /** @example contract.pdf */
             originalName: string;
         };
-        DownloadURLDTO: {
+        DownloadUrlDto: {
             /** @description Short-lived link to the stored bytes */
             downloadUrl: string;
         };
@@ -726,29 +726,29 @@ export type components = {
     headers: never;
     pathItems: never;
 };
-export type ProblemFieldErrorDTO = components['schemas']['ProblemFieldErrorDTO'];
-export type ProblemDetailsDTO = components['schemas']['ProblemDetailsDTO'];
-export type AuthTokensDTO = components['schemas']['AuthTokensDTO'];
-export type LoginDTO = components['schemas']['LoginDTO'];
-export type RefreshTokenDTO = components['schemas']['RefreshTokenDTO'];
-export type LogoutDTO = components['schemas']['LogoutDTO'];
-export type SessionUserDTO = components['schemas']['SessionUserDTO'];
-export type SessionDTO = components['schemas']['SessionDTO'];
-export type PruneResultDTO = components['schemas']['PruneResultDTO'];
-export type UserDTO = components['schemas']['UserDTO'];
-export type APIPagination = components['schemas']['APIPagination'];
-export type CreatedDTO = components['schemas']['CreatedDTO'];
-export type CreateUserDTO = components['schemas']['CreateUserDTO'];
-export type UpdateUserDTO = components['schemas']['UpdateUserDTO'];
-export type ChangePasswordDTO = components['schemas']['ChangePasswordDTO'];
-export type UpdatePreferencesDTO = components['schemas']['UpdatePreferencesDTO'];
-export type AssignUserRolesDTO = components['schemas']['AssignUserRolesDTO'];
-export type RoleDTO = components['schemas']['RoleDTO'];
-export type CreateRoleDTO = components['schemas']['CreateRoleDTO'];
-export type UpdateRoleDTO = components['schemas']['UpdateRoleDTO'];
-export type RequestedUploadDTO = components['schemas']['RequestedUploadDTO'];
-export type RequestUploadDTO = components['schemas']['RequestUploadDTO'];
-export type DownloadURLDTO = components['schemas']['DownloadURLDTO'];
+export type ProblemFieldErrorDto = components['schemas']['ProblemFieldErrorDto'];
+export type ProblemDetailsDto = components['schemas']['ProblemDetailsDto'];
+export type AuthTokensDto = components['schemas']['AuthTokensDto'];
+export type LoginDto = components['schemas']['LoginDto'];
+export type RefreshTokenDto = components['schemas']['RefreshTokenDto'];
+export type LogoutDto = components['schemas']['LogoutDto'];
+export type SessionUserDto = components['schemas']['SessionUserDto'];
+export type SessionDto = components['schemas']['SessionDto'];
+export type PruneResultDto = components['schemas']['PruneResultDto'];
+export type UserDto = components['schemas']['UserDto'];
+export type ApiPagination = components['schemas']['ApiPagination'];
+export type CreatedDto = components['schemas']['CreatedDto'];
+export type CreateUserDto = components['schemas']['CreateUserDto'];
+export type UpdateUserDto = components['schemas']['UpdateUserDto'];
+export type ChangePasswordDto = components['schemas']['ChangePasswordDto'];
+export type UpdatePreferencesDto = components['schemas']['UpdatePreferencesDto'];
+export type AssignUserRolesDto = components['schemas']['AssignUserRolesDto'];
+export type RoleDto = components['schemas']['RoleDto'];
+export type CreateRoleDto = components['schemas']['CreateRoleDto'];
+export type UpdateRoleDto = components['schemas']['UpdateRoleDto'];
+export type RequestedUploadDto = components['schemas']['RequestedUploadDto'];
+export type RequestUploadDto = components['schemas']['RequestUploadDto'];
+export type DownloadUrlDto = components['schemas']['DownloadUrlDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     live: {
@@ -1008,7 +1008,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["LoginDTO"];
+                "application/json": components["schemas"]["LoginDto"];
             };
         };
         responses: {
@@ -1019,7 +1019,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["AuthTokensDTO"];
+                        data: components["schemas"]["AuthTokensDto"];
                     };
                 };
             };
@@ -1029,7 +1029,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Invalid credentials */
@@ -1038,7 +1038,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Too many attempts from this address or for this account */
@@ -1047,7 +1047,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1061,7 +1061,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RefreshTokenDTO"];
+                "application/json": components["schemas"]["RefreshTokenDto"];
             };
         };
         responses: {
@@ -1072,7 +1072,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["AuthTokensDTO"];
+                        data: components["schemas"]["AuthTokensDto"];
                     };
                 };
             };
@@ -1082,7 +1082,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description The token is unknown, expired, or was already used */
@@ -1091,7 +1091,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Too many attempts from this address */
@@ -1100,7 +1100,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1114,7 +1114,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["LogoutDTO"];
+                "application/json": components["schemas"]["LogoutDto"];
             };
         };
         responses: {
@@ -1131,7 +1131,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1152,7 +1152,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["SessionDTO"];
+                        data: components["schemas"]["SessionDto"];
                     };
                 };
             };
@@ -1162,7 +1162,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1186,7 +1186,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["PruneResultDTO"];
+                        data: components["schemas"]["PruneResultDto"];
                     };
                 };
             };
@@ -1196,7 +1196,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1235,8 +1235,8 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["UserDTO"][];
-                        pagination: components["schemas"]["APIPagination"];
+                        data: components["schemas"]["UserDto"][];
+                        pagination: components["schemas"]["ApiPagination"];
                     };
                 };
             };
@@ -1246,7 +1246,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -1255,7 +1255,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1264,7 +1264,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1278,7 +1278,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateUserDTO"];
+                "application/json": components["schemas"]["CreateUserDto"];
             };
         };
         responses: {
@@ -1289,7 +1289,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["CreatedDTO"];
+                        data: components["schemas"]["CreatedDto"];
                     };
                 };
             };
@@ -1299,7 +1299,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -1308,7 +1308,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1317,7 +1317,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description The email is already registered */
@@ -1326,7 +1326,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1349,7 +1349,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["UserDTO"];
+                        data: components["schemas"]["UserDto"];
                     };
                 };
             };
@@ -1359,7 +1359,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1368,7 +1368,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No user matches the id */
@@ -1377,7 +1377,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1406,7 +1406,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1415,7 +1415,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No user matches the id */
@@ -1424,7 +1424,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1440,7 +1440,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateUserDTO"];
+                "application/json": components["schemas"]["UpdateUserDto"];
             };
         };
         responses: {
@@ -1457,7 +1457,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -1466,7 +1466,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1475,7 +1475,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No user matches the id */
@@ -1484,7 +1484,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description The email is already registered */
@@ -1493,7 +1493,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1507,7 +1507,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ChangePasswordDTO"];
+                "application/json": components["schemas"]["ChangePasswordDto"];
             };
         };
         responses: {
@@ -1524,7 +1524,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -1533,7 +1533,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1542,7 +1542,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1556,7 +1556,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdatePreferencesDTO"];
+                "application/json": components["schemas"]["UpdatePreferencesDto"];
             };
         };
         responses: {
@@ -1573,7 +1573,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -1582,7 +1582,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1591,7 +1591,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description The account is suspended */
@@ -1600,7 +1600,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1616,7 +1616,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AssignUserRolesDTO"];
+                "application/json": components["schemas"]["AssignUserRolesDto"];
             };
         };
         responses: {
@@ -1633,7 +1633,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -1642,7 +1642,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1651,7 +1651,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No user matches the id, or one of the roles does not exist */
@@ -1660,7 +1660,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1689,7 +1689,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1698,7 +1698,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No user matches the id */
@@ -1707,7 +1707,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1736,7 +1736,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1745,7 +1745,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No user matches the id */
@@ -1754,7 +1754,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1791,8 +1791,8 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["RoleDTO"][];
-                        pagination: components["schemas"]["APIPagination"];
+                        data: components["schemas"]["RoleDto"][];
+                        pagination: components["schemas"]["ApiPagination"];
                     };
                 };
             };
@@ -1802,7 +1802,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -1811,7 +1811,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1820,7 +1820,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1834,7 +1834,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateRoleDTO"];
+                "application/json": components["schemas"]["CreateRoleDto"];
             };
         };
         responses: {
@@ -1845,7 +1845,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["CreatedDTO"];
+                        data: components["schemas"]["CreatedDto"];
                     };
                 };
             };
@@ -1855,7 +1855,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -1864,7 +1864,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1873,7 +1873,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description A role with that name already exists */
@@ -1882,7 +1882,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1905,7 +1905,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["RoleDTO"];
+                        data: components["schemas"]["RoleDto"];
                     };
                 };
             };
@@ -1915,7 +1915,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1924,7 +1924,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No role matches the id */
@@ -1933,7 +1933,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1962,7 +1962,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -1971,7 +1971,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No role matches the id */
@@ -1980,7 +1980,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -1996,7 +1996,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateRoleDTO"];
+                "application/json": components["schemas"]["UpdateRoleDto"];
             };
         };
         responses: {
@@ -2013,7 +2013,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -2022,7 +2022,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -2031,7 +2031,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No role matches the id */
@@ -2040,7 +2040,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description A role with that name already exists */
@@ -2049,7 +2049,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -2063,7 +2063,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RequestUploadDTO"];
+                "application/json": components["schemas"]["RequestUploadDto"];
             };
         };
         responses: {
@@ -2074,7 +2074,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["RequestedUploadDTO"];
+                        data: components["schemas"]["RequestedUploadDto"];
                     };
                 };
             };
@@ -2084,7 +2084,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No valid credentials were presented */
@@ -2093,7 +2093,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -2102,7 +2102,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -2131,7 +2131,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -2140,7 +2140,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No file matches the id, or it is not the caller's */
@@ -2149,7 +2149,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Nothing was uploaded yet, or what was uploaded is not what was declared */
@@ -2158,7 +2158,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -2181,7 +2181,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["DownloadURLDTO"];
+                        data: components["schemas"]["DownloadUrlDto"];
                     };
                 };
             };
@@ -2191,7 +2191,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Missing the required permission */
@@ -2200,7 +2200,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description No file matches the id, or it is not the caller's */
@@ -2209,7 +2209,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description The upload was never confirmed */
@@ -2218,7 +2218,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetailsDTO"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };
@@ -2237,14 +2237,14 @@ export const pathsApiV1UsersGetParametersQueryStatusValues: ReadonlyArray<Flatte
 export const pathsApiV1UsersGetParametersQuerySortByValues: ReadonlyArray<FlattenedDeepRequired<paths>["/api/v1/users"]["get"]["parameters"]["query"]["sortBy"]> = ["createdAt", "name", "email"];
 export const pathsApiV1RolesGetParametersQuerySortOrderValues: ReadonlyArray<FlattenedDeepRequired<paths>["/api/v1/roles"]["get"]["parameters"]["query"]["sortOrder"]> = ["asc", "desc"];
 export const pathsApiV1RolesGetParametersQuerySortByValues: ReadonlyArray<FlattenedDeepRequired<paths>["/api/v1/roles"]["get"]["parameters"]["query"]["sortBy"]> = ["createdAt", "name"];
-export const loginDTOTransportValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["LoginDTO"]["transport"]> = ["cookie", "header"];
-export const sessionUserDTOPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionUserDTO"]["preferredLanguage"]> = ["en", "es"];
-export const sessionDTOPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionDTO"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
-export const userDTOStatusValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UserDTO"]["status"]> = ["active", "suspended"];
-export const userDTOPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UserDTO"]["preferredLanguage"]> = ["en", "es"];
-export const createUserDTOPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["CreateUserDTO"]["preferredLanguage"]> = ["en", "es"];
-export const updatePreferencesDTOPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UpdatePreferencesDTO"]["preferredLanguage"]> = ["en", "es"];
-export const roleDTOPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["RoleDTO"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
-export const createRoleDTOPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["CreateRoleDTO"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
-export const updateRoleDTOPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UpdateRoleDTO"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
-export const requestUploadDTOContentTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["RequestUploadDTO"]["contentType"]> = ["image/png", "image/jpeg", "application/pdf"];
+export const loginDtoTransportValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["LoginDto"]["transport"]> = ["cookie", "header"];
+export const sessionUserDtoPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionUserDto"]["preferredLanguage"]> = ["en", "es"];
+export const sessionDtoPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["SessionDto"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
+export const userDtoStatusValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UserDto"]["status"]> = ["active", "suspended"];
+export const userDtoPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UserDto"]["preferredLanguage"]> = ["en", "es"];
+export const createUserDtoPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["CreateUserDto"]["preferredLanguage"]> = ["en", "es"];
+export const updatePreferencesDtoPreferredLanguageValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UpdatePreferencesDto"]["preferredLanguage"]> = ["en", "es"];
+export const roleDtoPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["RoleDto"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
+export const createRoleDtoPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["CreateRoleDto"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
+export const updateRoleDtoPermissionsValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["UpdateRoleDto"]["permissions"]> = ["users:read", "users:create", "users:update", "users:delete", "users:assign_roles", "users:suspend", "roles:read", "roles:create", "roles:update", "roles:delete", "files:create", "files:read"];
+export const requestUploadDtoContentTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["RequestUploadDto"]["contentType"]> = ["image/png", "image/jpeg", "application/pdf"];

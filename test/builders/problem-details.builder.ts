@@ -1,6 +1,6 @@
-import type { ProblemDetailsDTO } from "@/common/api/schema.gen";
+import type { ProblemDetailsDto } from "@/common/api/schema.gen";
 
-export function buildProblemDetails(overrides: Partial<ProblemDetailsDTO> = {}): ProblemDetailsDTO {
+export function buildProblemDetails(overrides: Partial<ProblemDetailsDto> = {}): ProblemDetailsDto {
   return {
     type: "about:blank",
     title: "Conflict",

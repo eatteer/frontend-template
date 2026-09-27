@@ -1,6 +1,6 @@
 import type { SortOrder } from "@/common/api/pagination";
 import { pathsApiV1UsersGetParametersQuerySortByValues, pathsApiV1UsersGetParametersQueryStatusValues } from "@/common/api/schema.gen";
-import type { UserDTO } from "@/common/api/schema.gen";
+import type { UserDto } from "@/common/api/schema.gen";
 import type { Sort } from "@/common/components/data-table/sortable-table-head";
 import type { Language } from "@/common/i18n/languages";
 
@@ -8,7 +8,7 @@ import type { Language } from "@/common/i18n/languages";
 // drops changes the filters and the columns at compile time.
 export const USER_STATUS_VALUES = pathsApiV1UsersGetParametersQueryStatusValues;
 
-export type UserStatus = UserDTO["status"];
+export type UserStatus = UserDto["status"];
 
 export const USER_SORT_BY_VALUES = pathsApiV1UsersGetParametersQuerySortByValues;
 

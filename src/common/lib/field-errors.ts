@@ -1,4 +1,4 @@
-import { APIError } from "@/common/api/api-error";
+import { ApiError } from "@/common/api/api-error";
 
 import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
 
@@ -15,7 +15,7 @@ export function applyFieldErrors<T extends FieldValues>(
   setError: UseFormSetError<T>,
   fields: readonly Path<T>[],
 ): boolean {
-  if (!(error instanceof APIError)) {
+  if (!(error instanceof ApiError)) {
     return false;
   }
 

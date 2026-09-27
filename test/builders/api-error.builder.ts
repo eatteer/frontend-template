@@ -1,10 +1,10 @@
-import { APIError } from "@/common/api/api-error";
-import type { APIErrorInit } from "@/common/api/api-error";
+import { ApiError } from "@/common/api/api-error";
+import type { ApiErrorInit } from "@/common/api/api-error";
 
 import { USERS_URL } from "@test/msw/users";
 
 // What the backend's 409 turns into, with whatever a test needs to differ.
-export function buildApiErrorInit(overrides: Partial<APIErrorInit> = {}): APIErrorInit {
+export function buildApiErrorInit(overrides: Partial<ApiErrorInit> = {}): ApiErrorInit {
   return {
     method: "POST",
     url: USERS_URL,
@@ -19,6 +19,6 @@ export function buildApiErrorInit(overrides: Partial<APIErrorInit> = {}): APIErr
   };
 }
 
-export function buildApiError(overrides: Partial<APIErrorInit> = {}): APIError {
-  return new APIError(buildApiErrorInit(overrides));
+export function buildApiError(overrides: Partial<ApiErrorInit> = {}): ApiError {
+  return new ApiError(buildApiErrorInit(overrides));
 }

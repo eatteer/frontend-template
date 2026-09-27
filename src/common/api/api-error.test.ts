@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { APIError } from "@/common/api/api-error";
+import { ApiError } from "@/common/api/api-error";
 
 import { buildApiError, buildApiErrorInit } from "@test/builders/api-error.builder";
 import { USERS_URL } from "@test/msw/users";
 
-describe("APIError", () => {
+describe("ApiError", () => {
   it("is an Error, so it keeps a stack and a cause", () => {
     const cause = new TypeError("Failed to fetch");
-    const error = new APIError(buildApiErrorInit(), { cause });
+    const error = new ApiError(buildApiErrorInit(), { cause });
 
     expect(error).toBeInstanceOf(Error);
-    expect(error.name).toBe("APIError");
+    expect(error.name).toBe("ApiError");
     expect(error.message).toBe(error.detail);
     expect(error.stack).toBeDefined();
     expect(error.cause).toBe(cause);

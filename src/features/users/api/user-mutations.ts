@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { APIError } from "@/common/api/api-error";
+import type { ApiError } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { unwrap } from "@/common/api/envelope";
 import { publishSessionEvent } from "@/common/api/session-events";
@@ -21,7 +21,7 @@ async function updateUser(id: string, values: EditUserValues): Promise<void> {
 
 // Resolves to the new user's id. Both forms show their own failures — on the fields when the
 // backend names them, in a toast when it does not — so the default toast is off.
-export function useCreateUser(): UseMutationResult<string, APIError, CreateUserValues> {
+export function useCreateUser(): UseMutationResult<string, ApiError, CreateUserValues> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -33,7 +33,7 @@ export function useCreateUser(): UseMutationResult<string, APIError, CreateUserV
   });
 }
 
-export function useUpdateUser(id: string): UseMutationResult<void, APIError, EditUserValues> {
+export function useUpdateUser(id: string): UseMutationResult<void, ApiError, EditUserValues> {
   const queryClient = useQueryClient();
 
   return useMutation({

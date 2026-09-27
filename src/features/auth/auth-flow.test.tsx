@@ -3,12 +3,12 @@ import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { AuthTokensDTO, ProblemDetailsDTO } from "@/common/api/schema.gen";
+import type { AuthTokensDto, ProblemDetailsDto } from "@/common/api/schema.gen";
 import { publishSessionEvent, SESSION_CHANNEL_NAME } from "@/common/api/session-events";
 import { sessionQuery } from "@/features/auth/api/session-queries";
 
-import { buildAuthTokensDTO } from "@test/builders/auth-tokens.builder";
-import { buildSessionDTO } from "@test/builders/session.builder";
+import { buildAuthTokensDto } from "@test/builders/auth-tokens.builder";
+import { buildSessionDto } from "@test/builders/session.builder";
 import { problem } from "@test/msw/api";
 import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
@@ -28,14 +28,14 @@ function serveBackendThatSignsIn(): { loginBodies: unknown[] } {
 
   server.use(
     http.post(REFRESH_URL, unauthenticated),
-    http.post(LOGIN_URL, async ({ request }: { request: Request }): Promise<HttpResponse<{ data: AuthTokensDTO }>> => {
+    http.post(LOGIN_URL, async ({ request }: { request: Request }): Promise<HttpResponse<{ data: AuthTokensDto }>> => {
       loginBodies.push(await request.json());
 
       isSignedIn = true;
 
-      return HttpResponse.json({ data: buildAuthTokensDTO() });
+      return HttpResponse.json({ data: buildAuthTokensDto() });
     }),
-    http.get(SESSION_URL, (): MockedResponse => (isSignedIn ? HttpResponse.json({ data: buildSessionDTO() }) : unauthenticated())),
+    http.get(SESSION_URL, (): MockedResponse => (isSignedIn ? HttpResponse.json({ data: buildSessionDto() }) : unauthenticated())),
   );
 
   return { loginBodies };
@@ -111,7 +111,7 @@ describe("signing in", () => {
   it("explains wrong credentials in the form, not in a toast", async () => {
     server.use(
       ...signedOut(),
-      http.post(LOGIN_URL, (): HttpResponse<ProblemDetailsDTO> => problem({
+      http.post(LOGIN_URL, (): HttpResponse<ProblemDetailsDto> => problem({
         status: 401,
         title: "Unauthorized",
         detail: "Invalid credentials",
@@ -130,7 +130,7 @@ describe("signing in", () => {
   it("puts the backend's field errors on their fields and focuses the first", async () => {
     server.use(
       ...signedOut(),
-      http.post(LOGIN_URL, (): HttpResponse<ProblemDetailsDTO> => problem({
+      http.post(LOGIN_URL, (): HttpResponse<ProblemDetailsDto> => problem({
         status: 400,
         code: "common.validation_error",
         errors: [{ field: "email", message: "The email is not valid" }],
@@ -159,7 +159,7 @@ describe("signing in", () => {
 
     server.use(
       http.post(REFRESH_URL, unauthenticated),
-      http.get(SESSION_URL, (): MockedResponse => (isSignedIn ? HttpResponse.json({ data: buildSessionDTO() }) : unauthenticated())),
+      http.get(SESSION_URL, (): MockedResponse => (isSignedIn ? HttpResponse.json({ data: buildSessionDto() }) : unauthenticated())),
     );
 
     const { router } = renderRoute("/sign-in?redirect=%2F");
@@ -268,7 +268,7 @@ describe("refreshing", () => {
 
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
 
-    server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+    server.use(signedIn(buildSessionDto({ permissions: ["users:read"] })));
 
     otherTab.postMessage({ type: "refreshed" });
 

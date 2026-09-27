@@ -18,9 +18,9 @@ const e2eEnvSchema = z.object({
   E2E_BASE_URL: z.url().optional(),
 });
 
-export type E2EEnv = z.infer<typeof e2eEnvSchema>;
+export type E2eEnv = z.infer<typeof e2eEnvSchema>;
 
-function parseE2EEnv(source: NodeJS.ProcessEnv): E2EEnv {
+function parseE2eEnv(source: NodeJS.ProcessEnv): E2eEnv {
   const result = e2eEnvSchema.safeParse(source);
 
   if (!result.success) {
@@ -30,7 +30,7 @@ function parseE2EEnv(source: NodeJS.ProcessEnv): E2EEnv {
   return result.data;
 }
 
-export const e2eEnv = parseE2EEnv(process.env);
+export const e2eEnv = parseE2eEnv(process.env);
 
 // Not the dev server's port, so the suite runs while `npm run dev` does. The backend's CORS_ORIGIN
 // has to list this origin too.

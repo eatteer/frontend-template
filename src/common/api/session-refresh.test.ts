@@ -1,31 +1,31 @@
 import { http, HttpResponse } from "msw";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { APIError, NETWORK_ERROR_CODE } from "@/common/api/api-error";
+import { ApiError, NETWORK_ERROR_CODE } from "@/common/api/api-error";
 import { apiClient } from "@/common/api/client";
 import { unwrap } from "@/common/api/envelope";
-import type { AuthTokensDTO, UserDTO } from "@/common/api/schema.gen";
+import type { AuthTokensDto, UserDto } from "@/common/api/schema.gen";
 import { subscribeToSessionEvents } from "@/common/api/session-events";
 import type { SessionEvent } from "@/common/api/session-events";
 import { LAST_REFRESH_STORAGE_KEY, REFRESH_LOCK_NAME } from "@/common/api/session-refresh";
 
-import { buildAuthTokensDTO } from "@test/builders/auth-tokens.builder";
-import { buildUserDTO } from "@test/builders/user.builder";
+import { buildAuthTokensDto } from "@test/builders/auth-tokens.builder";
+import { buildUserDto } from "@test/builders/user.builder";
 import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
 import { LOGIN_URL, REFRESH_URL, unauthenticated } from "@test/msw/session";
 import { USER_URL, USERS_URL } from "@test/msw/users";
 
-const USER = buildUserDTO();
+const USER = buildUserDto();
 
 // Lands after the request that hit the expired token left, as another tab's refresh would.
 const OTHER_TAB_REFRESH_DELAY_MS = 1000;
 
-function refreshed(): HttpResponse<{ data: AuthTokensDTO }> {
-  return HttpResponse.json({ data: buildAuthTokensDTO() });
+function refreshed(): HttpResponse<{ data: AuthTokensDto }> {
+  return HttpResponse.json({ data: buildAuthTokensDto() });
 }
 
-function userFound(): HttpResponse<{ data: UserDTO }> {
+function userFound(): HttpResponse<{ data: UserDto }> {
   return HttpResponse.json({ data: USER });
 }
 
@@ -34,7 +34,7 @@ function serveExpiringAccessToken(): { refreshes: () => number } {
   let refreshCount = 0;
 
   server.use(
-    http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDTO }> => {
+    http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDto }> => {
       refreshCount += 1;
 
       return refreshed();
@@ -86,7 +86,7 @@ describe("the session refresh", () => {
     const received: unknown[] = [];
 
     server.use(
-      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDTO }> => {
+      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDto }> => {
         hasRefreshed = true;
 
         return refreshed();
@@ -166,7 +166,7 @@ describe("the session refresh", () => {
 
     const error: unknown = await getUser().catch((caught: unknown): unknown => caught);
 
-    expect(error).toBeInstanceOf(APIError);
+    expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({ code: NETWORK_ERROR_CODE });
 
     expect(events).toEqual([]);
@@ -176,7 +176,7 @@ describe("the session refresh", () => {
     let refreshCount = 0;
 
     server.use(
-      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDTO }> => {
+      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDto }> => {
         refreshCount += 1;
 
         return refreshed();
@@ -193,7 +193,7 @@ describe("the session refresh", () => {
     let refreshCount = 0;
 
     server.use(
-      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDTO }> => {
+      http.post(REFRESH_URL, (): HttpResponse<{ data: AuthTokensDto }> => {
         refreshCount += 1;
 
         return refreshed();
