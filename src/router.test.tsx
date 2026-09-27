@@ -1,8 +1,10 @@
 import { screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { renderRoute } from "@test/render";
+import { renderRoute, warmUpRoutes } from "@test/render";
+
+beforeAll(warmUpRoutes);
 
 describe("the application's routes", () => {
   it("renders the home page inside the app shell", async () => {

@@ -39,6 +39,9 @@ export default defineConfig({
     setupFiles: ["./test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "test/**/*.test.{ts,tsx}"],
     testTimeout: TEST_TIMEOUT_MS,
+    // Half the cores: the suite takes as long as with all of them, and a test that renders routes
+    // runs about twice as fast, away from its timeout, because it is not competing for the CPU.
+    maxWorkers: "50%",
     // The configuration the tests run with, so a suite never depends on whoever's `.env` is on disk.
     env: {
       VITE_API_URL: "http://api.test",

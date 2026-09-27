@@ -34,6 +34,19 @@ export function renderWithProviders(ui: ReactNode, queryClient: QueryClient = cr
 
 type RenderedRoute = Rendered & { router: ReturnType<typeof createAppRouter> };
 
+// Loads every route's chunks before a file's first test, so the time the test runner spends
+// transforming them cold is not spent inside a test and its `findBy*` waits. A file that renders
+// routes calls it from `beforeAll`.
+export async function warmUpRoutes(): Promise<void> {
+  const router = createAppRouter(createQueryClient(), createMemoryHistory());
+
+  await Promise.all(
+    Object.values(router.routesById).map(async (route): Promise<void> => {
+      await router.loadRouteChunk(route);
+    }),
+  );
+}
+
 // The whole application at a path, with the router it really uses.
 export function renderRoute(path: string): RenderedRoute {
   const queryClient = createQueryClient();

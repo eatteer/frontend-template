@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import type { UserDto } from "@/common/api/schema.gen";
 
@@ -14,7 +14,7 @@ import { server } from "@test/msw/server";
 import { signedIn } from "@test/msw/session";
 import { serveUsers, USERS_URL } from "@test/msw/users";
 import type { UsersBackend } from "@test/msw/users";
-import { renderRoute } from "@test/render";
+import { renderRoute, warmUpRoutes } from "@test/render";
 import { expectRouteFailureWarning } from "@test/route-failure-warning";
 
 const TWENTY_FIVE_USERS = buildUserDtos(25);
@@ -29,6 +29,8 @@ function rowNames(): string[] {
 
   return within(body ?? document.body).getAllByRole("row").map((row: HTMLElement): string => within(row).getAllByRole("cell")[0]?.textContent ?? "");
 }
+
+beforeAll(warmUpRoutes);
 
 describe("the users list", () => {
   it("shows a skeleton of the table, then the first page, newest first", async () => {

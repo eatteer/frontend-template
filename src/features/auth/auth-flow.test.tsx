@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import type { AuthTokensDto, ProblemDetailsDto } from "@/common/api/schema.gen";
 import { publishSessionEvent, SESSION_CHANNEL_NAME } from "@/common/api/session-events";
@@ -13,7 +13,7 @@ import { problem } from "@test/msw/api";
 import type { MockedResponse } from "@test/msw/api";
 import { server } from "@test/msw/server";
 import { LOGIN_URL, LOGOUT_URL, REFRESH_URL, SESSION_URL, signedIn, signedOut, unauthenticated } from "@test/msw/session";
-import { renderRoute } from "@test/render";
+import { renderRoute, warmUpRoutes } from "@test/render";
 
 // Another tab, as far as this one can tell: a second channel on the same name.
 const otherTab = new BroadcastChannel(SESSION_CHANNEL_NAME);
@@ -49,6 +49,8 @@ async function fillAndSubmit(email: string, password: string): Promise<void> {
 
   await user.click(screen.getByRole("button", { name: "Sign in" }));
 }
+
+beforeAll(warmUpRoutes);
 
 describe("signing in", () => {
   it("sends a visitor without a session to sign in, remembering where they were going", async () => {

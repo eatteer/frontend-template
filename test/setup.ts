@@ -15,9 +15,9 @@ import { guardConsole } from "@test/console-guard";
 import { stubMatchMedia } from "@test/match-media";
 import { server } from "@test/msw/server";
 
-// A route renders only after its guard has read the session and its code-split chunk has loaded. The
-// first route a file renders transforms those chunks cold, and with every file running at once that
-// has taken close to 4 s — far past the default second of `findBy*`.
+// A route renders only after its guard has read the session and its code-split chunk has loaded, and
+// with every file running at once that takes seconds — past the default second of `findBy*`. The
+// chunks' cold transform is paid before a file's first test (`warmUpRoutes` in @test/render).
 const ASYNC_UTIL_TIMEOUT_MS = 5000;
 
 configure({ asyncUtilTimeout: ASYNC_UTIL_TIMEOUT_MS });
