@@ -44,6 +44,7 @@ describe("ErrorState", () => {
     const user = userEvent.setup();
 
     renderWithProviders(<ErrorState error={buildApiError()} />);
+
     vi.spyOn(navigator.clipboard, "writeText").mockRejectedValueOnce(new Error("Denied"));
 
     await user.click(screen.getByRole("button", { name: "Copy error" }));

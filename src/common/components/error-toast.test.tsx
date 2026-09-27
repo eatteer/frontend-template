@@ -30,6 +30,7 @@ describe("showErrorToast", () => {
 
   it("is announced right away, and closes on its own", () => {
     vi.useFakeTimers();
+
     renderWithProviders(null);
 
     act(() => {
@@ -68,7 +69,9 @@ describe("showErrorToast", () => {
     const user = userEvent.setup();
 
     renderWithProviders(null);
+
     vi.spyOn(navigator.clipboard, "writeText").mockRejectedValueOnce(new Error("Denied"));
+
     showErrorToast(buildApiError());
 
     await user.click(await screen.findByRole("button", { name: "Copy error", hidden: true }));

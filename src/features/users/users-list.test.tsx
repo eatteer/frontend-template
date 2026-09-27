@@ -251,6 +251,7 @@ describe("the users list", () => {
 describe("the users list, by permission", () => {
   it("offers to create a user only to someone allowed to", async () => {
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+
     serveUsers(TWENTY_FIVE_USERS);
 
     renderRoute("/users");

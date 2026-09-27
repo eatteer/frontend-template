@@ -207,8 +207,8 @@ export default tseslint.config(
         { blankLine: "always", prev: "expression", next: ["const", "let"] },
       ],
 
-      // One-line statements that do different kinds of work are apart: an assignment and a call, and
-      // an awaited step and one that is not (code-conventions).
+      // One-line statements that do different kinds of work are apart: an assignment and a call, a
+      // function call and a method call, and an awaited step and one that is not (code-conventions).
       "local/padding-between-expression-kinds": "error",
 
       // The paragraph rule for hooks (code-conventions): a blank line between a statement that reads

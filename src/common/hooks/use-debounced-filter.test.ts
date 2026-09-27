@@ -101,6 +101,7 @@ describe("useDebouncedFilter", () => {
     });
 
     unmount();
+
     vi.advanceTimersByTime(FILTER_DEBOUNCE_MS);
 
     expect(commit).not.toHaveBeenCalled();

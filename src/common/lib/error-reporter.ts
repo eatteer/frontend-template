@@ -53,11 +53,13 @@ export function reportUnexpectedError(error: unknown, source: ErrorSource): void
 export function reportUncaughtErrors(target: Window = window): () => void {
   const onError = (event: ErrorEvent): void => {
     event.preventDefault();
+
     reportUnexpectedError(event.error ?? event.message, "uncaught");
   };
 
   const onUnhandledRejection = (event: PromiseRejectionEvent): void => {
     event.preventDefault();
+
     reportUnexpectedError(event.reason, "unhandled-rejection");
   };
 

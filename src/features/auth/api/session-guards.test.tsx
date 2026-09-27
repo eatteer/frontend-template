@@ -131,6 +131,7 @@ describe("useHasPermissions", () => {
 
     await vi.waitFor(() => {
       rerender();
+
       expect(result.current).toBe(true);
     });
   });

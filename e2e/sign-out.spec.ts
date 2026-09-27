@@ -27,6 +27,7 @@ test.beforeAll(async ({ playwright }) => {
 
 test.afterAll(async () => {
   await deleteUser(api, account.id);
+
   await api.dispose();
 });
 
@@ -70,6 +71,7 @@ test("signing out leaves every tab on sign-in, and nothing the account saw survi
 
   await first.route((url: URL): boolean => url.pathname === USERS_COLLECTION_PATH, async (route: Route): Promise<void> => {
     await released;
+
     await route.fallback();
   });
 

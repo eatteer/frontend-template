@@ -18,6 +18,7 @@ test("an anonymous visitor signs in and comes back to the page they asked for", 
 
   // Once signed in, the account's language decides the screen's, and the specs read it in English.
   await setAccountLanguage(page.request, "en");
+
   await page.reload();
 
   await expect(page.getByRole("heading", { name: "Users" })).toBeVisible();

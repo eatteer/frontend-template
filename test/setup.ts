@@ -35,6 +35,7 @@ beforeEach(() => {
   consoleGuard = guardConsole();
 
   stubMatchMedia();
+
   vi.stubGlobal("scrollTo", (): void => {});
 });
 
@@ -44,6 +45,7 @@ afterEach(async () => {
   cleanup();
   setErrorReporter(consoleErrorReporter);
   setWebVitalsReporter(ignoreWebVitals);
+
   server.resetHandlers();
   toast.close();
   localStorage.clear();

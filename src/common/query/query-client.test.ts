@@ -103,6 +103,7 @@ describe("createQueryClient", () => {
     queryClient.setQueryData(["user"], {});
 
     await queryClient.prefetchQuery({ queryKey: ["user"], queryFn: (): Promise<never> => Promise.reject(unauthenticated) });
+
     await failMutation(queryClient, unauthenticated);
     await failMutation(queryClient, buildApiError({ detail: "The save failed" }));
 
@@ -119,6 +120,7 @@ describe("createQueryClient", () => {
 
     await queryClient.prefetchQuery({ queryKey: USERS_KEY, queryFn: (): Promise<never> => Promise.reject(queryBug), retry: false });
     await queryClient.prefetchQuery({ queryKey: ["user"], queryFn: (): Promise<never> => Promise.reject(buildApiError()) });
+
     await failMutation(queryClient, mutationBug);
 
     expect(report.mock.calls).toEqual([[queryBug, "query"], [mutationBug, "query"]]);

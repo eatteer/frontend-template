@@ -233,6 +233,7 @@ describe("signing out", () => {
 
     queryClient.setQueryData(["unrelated"], "cached for the previous account");
     server.use(...signedOut());
+
     publishSessionEvent({ type: "signed-out", reason: "expired" });
 
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();

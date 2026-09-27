@@ -95,6 +95,7 @@ describe("reportUncaughtErrors", () => {
     const event = new Event("unhandledrejection", { cancelable: true });
 
     Object.assign(event, { reason: bug });
+
     setErrorReporter(report);
 
     stop = reportUncaughtErrors();
@@ -115,6 +116,7 @@ describe("reportUncaughtErrors", () => {
 
     setErrorReporter(report);
     reportUncaughtErrors()();
+
     window.addEventListener("error", swallow);
     window.dispatchEvent(new ErrorEvent("error", { error: new Error("late"), cancelable: true }));
     window.removeEventListener("error", swallow);

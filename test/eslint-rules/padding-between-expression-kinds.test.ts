@@ -20,6 +20,10 @@ ruleTester.run("padding-between-expression-kinds", paddingBetweenExpressionKinds
       code: "setDraft(value);\nsetCommitted(value);\nonChange(value);",
     },
     {
+      name: "a run of method calls on different objects packed together",
+      code: "server.resetHandlers();\ntoast.close();\nlocalStorage.clear();",
+    },
+    {
       name: "a run of assignments packed together",
       code: "user.name = name;\nuser.email = email;\ncount++;",
     },
@@ -57,6 +61,18 @@ ruleTester.run("padding-between-expression-kinds", paddingBetweenExpressionKinds
       name: "an assignment before a call",
       code: "isSubmitting.current = true;\ncreateUser.mutate(values);",
       output: "isSubmitting.current = true;\n\ncreateUser.mutate(values);",
+      errors: [{ messageId: "missingBlankLine" }],
+    },
+    {
+      name: "a function call before a method call",
+      code: "setWebVitalsReporter(ignoreWebVitals);\nserver.resetHandlers();",
+      output: "setWebVitalsReporter(ignoreWebVitals);\n\nserver.resetHandlers();",
+      errors: [{ messageId: "missingBlankLine" }],
+    },
+    {
+      name: "an awaited function call before an awaited method call",
+      code: "async function run() {\n  await fillCreateForm(user);\n  await user.click(submit);\n}",
+      output: "async function run() {\n  await fillCreateForm(user);\n\n  await user.click(submit);\n}",
       errors: [{ messageId: "missingBlankLine" }],
     },
     {

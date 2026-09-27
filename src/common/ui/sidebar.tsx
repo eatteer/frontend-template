@@ -106,6 +106,7 @@ function SidebarProvider({
         (event.metaKey || event.ctrlKey)
       ) {
         event.preventDefault();
+
         toggleSidebar();
       }
     };

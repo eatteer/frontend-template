@@ -39,6 +39,7 @@ describe("ThemeMenu", () => {
     const user = userEvent.setup();
 
     localStorage.setItem(THEME_STORAGE_KEY, "light");
+
     renderWithProviders(<ThemeMenu />);
 
     await user.click(screen.getByRole("button", { name: "Theme" }));

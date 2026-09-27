@@ -51,7 +51,9 @@ describe("creating a user", () => {
     const { router, queryClient } = renderRoute("/users");
 
     await user.click(await screen.findByRole("link", { name: "Create user" }));
+
     await fillCreateForm(user, { name: "Ada Lovelace", email: "ada@example.com", password: "Change-me-1!" });
+
     await user.click(screen.getByRole("button", { name: "Create user" }));
 
     expect(await screen.findByRole("status", { name: "Saving…" })).toBeInTheDocument();
@@ -75,6 +77,7 @@ describe("creating a user", () => {
 
     await fillCreateForm(user, { name: "Ada Lovelace", email: "ada@example.com", password: "Change-me-1!" });
     await chooseLanguage(user, "Español");
+
     await user.click(screen.getByRole("button", { name: "Create user" }));
 
     expect(await screen.findByRole("heading", { name: "Ada Lovelace" })).toBeInTheDocument();
@@ -92,6 +95,7 @@ describe("creating a user", () => {
     await chooseLanguage(user, "Español");
     await chooseLanguage(user, "The application's default");
     await fillCreateForm(user, { name: "Ada Lovelace", email: "ada@example.com", password: "Change-me-1!" });
+
     await user.click(screen.getByRole("button", { name: "Create user" }));
 
     expect(await screen.findByRole("heading", { name: "Ada Lovelace" })).toBeInTheDocument();
@@ -131,6 +135,7 @@ describe("creating a user", () => {
     renderRoute("/users/new");
 
     await fillCreateForm(user, { name: "Ada Lovelace", email: "ada@example.com", password: "a".repeat(80) });
+
     await user.click(screen.getByRole("button", { name: "Create user" }));
 
     expect(await screen.findByText("The password is too long (72 bytes at most)")).toBeInTheDocument();
@@ -143,11 +148,13 @@ describe("creating a user", () => {
     const user = userEvent.setup();
 
     serveUsers(USERS);
+
     server.use(http.post(USERS_URL, (): HttpResponse<ProblemDetailsDTO> => problem({})));
 
     renderRoute("/users/new");
 
     await fillCreateForm(user, { name: "Jane Doe", email: "jane@example.com", password: "Change-me-1!" });
+
     await user.click(screen.getByRole("button", { name: "Create user" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("The email is already registered");
@@ -160,6 +167,7 @@ describe("creating a user", () => {
     const warning = expectRouteFailureWarning();
 
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+
     serveUsers(USERS);
 
     renderRoute("/users/new");
@@ -185,6 +193,7 @@ describe("a user's page", () => {
 
   it("leaves out the edit link for someone who may only read", async () => {
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+
     serveUsers(USERS);
 
     renderRoute(`/users/${JANE.id}`);
@@ -319,6 +328,7 @@ describe("editing a user", () => {
     const warning = expectRouteFailureWarning();
 
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+
     serveUsers(USERS);
 
     renderRoute(`/users/${JANE.id}/edit`);

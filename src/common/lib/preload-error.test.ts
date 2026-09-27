@@ -27,6 +27,7 @@ describe("handlePreloadError", () => {
     const reload = vi.fn();
 
     sessionStorage.setItem(RELOAD_GUARD_STORAGE_KEY, String(NOW - RELOAD_GUARD_WINDOW_MS + 1));
+
     handlePreloadError(event, reload, NOW);
 
     expect(reload).not.toHaveBeenCalled();
@@ -37,6 +38,7 @@ describe("handlePreloadError", () => {
     const reload = vi.fn();
 
     sessionStorage.setItem(RELOAD_GUARD_STORAGE_KEY, String(NOW - RELOAD_GUARD_WINDOW_MS));
+
     handlePreloadError(new Event(PRELOAD_ERROR_EVENT), reload, NOW);
 
     expect(reload).toHaveBeenCalledOnce();
