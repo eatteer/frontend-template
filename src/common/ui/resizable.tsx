@@ -3,7 +3,6 @@ import * as ResizablePrimitive from "react-resizable-panels";
 
 import type { JSX } from "react";
 
-
 function ResizablePanelGroup({
   className,
   ...props

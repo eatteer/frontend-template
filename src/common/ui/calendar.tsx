@@ -5,14 +5,11 @@ import {
   DayPicker,
   getDefaultClassNames,
 
-
 } from "react-day-picker";
 
 import { Button, buttonVariants } from "@/common/ui/button";
 
 import type { DayButton, Locale } from "react-day-picker";
-
-
 
 function Calendar({
   className,

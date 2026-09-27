@@ -95,9 +95,7 @@ function InputGroupAddon({
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>): React.JSX.Element {
   return (
-    // The click only widens the mouse target onto the input beside the addon. Keyboard and screen
-    // reader users reach that input directly, so the addon has nothing of its own to operate.
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- the click only widens the mouse target onto the input beside the addon; keyboard and screen reader users reach that input directly.
     <div
       role="group"
       data-slot="input-group-addon"

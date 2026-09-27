@@ -4,7 +4,6 @@ import { CheckIcon } from "lucide-react";
 
 import type { JSX } from "react";
 
-
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props): JSX.Element {
   return (
     <CheckboxPrimitive.Root

@@ -4,7 +4,6 @@ import * as React from "react";
 
 import { Button } from "@/common/ui/button";
 
-
 function Pagination({ className, ...props }: React.ComponentProps<"nav">): React.JSX.Element {
   return (
     <nav

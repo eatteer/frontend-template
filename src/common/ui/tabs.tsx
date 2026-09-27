@@ -5,7 +5,6 @@ import { cn } from "cn";
 import type { VariantProps } from "class-variance-authority";
 import type { JSX } from "react";
 
-
 function Tabs({
   className,
   orientation = "horizontal",

@@ -3,7 +3,6 @@ import { cn } from "cn";
 
 import type { JSX } from "react";
 
-
 function Switch({
   className,
   size = "default",

@@ -3,9 +3,7 @@ import * as React from "react";
 
 function Label({ className, ...props }: React.ComponentProps<"label">): React.JSX.Element {
   return (
-    // A primitive: the control it labels arrives through `htmlFor` in the spread props, which the
-    // rule cannot see. Each form field wires it (see the field component).
-    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+    // eslint-disable-next-line jsx-a11y/label-has-associated-control -- a primitive: the control it labels arrives through `htmlFor` in the spread props, which the rule cannot see, and each form field wires it.
     <label
       data-slot="label"
       className={cn(

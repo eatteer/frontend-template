@@ -3,7 +3,6 @@ import { cn } from "cn";
 
 import type { JSX } from "react";
 
-
 function HoverCard({ ...props }: PreviewCardPrimitive.Root.Props): JSX.Element {
   return <PreviewCardPrimitive.Root data-slot="hover-card" {...props} />;
 }

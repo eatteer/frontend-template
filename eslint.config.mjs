@@ -12,7 +12,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-import paddingAroundHooks from "./eslint-rules/padding-around-hooks.mjs";
+import { paddingAroundHooks } from "./eslint-rules/padding-around-hooks.mjs";
 
 export default tseslint.config(
   {
@@ -77,8 +77,8 @@ export default tseslint.config(
       curly: ["error", "all"],
       "@typescript-eslint/no-floating-promises": "error",
 
-      // The observability skill forbids console.*; errors reach the user through the toast and the
-      // error reporter, never the devtools of whoever happens to be looking.
+      // The code-conventions skill forbids console.*; errors reach the user through the toast and the
+      // error reporter (the observability skill's port), never the devtools of whoever is looking.
       "no-console": "error",
 
       // The UI primitives are Base UI. A Radix import is a second headless library with a different
@@ -110,7 +110,6 @@ export default tseslint.config(
         },
       ],
 
-      // Strict typing rules
       "@typescript-eslint/explicit-function-return-type": [
         "error",
         {
@@ -139,7 +138,6 @@ export default tseslint.config(
       ],
       "import-x/consistent-type-specifier-style": ["error", "prefer-top-level"],
 
-      // Import organization rules
       "import-x/order": [
         "error",
         {
@@ -167,7 +165,6 @@ export default tseslint.config(
       "import-x/no-duplicates": "error",
       "import-x/first": "error",
 
-      // Stylistic rules
       "@stylistic/indent": ["error", 2],
       "@stylistic/quotes": ["error", "double"],
       "@stylistic/semi": ["error", "always"],
@@ -182,6 +179,7 @@ export default tseslint.config(
       "@stylistic/keyword-spacing": "error",
       "@stylistic/no-multi-spaces": "error",
       "@stylistic/no-trailing-spaces": "error",
+      "@stylistic/no-multiple-empty-lines": ["error", { max: 1, maxBOF: 0, maxEOF: 0 }],
       "@stylistic/space-before-blocks": "error",
       "@stylistic/space-infix-ops": "error",
       "@stylistic/eol-last": ["error", "always"],
@@ -193,9 +191,9 @@ export default tseslint.config(
         { blankLine: "always", prev: "*", next: ["multiline-const", "multiline-let", "multiline-expression", "multiline-block-like", "multiline-return", "multiline-export", "multiline-type"] },
       ],
 
-      // The paragraph rule for hooks: the hook calls that open a component or a hook are one group, and
-      // the work that uses them another (code-conventions). How the hooks group among themselves is
-      // left to the reader.
+      // The paragraph rule for hooks (code-conventions): a blank line between a statement that reads
+      // a hook and one that does not, and between two hooks unless they read the same thing — the
+      // same hook, or the same object's hooks.
       "local/padding-around-hooks": "error",
 
       // The same height rule between JSX siblings: a multi-line element gets a blank line on each

@@ -2,7 +2,7 @@ import { RuleTester } from "eslint";
 import tseslint from "typescript-eslint";
 import { describe, it } from "vitest";
 
-import rule from "../../eslint-rules/padding-around-hooks.mjs";
+import { paddingAroundHooks } from "../../eslint-rules/padding-around-hooks.mjs";
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -14,7 +14,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run("padding-around-hooks", rule, {
+ruleTester.run("padding-around-hooks", paddingAroundHooks, {
   valid: [
     {
       name: "calls to the same hook or the same object packed together, and a blank line before the work",

@@ -23,7 +23,6 @@ import {
   TooltipTrigger,
 } from "@/common/ui/tooltip";
 
-
 import type { VariantProps } from "class-variance-authority";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
