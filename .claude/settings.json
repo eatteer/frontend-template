@@ -1,4 +1,5 @@
 {
+  "skillListingBudgetFraction": 0.04,
   "extraKnownMarketplaces": {
     "architecture-marketplace": {
       "source": {
