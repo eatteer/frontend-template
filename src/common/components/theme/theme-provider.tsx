@@ -17,7 +17,9 @@ import type { JSX, ReactNode } from "react";
 
 export function ThemeProvider({ children }: { children: ReactNode }): JSX.Element {
   const [theme, setThemeState] = useState<Theme>(readStoredTheme);
+
   const systemTheme = useSyncExternalStore(subscribeToSystemTheme, getSystemTheme);
+
   const resolvedTheme = resolveTheme(theme, systemTheme);
 
   // Keeps the class in step when the system theme changes under a reader who follows it.

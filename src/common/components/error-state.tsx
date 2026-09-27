@@ -17,7 +17,9 @@ type ErrorStateProps = {
 // as the error toast, so a reader who copies either sends the same thing.
 export function ErrorState({ error, onRetry }: ErrorStateProps): JSX.Element {
   const { t } = useTranslation();
+
   const [isCopied, setIsCopied] = useState(false);
+
   const { title, detail } = describeError(error);
 
   async function copyError(): Promise<void> {
@@ -54,7 +56,7 @@ export function ErrorState({ error, onRetry }: ErrorStateProps): JSX.Element {
             void copyError();
           }}
         >
-          {isCopied ? t("actions.errorCopied") : t("actions.copyError")}
+          {isCopied ? t("actions.error_copied") : t("actions.copy_error")}
         </Button>
       </EmptyContent>
     </Empty>

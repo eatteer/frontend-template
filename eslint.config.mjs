@@ -12,6 +12,8 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+import paddingAroundHooks from "./eslint-rules/padding-around-hooks.mjs";
+
 export default tseslint.config(
   {
     // Generated files: `api:types` writes the API schema and the router plugin writes the route tree.
@@ -29,6 +31,8 @@ export default tseslint.config(
       "@stylistic": stylistic,
       "better-tailwindcss": betterTailwindcss,
       "import-x": importX,
+      // The project's own rules, in eslint-rules/.
+      local: { rules: { "padding-around-hooks": paddingAroundHooks } },
     },
   },
   {
@@ -188,6 +192,11 @@ export default tseslint.config(
         { blankLine: "always", prev: ["multiline-const", "multiline-let", "multiline-expression", "multiline-block-like", "multiline-return", "multiline-export", "multiline-type"], next: "*" },
         { blankLine: "always", prev: "*", next: ["multiline-const", "multiline-let", "multiline-expression", "multiline-block-like", "multiline-return", "multiline-export", "multiline-type"] },
       ],
+
+      // The paragraph rule for hooks: the hook calls that open a component or a hook are one group, and
+      // the work that uses them another (code-conventions). How the hooks group among themselves is
+      // left to the reader.
+      "local/padding-around-hooks": "error",
 
       // The same height rule between JSX siblings: a multi-line element gets a blank line on each
       // side, and a run of single-line siblings stays packed.

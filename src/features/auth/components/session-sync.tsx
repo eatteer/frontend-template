@@ -43,6 +43,7 @@ async function enterSession(queryClient: QueryClient, router: AnyRouter): Promis
 // Keeps what this tab believes about the session in step with the cookies, which every tab shares.
 export function SessionSync(): null {
   const queryClient = useQueryClient();
+
   const router = useRouter();
 
   useEffect(() => subscribeToSessionEvents((event: SessionEvent, isRemote: boolean): void => {

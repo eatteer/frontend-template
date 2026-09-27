@@ -53,6 +53,7 @@ function InputOTPSlot({
   index: number
 }): React.JSX.Element {
   const inputOTPContext = React.useContext(OTPInputContext);
+
   const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {};
 
   return (

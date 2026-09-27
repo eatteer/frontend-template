@@ -18,7 +18,7 @@ export function AppShell({ languageMenu, userMenu }: AppShellProps): JSX.Element
   return (
     <div className="flex min-h-svh flex-col">
       <header className="flex h-14 items-center gap-2 border-b px-4">
-        <Link to="/" className="font-heading font-semibold">{t("appName")}</Link>
+        <Link to="/" className="font-heading font-semibold">{t("app_name")}</Link>
 
         <div className="ml-auto flex items-center gap-1">
           {languageMenu}

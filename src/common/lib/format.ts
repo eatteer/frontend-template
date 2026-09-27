@@ -56,6 +56,7 @@ type Formatters = {
 // The formatters bound to the language on screen, re-rendering the caller when it changes.
 export function useFormatters(): Formatters {
   const { i18n } = useTranslation();
+
   const { language } = i18n;
 
   return {

@@ -1,10 +1,10 @@
 {
-  "appName": "Plantilla de frontend",
+  "app_name": "Plantilla de frontend",
   "actions": {
     "close": "Cerrar",
-    "copyError": "Copiar error",
-    "errorCopied": "Copiado",
-    "goHome": "Ir al inicio",
+    "copy_error": "Copiar error",
+    "error_copied": "Copiado",
+    "go_home": "Ir al inicio",
     "retry": "Reintentar"
   },
   "errors": {
@@ -16,12 +16,12 @@
       "title": "Sin conexión",
       "detail": "No se pudo contactar al servidor. Revisa tu conexión y vuelve a intentarlo."
     },
-    "unexpectedResponse": {
+    "unexpected_response": {
       "title": "Respuesta inesperada",
       "detail": "El servidor respondió de una forma que esta aplicación no entiende."
     }
   },
-  "notFound": {
+  "not_found": {
     "title": "Página no encontrada",
     "detail": "La página que buscas no existe o se movió."
   },

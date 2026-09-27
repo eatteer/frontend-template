@@ -26,8 +26,11 @@ const HALF = 2;
 
 export function ThemeMenu(): JSX.Element {
   const { t } = useTranslation();
+
   const { theme, resolvedTheme, setTheme } = useTheme();
+
   const triggerRef = useRef<HTMLButtonElement>(null);
+
   const TriggerIcon = resolvedTheme === "dark" ? MoonIcon : SunIcon;
 
   // The reveal grows out of the button that opened the menu, wherever the reader clicked.

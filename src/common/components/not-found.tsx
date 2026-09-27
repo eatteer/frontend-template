@@ -17,13 +17,13 @@ export function NotFound(): JSX.Element {
           <FileQuestionIcon aria-hidden="true" />
         </EmptyMedia>
 
-        <EmptyTitle>{t("notFound.title")}</EmptyTitle>
-        <EmptyDescription>{t("notFound.detail")}</EmptyDescription>
+        <EmptyTitle>{t("not_found.title")}</EmptyTitle>
+        <EmptyDescription>{t("not_found.detail")}</EmptyDescription>
       </EmptyHeader>
 
       <EmptyContent>
         {/* Styled as a button, announced as the link it is: it navigates. */}
-        <Link to="/" className={buttonVariants()}>{t("actions.goHome")}</Link>
+        <Link to="/" className={buttonVariants()}>{t("actions.go_home")}</Link>
       </EmptyContent>
     </Empty>
   );

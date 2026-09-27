@@ -24,7 +24,7 @@ export function Forbidden(): JSX.Element {
       </EmptyHeader>
 
       <EmptyContent>
-        <Link to="/" className={buttonVariants()}>{t("actions.goHome")}</Link>
+        <Link to="/" className={buttonVariants()}>{t("actions.go_home")}</Link>
       </EmptyContent>
     </Empty>
   );

@@ -1,10 +1,10 @@
 {
-  "appName": "Frontend template",
+  "app_name": "Frontend template",
   "actions": {
     "close": "Close",
-    "copyError": "Copy error",
-    "errorCopied": "Copied",
-    "goHome": "Go to the home page",
+    "copy_error": "Copy error",
+    "error_copied": "Copied",
+    "go_home": "Go to the home page",
     "retry": "Try again"
   },
   "errors": {
@@ -16,12 +16,12 @@
       "title": "No connection",
       "detail": "The server could not be reached. Check your connection and try again."
     },
-    "unexpectedResponse": {
+    "unexpected_response": {
       "title": "Unexpected response",
       "detail": "The server answered in a way this application does not understand."
     }
   },
-  "notFound": {
+  "not_found": {
     "title": "Page not found",
     "detail": "The page you are looking for does not exist or was moved."
   },

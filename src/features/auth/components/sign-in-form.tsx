@@ -24,12 +24,16 @@ type SignInFormProps = {
 
 export function SignInForm({ onSignedIn }: SignInFormProps): JSX.Element {
   const { t } = useTranslation("auth");
+
   const signIn = useSignIn();
+
   const emailId = useId();
   const passwordId = useId();
+
   // Set on submit and released when the request settles, so a double click or a held Enter sends
   // one sign-in, not one per event that arrives before the button disables.
   const isSubmitting = useRef(false);
+
   // What the fields cannot carry: wrong credentials, too many attempts, no connection. `unknown`,
   // because not every failure is an answer from the backend.
   const [formError, setFormError] = useState<unknown>();
@@ -79,7 +83,7 @@ export function SignInForm({ onSignedIn }: SignInFormProps): JSX.Element {
         )}
 
         <Field data-invalid={errors.email !== undefined}>
-          <FieldLabel htmlFor={emailId}>{t("signIn.email")}</FieldLabel>
+          <FieldLabel htmlFor={emailId}>{t("sign_in.email")}</FieldLabel>
 
           <Input
             id={emailId}
@@ -94,7 +98,7 @@ export function SignInForm({ onSignedIn }: SignInFormProps): JSX.Element {
         </Field>
 
         <Field data-invalid={errors.password !== undefined}>
-          <FieldLabel htmlFor={passwordId}>{t("signIn.password")}</FieldLabel>
+          <FieldLabel htmlFor={passwordId}>{t("sign_in.password")}</FieldLabel>
 
           <Input
             id={passwordId}
@@ -108,7 +112,7 @@ export function SignInForm({ onSignedIn }: SignInFormProps): JSX.Element {
           <FieldError id={`${passwordId}-error`} errors={[errors.password]} />
         </Field>
 
-        <Button type="submit" disabled={signIn.isPending}>{t("signIn.submit")}</Button>
+        <Button type="submit" disabled={signIn.isPending}>{t("sign_in.submit")}</Button>
       </FieldGroup>
     </form>
   );

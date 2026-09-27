@@ -73,8 +73,8 @@ export const problemDetailsMiddleware: Middleware = {
       throw new ApiError({
         ...context,
         code: UNEXPECTED_RESPONSE_CODE,
-        title: i18n.t("errors.unexpectedResponse.title"),
-        detail: i18n.t("errors.unexpectedResponse.detail"),
+        title: i18n.t("errors.unexpected_response.title"),
+        detail: i18n.t("errors.unexpected_response.detail"),
         fieldErrors: [],
       });
     }

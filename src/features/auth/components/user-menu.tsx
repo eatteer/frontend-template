@@ -18,7 +18,9 @@ import type { JSX } from "react";
 
 export function UserMenu(): JSX.Element | null {
   const { t } = useTranslation("auth");
+
   const user = useSessionUser();
+
   const signOut = useSignOut();
 
   if (user === undefined) {
@@ -27,7 +29,7 @@ export function UserMenu(): JSX.Element | null {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label={t("userMenu.label")} />}>
+      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label={t("user_menu.label")} />}>
         <CircleUserIcon aria-hidden="true" />
       </DropdownMenuTrigger>
 
@@ -47,7 +49,7 @@ export function UserMenu(): JSX.Element | null {
           }}
         >
           <LogOutIcon aria-hidden="true" />
-          {t("userMenu.signOut")}
+          {t("user_menu.sign_out")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -18,7 +18,7 @@ export function showErrorToast(error: unknown): void {
       return;
     }
 
-    toast.update(toastId, { actionProps: { children: i18n.t("actions.errorCopied"), disabled: true } });
+    toast.update(toastId, { actionProps: { children: i18n.t("actions.error_copied"), disabled: true } });
   }
 
   const toastId = toast.add({
@@ -29,7 +29,7 @@ export function showErrorToast(error: unknown): void {
     description: detail,
     timeout: ERROR_TOAST_TIMEOUT_MS,
     actionProps: {
-      children: i18n.t("actions.copyError"),
+      children: i18n.t("actions.copy_error"),
       onClick: (): void => {
         void copyAndConfirm();
       },

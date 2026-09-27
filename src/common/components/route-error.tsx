@@ -21,6 +21,7 @@ function isForbidden(error: unknown): boolean {
 // one rather than a re-render of the same error.
 export function RouteError({ error }: ErrorComponentProps): JSX.Element {
   const router = useRouter();
+
   const queryErrorResetBoundary = useQueryErrorResetBoundary();
 
   useEffect(() => {

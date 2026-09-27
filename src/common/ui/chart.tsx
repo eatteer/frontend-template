@@ -55,6 +55,7 @@ function ChartContainer({
   }
 }): React.JSX.Element {
   const uniqueId = React.useId();
+
   const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`;
 
   return (

@@ -13,6 +13,7 @@ const signInRoute = getRouteApi("/sign-in");
 
 export function SignInPage(): JSX.Element {
   const { t } = useTranslation("auth");
+
   const { redirect } = signInRoute.useSearch();
   const navigate = signInRoute.useNavigate();
 
@@ -27,10 +28,10 @@ export function SignInPage(): JSX.Element {
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle>
-              <h1 className="font-heading text-xl font-semibold">{t("signIn.title")}</h1>
+              <h1 className="font-heading text-xl font-semibold">{t("sign_in.title")}</h1>
             </CardTitle>
 
-            <CardDescription>{t("signIn.description")}</CardDescription>
+            <CardDescription>{t("sign_in.description")}</CardDescription>
           </CardHeader>
 
           <CardContent>

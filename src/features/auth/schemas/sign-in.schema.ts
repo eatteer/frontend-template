@@ -14,7 +14,7 @@ export const SIGN_IN_DEFAULT_VALUES: SignInValues = { email: "", password: "" };
 
 export function buildSignInSchema(t: TFunction<"auth">): z.ZodType<SignInValues, SignInValues> {
   return z.object({
-    email: z.email({ error: t("signIn.errors.emailInvalid") }),
-    password: z.string().min(1, { error: t("signIn.errors.passwordRequired") }),
+    email: z.email({ error: t("sign_in.errors.email_invalid") }),
+    password: z.string().min(1, { error: t("sign_in.errors.password_required") }),
   });
 }
