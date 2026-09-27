@@ -162,6 +162,26 @@ describe("signing in", () => {
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/");
   });
+
+  // The failure is the query cache's to show; the tab stays where it is and follows the next event.
+  it("stays on the sign-in page, and says why, when another tab's session cannot be read", async () => {
+    let isSignedIn = false;
+
+    server.use(
+      http.post(REFRESH_URL, unauthenticated),
+      http.get(SESSION_URL, (): MockedResponse => (isSignedIn ? problem({ status: 429, code: "common.too_many_requests", title: "Too Many Requests", detail: "Try again in a minute" }) : unauthenticated())),
+    );
+
+    const { router } = renderRoute("/sign-in?redirect=%2F");
+
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+
+    isSignedIn = true;
+    otherTab.postMessage({ type: "signed-in" });
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Try again in a minute");
+    expect(router.state.location.pathname).toBe("/sign-in");
+  });
 });
 
 describe("signing out", () => {

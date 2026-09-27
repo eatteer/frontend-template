@@ -35,7 +35,14 @@ async function leaveSession(queryClient: QueryClient, router: AnyRouter, redirec
 // guard sends it where it was going. Fetched rather than reset, so a read already under way is
 // joined instead of cancelled under whoever is waiting for it.
 async function enterSession(queryClient: QueryClient, router: AnyRouter): Promise<void> {
-  await queryClient.fetchQuery({ ...sessionQuery, staleTime: ALWAYS_STALE_MS });
+  try {
+    await queryClient.fetchQuery({ ...sessionQuery, staleTime: ALWAYS_STALE_MS });
+  } catch {
+    // The query cache already showed the failure. This tab stays where it is, still without a
+    // session, and the next session event or a reload tries again.
+    return;
+  }
+
   await router.invalidate();
 }
 
