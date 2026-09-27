@@ -44,5 +44,15 @@
   "home": {
     "title": "Welcome",
     "description": "This application is ready to grow feature by feature."
+  },
+  "pagination": {
+    "label": "Pagination",
+    "summary_one": "Page {{page}} of {{pages}} · {{count}} result",
+    "summary_other": "Page {{page}} of {{pages}} · {{count}} results",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "navigation": {
+    "label": "Main"
   }
 }

@@ -3,6 +3,7 @@ import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { render } from "@testing-library/react";
 
 import { AppToaster } from "@/common/components/app-toaster";
+import { FullscreenLoader } from "@/common/components/fullscreen-loader";
 import { ThemeProvider } from "@/common/components/theme/theme-provider";
 import { handleCaughtError } from "@/common/lib/caught-error";
 import { createQueryClient } from "@/common/query/query-client";
@@ -20,6 +21,7 @@ export function renderWithProviders(ui: ReactNode, queryClient: QueryClient = cr
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         {ui}
+        <FullscreenLoader />
         <AppToaster />
       </QueryClientProvider>
     </ThemeProvider>,

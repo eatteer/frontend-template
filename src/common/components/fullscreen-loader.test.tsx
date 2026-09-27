@@ -1,7 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { FullscreenLoader } from "@/common/components/fullscreen-loader";
 import type { MutationMeta } from "@/common/query/query-client";
 
 import { renderWithProviders } from "@test/render";
@@ -26,9 +25,10 @@ function startMutation(queryClient: QueryClient, meta?: MutationMeta): () => voi
   };
 }
 
+// The providers mount the loader beside whatever is rendered, as the application root does.
 describe("FullscreenLoader", () => {
   it("blocks the screen while a write is in flight", async () => {
-    const { queryClient } = renderWithProviders(<FullscreenLoader />);
+    const { queryClient } = renderWithProviders(null);
 
     const settle = startMutation(queryClient);
 
@@ -42,7 +42,7 @@ describe("FullscreenLoader", () => {
   });
 
   it("ignores a mutation the reader should not wait on", async () => {
-    const { queryClient } = renderWithProviders(<FullscreenLoader />);
+    const { queryClient } = renderWithProviders(null);
 
     const settle = startMutation(queryClient, { fullscreenLoader: false });
 

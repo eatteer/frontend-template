@@ -44,5 +44,16 @@
   "home": {
     "title": "Bienvenido",
     "description": "Esta aplicación está lista para crecer funcionalidad por funcionalidad."
+  },
+  "pagination": {
+    "label": "Paginación",
+    "summary_one": "Página {{page}} de {{pages}} · {{count}} resultado",
+    "summary_many": "Página {{page}} de {{pages}} · {{count}} resultados",
+    "summary_other": "Página {{page}} de {{pages}} · {{count}} resultados",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "navigation": {
+    "label": "Principal"
   }
 }
