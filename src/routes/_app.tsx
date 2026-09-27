@@ -4,11 +4,14 @@ import { AppShell } from "@/common/components/app-shell";
 import { requireSession } from "@/features/auth/api/session-guards";
 import { AccountLanguageMenu } from "@/features/auth/components/account-language-menu";
 import { UserMenu } from "@/features/auth/components/user-menu";
+import { UsersNavLink } from "@/features/users/components/users-nav-link";
 
 import type { JSX } from "react";
 
 // Everything under this layout needs a session; its routes read it from their context.
 export const Route = createFileRoute("/_app")({
   beforeLoad: requireSession,
-  component: (): JSX.Element => <AppShell languageMenu={<AccountLanguageMenu />} userMenu={<UserMenu />} />,
+  component: (): JSX.Element => (
+    <AppShell navigation={<UsersNavLink />} languageMenu={<AccountLanguageMenu />} userMenu={<UserMenu />} />
+  ),
 });

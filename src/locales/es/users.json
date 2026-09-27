@@ -1,0 +1,61 @@
+{
+  "nav": "Usuarios",
+  "status": {
+    "active": "Activo",
+    "suspended": "Suspendido"
+  },
+  "list": {
+    "title": "Usuarios",
+    "description": "Todas las personas que pueden iniciar sesión en esta aplicación.",
+    "create": "Crear usuario",
+    "search": "Buscar",
+    "search_placeholder": "Nombre o email",
+    "status": "Estado",
+    "all_statuses": "Todos los estados",
+    "caption": "Usuarios",
+    "columns": {
+      "name": "Nombre",
+      "email": "Email",
+      "status": "Estado",
+      "created_at": "Creado"
+    },
+    "empty": {
+      "title": "No hay usuarios",
+      "detail": "Ningún usuario coincide con estos filtros. Prueba con otra búsqueda u otro estado."
+    }
+  },
+  "detail": {
+    "back": "Todos los usuarios",
+    "edit": "Editar",
+    "name": "Nombre",
+    "email": "Email",
+    "status": "Estado",
+    "language": "Idioma",
+    "created_at": "Creado",
+    "updated_at": "Última actualización"
+  },
+  "create": {
+    "title": "Crear usuario",
+    "description": "El usuario nuevo inicia sesión con este email y esta contraseña.",
+    "submit": "Crear usuario"
+  },
+  "edit": {
+    "title": "Editar usuario",
+    "description": "Aquí solo se cambia el email. El idioma lo elige cada usuario.",
+    "submit": "Guardar cambios",
+    "cancel": "Cancelar"
+  },
+  "form": {
+    "name": "Nombre",
+    "email": "Email",
+    "password": "Contraseña",
+    "language": "Idioma",
+    "default_language": "El predeterminado de la aplicación",
+    "language_description": "Todos los mensajes a este usuario se escriben en ese idioma. Cada usuario puede cambiarlo.",
+    "errors": {
+      "name_required": "Escribe un nombre",
+      "email_invalid": "Escribe un email válido",
+      "password_too_short": "Usa al menos {{min}} caracteres"
+    }
+  }
+}

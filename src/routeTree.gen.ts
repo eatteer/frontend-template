@@ -12,6 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppUsersRouteRouteImport } from './routes/_app/users/route'
+import { Route as AppUsersIndexRouteImport } from './routes/_app/users/index'
+import { Route as AppUsersNewRouteImport } from './routes/_app/users/new'
+import { Route as AppUsersIdIndexRouteImport } from './routes/_app/users/$id/index'
+import { Route as AppUsersIdEditRouteImport } from './routes/_app/users/$id/edit'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -27,27 +32,88 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppUsersRouteRoute = AppUsersRouteRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUsersIndexRoute = AppUsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppUsersRouteRoute,
+} as any)
+const AppUsersNewRoute = AppUsersNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppUsersRouteRoute,
+} as any)
+const AppUsersIdIndexRoute = AppUsersIdIndexRouteImport.update({
+  id: '/$id/',
+  path: '/$id/',
+  getParentRoute: () => AppUsersRouteRoute,
+} as any)
+const AppUsersIdEditRoute = AppUsersIdEditRouteImport.update({
+  id: '/$id/edit',
+  path: '/$id/edit',
+  getParentRoute: () => AppUsersRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/sign-in': typeof SignInRoute
+  '/users': typeof AppUsersRouteRouteWithChildren
+  '/users/new': typeof AppUsersNewRoute
+  '/users/': typeof AppUsersIndexRoute
+  '/users/$id/edit': typeof AppUsersIdEditRoute
+  '/users/$id/': typeof AppUsersIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/': typeof AppIndexRoute
+  '/users/new': typeof AppUsersNewRoute
+  '/users': typeof AppUsersIndexRoute
+  '/users/$id/edit': typeof AppUsersIdEditRoute
+  '/users/$id': typeof AppUsersIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/_app/users': typeof AppUsersRouteRouteWithChildren
   '/_app/': typeof AppIndexRoute
+  '/_app/users/new': typeof AppUsersNewRoute
+  '/_app/users/': typeof AppUsersIndexRoute
+  '/_app/users/$id/edit': typeof AppUsersIdEditRoute
+  '/_app/users/$id/': typeof AppUsersIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in'
+  fullPaths:
+    | '/'
+    | '/sign-in'
+    | '/users'
+    | '/users/new'
+    | '/users/'
+    | '/users/$id/edit'
+    | '/users/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/sign-in' | '/'
-  id: '__root__' | '/_app' | '/sign-in' | '/_app/'
+  to:
+    | '/sign-in'
+    | '/'
+    | '/users/new'
+    | '/users'
+    | '/users/$id/edit'
+    | '/users/$id'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/sign-in'
+    | '/_app/users'
+    | '/_app/'
+    | '/_app/users/new'
+    | '/_app/users/'
+    | '/_app/users/$id/edit'
+    | '/_app/users/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,14 +144,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/users': {
+      id: '/_app/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AppUsersRouteRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/users/': {
+      id: '/_app/users/'
+      path: '/'
+      fullPath: '/users/'
+      preLoaderRoute: typeof AppUsersIndexRouteImport
+      parentRoute: typeof AppUsersRouteRoute
+    }
+    '/_app/users/new': {
+      id: '/_app/users/new'
+      path: '/new'
+      fullPath: '/users/new'
+      preLoaderRoute: typeof AppUsersNewRouteImport
+      parentRoute: typeof AppUsersRouteRoute
+    }
+    '/_app/users/$id/': {
+      id: '/_app/users/$id/'
+      path: '/$id'
+      fullPath: '/users/$id/'
+      preLoaderRoute: typeof AppUsersIdIndexRouteImport
+      parentRoute: typeof AppUsersRouteRoute
+    }
+    '/_app/users/$id/edit': {
+      id: '/_app/users/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/users/$id/edit'
+      preLoaderRoute: typeof AppUsersIdEditRouteImport
+      parentRoute: typeof AppUsersRouteRoute
+    }
   }
 }
 
+interface AppUsersRouteRouteChildren {
+  AppUsersNewRoute: typeof AppUsersNewRoute
+  AppUsersIndexRoute: typeof AppUsersIndexRoute
+  AppUsersIdEditRoute: typeof AppUsersIdEditRoute
+  AppUsersIdIndexRoute: typeof AppUsersIdIndexRoute
+}
+
+const AppUsersRouteRouteChildren: AppUsersRouteRouteChildren = {
+  AppUsersNewRoute: AppUsersNewRoute,
+  AppUsersIndexRoute: AppUsersIndexRoute,
+  AppUsersIdEditRoute: AppUsersIdEditRoute,
+  AppUsersIdIndexRoute: AppUsersIdIndexRoute,
+}
+
+const AppUsersRouteRouteWithChildren = AppUsersRouteRoute._addFileChildren(
+  AppUsersRouteRouteChildren,
+)
+
 interface AppRouteChildren {
+  AppUsersRouteRoute: typeof AppUsersRouteRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppUsersRouteRoute: AppUsersRouteRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 

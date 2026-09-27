@@ -1,0 +1,61 @@
+{
+  "nav": "Users",
+  "status": {
+    "active": "Active",
+    "suspended": "Suspended"
+  },
+  "list": {
+    "title": "Users",
+    "description": "Everyone who can sign in to this application.",
+    "create": "Create user",
+    "search": "Search",
+    "search_placeholder": "Name or email",
+    "status": "Status",
+    "all_statuses": "All statuses",
+    "caption": "Users",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "created_at": "Created"
+    },
+    "empty": {
+      "title": "No users found",
+      "detail": "No user matches these filters. Try a different search or status."
+    }
+  },
+  "detail": {
+    "back": "All users",
+    "edit": "Edit",
+    "name": "Name",
+    "email": "Email",
+    "status": "Status",
+    "language": "Language",
+    "created_at": "Created",
+    "updated_at": "Last updated"
+  },
+  "create": {
+    "title": "Create user",
+    "description": "The new user signs in with this email and password.",
+    "submit": "Create user"
+  },
+  "edit": {
+    "title": "Edit user",
+    "description": "Only the email can be changed here. The language is the user's own choice.",
+    "submit": "Save changes",
+    "cancel": "Cancel"
+  },
+  "form": {
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "language": "Language",
+    "default_language": "The application's default",
+    "language_description": "Every message to this user is written in it. Each user can change it.",
+    "errors": {
+      "name_required": "Enter a name",
+      "email_invalid": "Enter a valid email address",
+      "password_too_short": "Use at least {{min}} characters"
+    }
+  }
+}
