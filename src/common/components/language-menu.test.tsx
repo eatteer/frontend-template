@@ -16,6 +16,7 @@ describe("LanguageMenu", () => {
     await user.click(await screen.findByRole("menuitemradio", { name: "Español" }));
 
     expect(await screen.findByRole("button", { name: "Idioma" })).toBeInTheDocument();
+
     expect(document.documentElement.lang).toBe("es");
   });
 });

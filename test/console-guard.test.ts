@@ -26,6 +26,7 @@ describe("guardConsole", () => {
 
     // eslint-disable-next-line no-console -- the console is what this suite is about, so this call is its input
     console.error("once");
+
     guard.drain();
 
     const messages = guard.drain();

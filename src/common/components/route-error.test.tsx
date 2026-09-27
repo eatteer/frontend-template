@@ -16,6 +16,7 @@ import type { JSX } from "react";
 // A route whose loader fails the first time and succeeds after, so a retry has something to find.
 function renderFailingRoute(): void {
   let attempts = 0;
+
   const rootRoute = createRootRoute();
 
   const pageRoute = createRoute({
@@ -48,6 +49,7 @@ function renderFailingRoute(): void {
 describe("RouteError", () => {
   it("shows why the route failed and loads it again on retry", async () => {
     const user = userEvent.setup();
+
     const warning = expectRouteFailureWarning();
 
     renderFailingRoute();
@@ -57,6 +59,7 @@ describe("RouteError", () => {
     await user.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(await screen.findByRole("heading", { name: "Loaded" })).toBeInTheDocument();
+
     warning.assertWarned();
   });
 });

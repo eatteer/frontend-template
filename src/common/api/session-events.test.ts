@@ -56,6 +56,7 @@ describe("session events", () => {
     const listener = vi.fn();
 
     subscribeToSessionEvents(listener)();
+
     publishSessionEvent({ type: "refreshed" });
 
     expect(listener).not.toHaveBeenCalled();

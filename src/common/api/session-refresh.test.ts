@@ -77,6 +77,7 @@ describe("the session refresh", () => {
     await expect(getUser()).resolves.toEqual(USER);
 
     expect(backend.refreshes()).toBe(1);
+
     expect(events).toEqual([{ type: "refreshed" }]);
   });
 
@@ -167,6 +168,7 @@ describe("the session refresh", () => {
 
     expect(error).toBeInstanceOf(APIError);
     expect(error).toMatchObject({ code: NETWORK_ERROR_CODE });
+
     expect(events).toEqual([]);
   });
 

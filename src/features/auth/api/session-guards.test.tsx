@@ -83,6 +83,7 @@ describe("the route guards", () => {
 
     expect(await screen.findByText("You don't have access")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Users" })).not.toBeInTheDocument();
+
     warning.assertWarned();
   });
 
@@ -100,6 +101,7 @@ describe("the route guards", () => {
     renderGuardedRoute("/files");
 
     expect(await screen.findByText("You don't have access")).toBeInTheDocument();
+
     warning.assertWarned();
   });
 
@@ -109,6 +111,7 @@ describe("the route guards", () => {
     renderGuardedRoute("/roles/missing");
 
     expect(await screen.findByText("Page not found")).toBeInTheDocument();
+
     warning.assertWarned();
   });
 });

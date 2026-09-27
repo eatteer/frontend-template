@@ -56,6 +56,7 @@ describe("apiClient", () => {
     }));
 
     await changeLanguage("es");
+
     await listUsers();
 
     expect(received?.credentials).toBe("include");

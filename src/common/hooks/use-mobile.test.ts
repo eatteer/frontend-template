@@ -17,6 +17,7 @@ function stubViewport(width: number): { resize: (next: number) => void } {
   return {
     resize: (next: number): void => {
       vi.stubGlobal("innerWidth", next);
+
       mediaQueryList.dispatchEvent(new Event("change"));
     },
   };
@@ -37,6 +38,7 @@ describe("useIsMobile", () => {
 
   it("follows the viewport when it crosses the breakpoint", () => {
     const viewport = stubViewport(DESKTOP_WIDTH);
+
     const { result } = renderHook(useIsMobile);
 
     act(() => { viewport.resize(PHONE_WIDTH); });

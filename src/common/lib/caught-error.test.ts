@@ -11,6 +11,7 @@ describe("handleCaughtError", () => {
     const report = vi.fn();
 
     setErrorReporter(report);
+
     handleCaughtError(buildApiError());
 
     expect(report).not.toHaveBeenCalled();
@@ -20,6 +21,7 @@ describe("handleCaughtError", () => {
     const report = vi.fn();
 
     setErrorReporter(report);
+
     handleCaughtError(new ForbiddenError());
 
     expect(report).not.toHaveBeenCalled();
@@ -30,6 +32,7 @@ describe("handleCaughtError", () => {
     const bug = new TypeError("x is undefined");
 
     setErrorReporter(report);
+
     handleCaughtError(bug);
 
     expect(report).toHaveBeenCalledWith(bug, "boundary");

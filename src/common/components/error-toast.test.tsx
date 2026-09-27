@@ -19,6 +19,7 @@ describe("showErrorToast", () => {
 
   it("announces what went wrong without any id", async () => {
     renderWithProviders(null);
+
     showErrorToast(buildApiError({ traceId: TRACE_ID }));
 
     const alert = await screen.findByRole("alert");
@@ -54,14 +55,17 @@ describe("showErrorToast", () => {
 
   it("copies the whole report and says so", async () => {
     const user = userEvent.setup();
+
     const error = buildApiError({ fieldErrors: [{ field: "email", message: "Invalid email" }] });
 
     renderWithProviders(null);
+
     showErrorToast(error);
 
     await user.click(await screen.findByRole("button", { name: "Copy error", hidden: true }));
 
     expect(JSON.parse(await navigator.clipboard.readText())).toEqual(error.toReport());
+
     expect(await screen.findByRole("button", { name: "Copied", hidden: true })).toHaveAttribute("aria-disabled", "true");
   });
 
@@ -85,6 +89,7 @@ describe("showErrorToast", () => {
     await changeLanguage("es");
 
     renderWithProviders(null);
+
     showErrorToast(buildApiError());
 
     await screen.findByRole("alert");

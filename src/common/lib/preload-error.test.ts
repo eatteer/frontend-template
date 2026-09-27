@@ -18,7 +18,9 @@ describe("handlePreloadError", () => {
     handlePreloadError(event, reload, NOW);
 
     expect(reload).toHaveBeenCalledOnce();
+
     expect(event.defaultPrevented).toBe(true);
+
     expect(sessionStorage.getItem(RELOAD_GUARD_STORAGE_KEY)).toBe(String(NOW));
   });
 
@@ -31,6 +33,7 @@ describe("handlePreloadError", () => {
     handlePreloadError(event, reload, NOW);
 
     expect(reload).not.toHaveBeenCalled();
+
     expect(event.defaultPrevented).toBe(false);
   });
 

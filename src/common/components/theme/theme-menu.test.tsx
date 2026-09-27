@@ -18,6 +18,7 @@ describe("ThemeMenu", () => {
     await user.click(await screen.findByRole("menuitemradio", { name: "Dark" }));
 
     expect(document.documentElement).toHaveClass("dark");
+
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
   });
 

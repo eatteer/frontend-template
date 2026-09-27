@@ -85,6 +85,7 @@ export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOpt
       await holdCreate;
 
       backend.createBodies.push(body);
+
       users.push(buildUserDTO({ id: CREATED_ID, name: body.name, email: body.email, createdAt: new Date().toISOString() }));
 
       return HttpResponse.json({ data: { id: CREATED_ID } }, { status: 201 });
@@ -93,6 +94,7 @@ export function usersBackend(initial: UserDTO[], { holdCreate }: UsersBackendOpt
       USER_URL,
       async ({ request, params }: { request: StrictRequest<UpdateUserDTO>; params: UserParams }): Promise<MockedResponse> => {
         const body = await request.json();
+
         const index = users.findIndex((candidate: UserDTO): boolean => candidate.id === params.id);
         const user = users[index];
 

@@ -55,6 +55,7 @@ test("signing out leaves every tab on sign-in, and nothing the account saw survi
 
   await first.getByLabel("Email").fill(account.email);
   await first.getByLabel("Password").fill(E2E_USER_PASSWORD);
+
   await first.getByRole("button", { name: "Sign in" }).click();
 
   await expect(first).toHaveURL("/");

@@ -42,11 +42,13 @@ describe("the users list", () => {
     expect(rowNames()).toHaveLength(10);
     expect(rowNames()[0]).toBe("User 25");
     expect(screen.getByText("Page 1 of 3 · 25 results")).toBeInTheDocument();
+
     expect(lastListQuery(backend)).toEqual({ limit: "10" });
   });
 
   it("pages through the backend's pages, keeping the page in the URL", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers(TWENTY_FIVE_USERS);
 
     const { router } = renderRoute("/users");
@@ -58,22 +60,27 @@ describe("the users list", () => {
     await user.click(screen.getByRole("button", { name: "Next" }));
 
     expect(await screen.findByRole("link", { name: "User 15" })).toBeInTheDocument();
+
     expect(router.state.location.search).toEqual({ page: 2 });
+
     expect(lastListQuery(backend)).toEqual({ page: "2", limit: "10" });
 
     await user.click(screen.getByRole("button", { name: "Previous" }));
 
     expect(await screen.findByRole("link", { name: "User 25" })).toBeInTheDocument();
+
     expect(router.state.location.search).toEqual({});
   });
 
   it("searches from the first page", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers(TWENTY_FIVE_USERS);
 
     const { router } = renderRoute("/users?page=2");
 
     await screen.findByRole("link", { name: "User 15" });
+
     await user.type(screen.getByRole("searchbox", { name: "Search" }), "user0");
 
     await waitFor(() => {
@@ -81,6 +88,7 @@ describe("the users list", () => {
     });
 
     expect(await screen.findByText("Page 1 of 1 · 9 results")).toBeInTheDocument();
+
     expect(lastListQuery(backend)).toEqual({ search: "user0", limit: "10" });
   });
 
@@ -127,11 +135,13 @@ describe("the users list", () => {
 
   it("filters by status from the first page, and clears the filter", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers([...buildUserDTOs(3), buildUserDTO({ id: "suspended", name: "Sam Suspended", status: "suspended" })]);
 
     const { router } = renderRoute("/users?page=1");
 
     await screen.findByRole("link", { name: "Sam Suspended" });
+
     await user.click(screen.getByRole("combobox", { name: "Status" }));
     await user.click(await screen.findByRole("option", { name: "Suspended" }));
 
@@ -140,6 +150,7 @@ describe("the users list", () => {
     });
 
     expect(router.state.location.search).toEqual({ status: "suspended" });
+
     expect(lastListQuery(backend)).toEqual({ status: "suspended", limit: "10" });
 
     await user.click(screen.getByRole("combobox", { name: "Status" }));
@@ -154,6 +165,7 @@ describe("the users list", () => {
 
   it("sorts by a column, ascending first and then the other way", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers(TWENTY_FIVE_USERS);
 
     const { router } = renderRoute("/users?page=3");
@@ -169,6 +181,7 @@ describe("the users list", () => {
     });
 
     expect(router.state.location.search).toEqual({ sortBy: "name", sortOrder: "asc" });
+
     expect(screen.getByRole("columnheader", { name: "Name" })).toHaveAttribute("aria-sort", "ascending");
     expect(screen.getByRole("columnheader", { name: "Created" })).not.toHaveAttribute("aria-sort");
 
@@ -183,11 +196,13 @@ describe("the users list", () => {
 
   it("leaves the backend's default order out of the URL and the request", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers(TWENTY_FIVE_USERS);
 
     const { router } = renderRoute("/users");
 
     await screen.findByRole("link", { name: "User 25" });
+
     await user.click(screen.getByRole("button", { name: "Created" }));
 
     await waitFor(() => {
@@ -201,7 +216,9 @@ describe("the users list", () => {
     });
 
     expect(router.state.location.search).toEqual({});
+
     expect(screen.getByRole("columnheader", { name: "Created" })).toHaveAttribute("aria-sort", "descending");
+
     expect(lastListQuery(backend)).toEqual({ limit: "10" });
   });
 
@@ -226,6 +243,7 @@ describe("the users list", () => {
 
   it("shows why the list failed in its place, and loads it again on retry", async () => {
     const user = userEvent.setup();
+
     let isFailing = true;
 
     server.use(http.get(USERS_URL, (): MockedResponse => {
@@ -280,8 +298,11 @@ describe("the users list, by permission", () => {
     const { router } = renderRoute("/users");
 
     expect(await screen.findByText("You don't have access")).toBeInTheDocument();
+
     expect(router.state.location.pathname).toBe("/users");
+
     expect(backend.listQueries).toEqual([]);
+
     warning.assertWarned();
   });
 
@@ -289,6 +310,7 @@ describe("the users list, by permission", () => {
     const user = userEvent.setup();
 
     serveUsers(TWENTY_FIVE_USERS);
+
     renderRoute("/");
 
     await user.click(await screen.findByRole("link", { name: "Users" }));

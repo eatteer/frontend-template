@@ -50,6 +50,7 @@ test.describe("with a session of its own", () => {
     // Without the access cookie the backend answers exactly as it does to an expired one: 401
     // `common.unauthenticated`.
     await context.clearCookies({ name: ACCESS_TOKEN_COOKIE });
+
     await Promise.all([first.reload(), second.reload()]);
 
     for (const tab of [first, second]) {
@@ -57,6 +58,7 @@ test.describe("with a session of its own", () => {
     }
 
     expect(refreshes).toHaveLength(1);
+
     expect((await context.cookies()).some((cookie: Cookie): boolean => cookie.name === ACCESS_TOKEN_COOKIE)).toBe(true);
   });
 });
@@ -69,6 +71,7 @@ test("a language chosen in one tab is the account's, and the other tab follows i
     await first.getByRole("menuitemradio", { name: "Español" }).click();
 
     await expect(first.getByRole("heading", { name: "Usuarios" })).toBeVisible();
+
     await expect(second.getByRole("heading", { name: "Usuarios" })).toBeVisible();
 
     // A reload reads it back from the account, not from this browser.

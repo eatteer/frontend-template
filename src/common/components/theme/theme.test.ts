@@ -69,6 +69,7 @@ describe("startThemeTransition", () => {
 
     expect(startViewTransition).toHaveBeenCalledWith(apply);
     expect(apply).toHaveBeenCalledOnce();
+
     expect(document.documentElement.style.getPropertyValue("--theme-transition-x")).toBe("100px");
     expect(document.documentElement.style.getPropertyValue("--theme-transition-radius")).not.toBe("");
   });

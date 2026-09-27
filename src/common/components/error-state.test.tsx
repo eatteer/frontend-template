@@ -18,6 +18,7 @@ describe("ErrorState", () => {
 
   it("offers a retry when the screen can retry", async () => {
     const user = userEvent.setup();
+
     const onRetry = vi.fn();
 
     renderWithProviders(<ErrorState error={new Error("boom")} onRetry={onRetry} />);
@@ -25,11 +26,13 @@ describe("ErrorState", () => {
     await user.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(onRetry).toHaveBeenCalledOnce();
+
     expect(screen.getByRole("alert")).toHaveTextContent("Something went wrong");
   });
 
   it("copies the same report as the toast", async () => {
     const user = userEvent.setup();
+
     const error = buildApiError();
 
     renderWithProviders(<ErrorState error={error} />);
@@ -37,6 +40,7 @@ describe("ErrorState", () => {
     await user.click(screen.getByRole("button", { name: "Copy error" }));
 
     expect(JSON.parse(await navigator.clipboard.readText())).toEqual(error.toReport());
+
     expect(screen.getByRole("button", { name: "Copied" })).toHaveAttribute("aria-disabled", "true");
   });
 

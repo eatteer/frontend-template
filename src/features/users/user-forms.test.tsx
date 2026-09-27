@@ -40,6 +40,7 @@ async function chooseLanguage(user: UserEvent, language: string): Promise<void> 
 describe("creating a user", () => {
   it("creates them behind the fullscreen loader, shows them, and marks every list out of date", async () => {
     const user = userEvent.setup();
+
     let answer: (() => void) | undefined;
 
     const answered = new Promise<void>((resolve: () => void): void => {
@@ -64,13 +65,17 @@ describe("creating a user", () => {
 
     expect(await screen.findByRole("heading", { name: "Ada Lovelace" })).toBeInTheDocument();
     expect(screen.queryByRole("status", { name: "Saving…" })).not.toBeInTheDocument();
+
     expect(router.state.location.pathname).toBe("/users/01890a5d-ac96-774b-bcce-b3020990ffff");
+
     expect(queryClient.getQueryState(userQueries.list({}).queryKey)?.isInvalidated).toBe(true);
+
     expect(backend.createBodies).toEqual([{ name: "Ada Lovelace", email: "ada@example.com", password: "Change-me-1!" }]);
   });
 
   it("sends the language chosen for the account", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers(USERS);
 
     renderRoute("/users/new");
@@ -81,11 +86,13 @@ describe("creating a user", () => {
     await user.click(screen.getByRole("button", { name: "Create user" }));
 
     expect(await screen.findByRole("heading", { name: "Ada Lovelace" })).toBeInTheDocument();
+
     expect(backend.createBodies).toEqual([expect.objectContaining({ preferredLanguage: "es" })]);
   });
 
   it("leaves the language to the backend when the choice is taken back", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers(USERS);
 
     renderRoute("/users/new");
@@ -99,16 +106,19 @@ describe("creating a user", () => {
     await user.click(screen.getByRole("button", { name: "Create user" }));
 
     expect(await screen.findByRole("heading", { name: "Ada Lovelace" })).toBeInTheDocument();
+
     expect(backend.createBodies).toEqual([{ name: "Ada Lovelace", email: "ada@example.com", password: "Change-me-1!" }]);
   });
 
   it("checks the fields before sending anything, and focuses the first one wrong", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers(USERS);
 
     renderRoute("/users/new");
 
     await user.type(await screen.findByLabelText("Password"), "short");
+
     await user.click(screen.getByRole("button", { name: "Create user" }));
 
     expect(await screen.findByText("Enter a name")).toBeInTheDocument();
@@ -116,6 +126,7 @@ describe("creating a user", () => {
     expect(screen.getByLabelText("Password")).toHaveAccessibleDescription("Use at least 8 characters");
     expect(screen.getByLabelText("Name")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText("Name")).toHaveFocus();
+
     expect(backend.createBodies).toEqual([]);
   });
 
@@ -174,6 +185,7 @@ describe("creating a user", () => {
 
     expect(await screen.findByText("You don't have access")).toBeInTheDocument();
     expect(screen.queryByLabelText("Name")).not.toBeInTheDocument();
+
     warning.assertWarned();
   });
 });
@@ -241,6 +253,7 @@ describe("a user's page", () => {
     renderRoute("/users/missing");
 
     expect(await screen.findByText("Page not found")).toBeInTheDocument();
+
     warning.assertWarned();
   });
 });
@@ -248,6 +261,7 @@ describe("a user's page", () => {
 describe("editing a user", () => {
   it("opens with the user's email, saves a change and shows the user again", async () => {
     const user = userEvent.setup();
+
     const backend = serveUsers(USERS);
 
     const { router } = renderRoute(`/users/${JANE.id}`);
@@ -261,10 +275,13 @@ describe("editing a user", () => {
 
     await user.clear(email);
     await user.type(email, "jane.doe@example.com");
+
     await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect(await screen.findByText("jane.doe@example.com")).toBeInTheDocument();
+
     expect(router.state.location.pathname).toBe(`/users/${JANE.id}`);
+
     expect(backend.updateBodies).toEqual([{ email: "jane.doe@example.com" }]);
   });
 
@@ -283,6 +300,7 @@ describe("editing a user", () => {
 
     await user.clear(email);
     await user.type(email, "taken@example.com");
+
     await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect(await screen.findByText("The email is not valid")).toBeInTheDocument();
@@ -298,6 +316,7 @@ describe("editing a user", () => {
 
   it("reads the session again after an administrator edits their own account", async () => {
     const user = userEvent.setup();
+
     const session = buildSessionDTO();
     let sessionReads = 0;
 
@@ -315,6 +334,7 @@ describe("editing a user", () => {
 
     await user.clear(email);
     await user.type(email, "root@example.com");
+
     await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect(await screen.findByRole("heading", { name: session.user.name })).toBeInTheDocument();
@@ -335,6 +355,7 @@ describe("editing a user", () => {
 
     expect(await screen.findByText("You don't have access")).toBeInTheDocument();
     expect(within(document.body).queryByLabelText("Email")).not.toBeInTheDocument();
+
     warning.assertWarned();
   });
 });

@@ -42,6 +42,7 @@ describe("useDebouncedFilter", () => {
     });
 
     expect(result.current.draft).toBe("ad");
+
     expect(commit).not.toHaveBeenCalled();
 
     act(() => {

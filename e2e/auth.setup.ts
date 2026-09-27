@@ -11,9 +11,11 @@ test("an anonymous visitor signs in and comes back to the page they asked for", 
 
   await page.getByLabel("Email").fill(e2eEnv.E2E_ADMIN_EMAIL);
   await page.getByLabel("Password").fill(e2eEnv.E2E_ADMIN_PASSWORD);
+
   await page.getByRole("button", { name: "Sign in" }).click();
 
   await expect(page).toHaveURL("/users");
+
   await expect(page.getByRole("heading", { name: /^(Users|Usuarios)$/ })).toBeVisible();
 
   // Once signed in, the account's language decides the screen's, and the specs read it in English.

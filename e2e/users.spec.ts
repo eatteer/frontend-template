@@ -119,6 +119,7 @@ test("the list shows a skeleton, then the users, and keeps its page and search i
   await page.getByRole("button", { name: "Next" }).click();
 
   await expect(page).toHaveURL(/[?&]page=2(&|$)/);
+
   await expect(table.getByRole("link")).toHaveCount(Math.min(pageSize, SEEDED_USERS - pageSize));
 
   expect(new URL(page.url()).searchParams.get("search")).toBe(RUN);
@@ -137,6 +138,7 @@ test("creating a user blocks the screen until it is saved, then edits it with a 
   const release = await holdRequests(page, (request: Request): boolean => request.method() === "POST" && isUsersCollection(request));
 
   await page.goto("/users/new");
+
   await page.getByLabel("Name").fill(`${RUN} created`);
   await page.getByLabel("Email").fill(emailOf("created"));
   await page.getByLabel("Password").fill(E2E_USER_PASSWORD);
@@ -186,14 +188,17 @@ test("creating a user blocks the screen until it is saved, then edits it with a 
   await expect(email).toHaveValue(emailOf("created"));
 
   await email.fill(emailOf("edited"));
+
   await page.getByRole("button", { name: "Save changes" }).click();
 
   await expect(page).toHaveURL(USER_DETAIL_URL);
+
   await expect(page.getByText(emailOf("edited"))).toBeVisible();
 });
 
 test("an email already registered is a toast that closes itself and copies the whole report", async ({ page }) => {
   await page.goto("/users/new");
+
   await page.getByLabel("Name").fill(`${RUN} duplicate`);
   await page.getByLabel("Email").fill(emailOf("01"));
   await page.getByLabel("Password").fill(E2E_USER_PASSWORD);
@@ -204,6 +209,7 @@ test("an email already registered is a toast that closes itself and copies the w
 
   const response = await conflict;
   const traceId = response.headers()[TRACE_ID_HEADER];
+
   const toast = page.locator("[data-slot=toast]");
 
   expect(response.status()).toBe(409);
@@ -225,6 +231,7 @@ test("an email already registered is a toast that closes itself and copies the w
   await page.getByRole("button", { name: "Create user" }).click();
 
   const reportedTraceId = (await secondConflict).headers()[TRACE_ID_HEADER];
+
   const copy = toast.getByRole("button", { name: "Copy error", includeHidden: true });
 
   await copy.click();
@@ -248,6 +255,7 @@ test("an email already registered is a toast that closes itself and copies the w
 
 test("the backend's field errors land on the fields they name", async ({ page }) => {
   await page.goto("/users/new");
+
   await page.getByLabel("Name").fill("n".repeat(NAME_MAX_LENGTH + 1));
   await page.getByLabel("Email").fill(emailOf("too-long"));
   await page.getByLabel("Password").fill("p".repeat(PASSWORD_MAX_BYTES + 1));

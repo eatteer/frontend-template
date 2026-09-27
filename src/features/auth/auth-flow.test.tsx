@@ -46,6 +46,7 @@ async function fillAndSubmit(email: string, password: string): Promise<void> {
 
   await user.type(await screen.findByLabelText("Email"), email);
   await user.type(screen.getByLabelText("Password"), password);
+
   await user.click(screen.getByRole("button", { name: "Sign in" }));
 }
 
@@ -56,6 +57,7 @@ describe("signing in", () => {
     const { router } = renderRoute("/?tab=recent");
 
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+
     expect(router.state.location.pathname).toBe("/sign-in");
     expect(router.state.location.search).toEqual({ redirect: "/?tab=recent" });
   });
@@ -68,8 +70,11 @@ describe("signing in", () => {
     await fillAndSubmit("admin@example.com", "Change-me-1!");
 
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
+
     expect(router.state.location.href).toBe("/?tab=recent");
+
     expect(backend.loginBodies).toEqual([{ email: "admin@example.com", password: "Change-me-1!" }]);
+
     expect(screen.getByRole("button", { name: "Account" })).toBeInTheDocument();
   });
 
@@ -81,11 +86,13 @@ describe("signing in", () => {
     await fillAndSubmit("admin@example.com", "Change-me-1!");
 
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
+
     expect(router.state.location.href).toBe("/");
   });
 
   it("checks the fields before sending anything", async () => {
     const backend = serveBackendThatSignsIn();
+
     const user = userEvent.setup();
 
     renderRoute("/sign-in");
@@ -97,6 +104,7 @@ describe("signing in", () => {
     expect(screen.getByLabelText("Email")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText("Email")).toHaveAccessibleDescription("Enter a valid email address");
     expect(screen.getByLabelText("Email")).toHaveFocus();
+
     expect(backend.loginBodies).toEqual([]);
   });
 
@@ -142,6 +150,7 @@ describe("signing in", () => {
     const { router } = renderRoute("/sign-in");
 
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
+
     expect(router.state.location.pathname).toBe("/");
   });
 
@@ -162,6 +171,7 @@ describe("signing in", () => {
     otherTab.postMessage({ type: "signed-in" });
 
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
+
     expect(router.state.location.pathname).toBe("/");
   });
 
@@ -183,6 +193,7 @@ describe("signing in", () => {
     otherTab.postMessage({ type: "signed-in" });
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Try again in a minute");
+
     expect(router.state.location.pathname).toBe("/sign-in");
   });
 });
@@ -190,6 +201,7 @@ describe("signing in", () => {
 describe("signing out", () => {
   it("signs out from the account menu, forgets the session and stays on the sign-in page", async () => {
     const user = userEvent.setup();
+
     let signedOutCalls = 0;
 
     server.use(http.post(LOGOUT_URL, (): HttpResponse<undefined> => {
@@ -209,8 +221,11 @@ describe("signing out", () => {
     await user.click(screen.getByRole("menuitem", { name: "Sign out" }));
 
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+
     expect(router.state.location.search).toEqual({});
+
     expect(signedOutCalls).toBe(1);
+
     expect(queryClient.getQueryData(sessionQuery.queryKey)).toBeNull();
   });
 
@@ -220,9 +235,11 @@ describe("signing out", () => {
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
 
     server.use(...signedOut());
+
     otherTab.postMessage({ type: "signed-out", reason: "sign-out" });
 
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+
     expect(router.state.location.search).toEqual({ redirect: "/?tab=recent" });
   });
 
@@ -232,12 +249,15 @@ describe("signing out", () => {
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
 
     queryClient.setQueryData(["unrelated"], "cached for the previous account");
+
     server.use(...signedOut());
 
     publishSessionEvent({ type: "signed-out", reason: "expired" });
 
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+
     expect(router.state.location.search).toEqual({ redirect: "/" });
+
     expect(queryClient.getQueryData(["unrelated"])).toBeUndefined();
   });
 });
@@ -249,6 +269,7 @@ describe("refreshing", () => {
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
 
     server.use(signedIn(buildSessionDTO({ permissions: ["users:read"] })));
+
     otherTab.postMessage({ type: "refreshed" });
 
     await waitFor(() => {

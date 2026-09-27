@@ -35,7 +35,9 @@ describe("the account's language", () => {
     renderRoute("/");
 
     expect(await screen.findByRole("heading", { name: "Bienvenido" })).toBeInTheDocument();
+
     expect(document.documentElement.lang).toBe("es");
+
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("es");
   });
 
@@ -104,7 +106,9 @@ describe("the account's language", () => {
 
     expect(within(await screen.findByRole("alert")).getByText("Something failed")).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
+
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("en");
+
     expect(queryClient.getQueryData(sessionQuery.queryKey)?.user.preferredLanguage).toBe("en");
   });
 
@@ -114,6 +118,7 @@ describe("the account's language", () => {
     expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
 
     server.use(signedIn(SPANISH_SESSION));
+
     otherTab.postMessage({ type: "updated" });
 
     expect(await screen.findByRole("heading", { name: "Bienvenido" })).toBeInTheDocument();

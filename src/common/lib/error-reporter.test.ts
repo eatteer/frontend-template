@@ -16,6 +16,7 @@ describe("reportUnexpectedError", () => {
     const bug = new TypeError("x is undefined");
 
     setErrorReporter(report);
+
     reportUnexpectedError(bug, "query");
 
     expect(report).toHaveBeenCalledWith(bug, "query");
@@ -26,6 +27,7 @@ describe("reportUnexpectedError", () => {
     const bug = new TypeError("y is undefined");
 
     setErrorReporter(report);
+
     reportUnexpectedError(bug, "query");
     reportUnexpectedError(bug, "boundary");
 
@@ -37,6 +39,7 @@ describe("reportUnexpectedError", () => {
     const report = vi.fn();
 
     setErrorReporter(report);
+
     reportUnexpectedError(buildApiError(), "boundary");
     reportUnexpectedError(new ForbiddenError(), "boundary");
 
@@ -74,6 +77,7 @@ describe("reportUncaughtErrors", () => {
     window.dispatchEvent(event);
 
     expect(report).toHaveBeenCalledWith(bug, "uncaught");
+
     expect(event.defaultPrevented).toBe(true);
   });
 
@@ -103,6 +107,7 @@ describe("reportUncaughtErrors", () => {
     window.dispatchEvent(event);
 
     expect(report).toHaveBeenCalledWith(bug, "unhandled-rejection");
+
     expect(event.defaultPrevented).toBe(true);
   });
 
@@ -115,6 +120,7 @@ describe("reportUncaughtErrors", () => {
     };
 
     setErrorReporter(report);
+
     reportUncaughtErrors()();
 
     window.addEventListener("error", swallow);

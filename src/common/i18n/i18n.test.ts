@@ -26,7 +26,9 @@ describe("changeLanguage", () => {
     await changeLanguage("es");
 
     expect(i18n.t("actions.retry")).toBe("Reintentar");
+
     expect(document.documentElement.lang).toBe("es");
+
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("es");
   });
 

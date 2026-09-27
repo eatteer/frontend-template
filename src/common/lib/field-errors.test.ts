@@ -25,6 +25,7 @@ describe("applyFieldErrors", () => {
     });
 
     expect(isPlaced).toBe(true);
+
     expect(form.current.getFieldState("email").error?.message).toBe("Taken");
     expect(form.current.getFieldState("name").error?.message).toBe("Too long");
   });
@@ -39,6 +40,7 @@ describe("applyFieldErrors", () => {
     });
 
     expect(isPlaced).toBe(false);
+
     expect(form.current.getFieldState("email").error?.message).toBe("Taken");
   });
 
