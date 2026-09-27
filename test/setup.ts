@@ -1,3 +1,5 @@
+// The tests parse the way the browser does.
+import "@/common/config/zod";
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup, configure } from "@testing-library/react";

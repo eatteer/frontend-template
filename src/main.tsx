@@ -1,3 +1,4 @@
+import "@/common/config/zod";
 import "@/styles.css";
 import "@/common/i18n/i18n";
 

@@ -19,6 +19,16 @@ export default defineConfig({
     ...(process.env.VITEST ? [] : [babel({ presets: [reactCompilerPreset()] })]),
     tailwindcss(),
   ],
+  // Modules run in the order they are imported even when the bundler puts them in different chunks.
+  // Without it, a chunk shared by several routes runs before the entry's own first import — the one
+  // that configures Zod before any schema is built (see src/common/config/zod.ts).
+  build: {
+    rolldownOptions: {
+      output: {
+        strictExecutionOrder: true,
+      },
+    },
+  },
   // The aliases are declared once, in tsconfig.app.json, and every tool reads them from there: the
   // compiler, the bundler and the test runner. (The shadcn CLI reads the root tsconfig.json.)
   resolve: {
