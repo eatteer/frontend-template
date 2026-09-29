@@ -11,6 +11,12 @@ describe("parseEnv", () => {
     expect(() => parseEnv({})).toThrow(/VITE_API_URL/);
   });
 
+  // Blank is a line somebody meant to fill in, not a value: no default and no `.optional()` may turn
+  // it into one.
+  it("rejects an empty value", () => {
+    expect(() => parseEnv({ VITE_API_URL: "" })).toThrow(/VITE_API_URL/);
+  });
+
   it("rejects a value that is not a URL", () => {
     expect(() => parseEnv({ VITE_API_URL: "localhost" })).toThrow(/Invalid environment variables/);
   });
