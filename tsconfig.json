@@ -3,8 +3,7 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.test.json" },
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.e2e.json" }
+    { "path": "./tsconfig.node.json" }
   ],
   // Only the shadcn CLI reads this: it resolves its aliases from the root config, which compiles
   // nothing. The alias every tool actually uses is declared in tsconfig.app.json.

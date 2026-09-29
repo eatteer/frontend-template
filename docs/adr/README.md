@@ -24,5 +24,6 @@ linked rather than repeated.
 | [0005](0005-shadcn-on-base-ui.md) | The UI primitives are shadcn on Base UI, and the whole catalog lives in the repository | accepted |
 | [0006](0006-toasts-are-base-ui.md) | Toasts are Base UI's, not sonner | accepted |
 | [0007](0007-react-compiler-outside-vitest.md) | The React Compiler builds the application, but not the component tests | accepted |
-| [0008](0008-e2e-against-the-build-and-the-real-backend.md) | The end-to-end suite runs the production build against the real backend | accepted |
+| [0008](0008-e2e-against-the-build-and-the-real-backend.md) | The end-to-end suite runs the production build against the real backend | superseded by [0010](0010-no-end-to-end-suite.md) |
 | [0009](0009-api-address-fixed-at-build.md) | The API's address is fixed when the image is built | accepted |
+| [0010](0010-no-end-to-end-suite.md) | The application is tested without an end-to-end suite | accepted |

@@ -15,7 +15,7 @@ export default defineConfig({
     react(),
     // Not under Vitest: the compiler adds a cache branch to every component, taken only on a
     // re-render with the same props, and coverage would count those as branches of our own code.
-    // The compiled output is exercised by the end-to-end suite, which runs against the real build.
+    // The compiled output is checked by hand in the served image before a release.
     ...(process.env.VITEST ? [] : [babel({ presets: [reactCompilerPreset()] })]),
     tailwindcss(),
   ],

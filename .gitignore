@@ -12,11 +12,6 @@ npm-debug.log*
 
 # Tests
 /coverage
-/playwright-report
-/test-results
-/blob-report
-# The cookies the end-to-end setup signs in with: a live session, never committed.
-/playwright/.auth
 
 # IDEs and editors
 /.idea

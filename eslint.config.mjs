@@ -273,19 +273,6 @@ export default tseslint.config(
     },
   },
   {
-    // The end-to-end suite is Node driving a browser, not React: a Playwright fixture hands its value
-    // over by calling `use`, which the hooks rules would read as React's.
-    files: ["e2e/**/*.ts"],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
-    rules: {
-      "react-hooks/rules-of-hooks": "off",
-    },
-  },
-  {
     // The module that validates the configuration is the one place that reads it raw. An override
     // replaces the rule's whole option list, so the selectors that still apply are listed again.
     files: ["src/common/config/env.ts"],

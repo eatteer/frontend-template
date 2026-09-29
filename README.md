@@ -15,10 +15,6 @@ naming it.
 page.** It is configuration, never a secret. Today there is one: `VITE_API_URL`, where
 backend-template listens.
 
-The `E2E_*` variables at the end of the file are read only by the end-to-end suite, and Vite never
-exposes them to the bundle: the administrator backend-template's seed created, which the suite signs
-in as, and optionally an application already served to run against.
-
 The front end and the API have to be **same-site**: the session cookies are `SameSite=strict`, and a
 cross-site page never sends them. `localhost:5173` calling `localhost:3000` is same-site; so is
 `app.example.com` calling `api.example.com`.
@@ -54,26 +50,13 @@ npm run api:types             # writes src/common/api/schema.gen.ts, which is co
 | `npm run build` | The production bundle, in `dist/` | |
 | `npm run preview` | Serves `dist/` | `build` |
 | `npm run lint` | ESLint with `--fix`; it owns formatting | |
-| `npm run typecheck` | `tsc -b`, over the application, the tests, the end-to-end suite and the tooling | |
+| `npm run typecheck` | `tsc -b`, over the application, the tests and the tooling | |
 | `npm test` | Unit and component tests with Vitest, and the coverage floor. The network is MSW; nothing runs | |
-| `npm run test:e2e` | Builds, serves the build, and drives it with Playwright against the real backend | the backend, seeded |
 | `npm run api:types` | Regenerates the API's types from its OpenAPI document | the backend |
 
 **The component tests fail on any console error or warning.** React reports what it considers a bug
 — an input switching from uncontrolled to controlled, a missing key — through the console and keeps
-rendering, so a test asserting on the screen would pass. The end-to-end suite holds the browser to
-the same rule, except for the line Chrome writes for each 4xx response, which the flows provoke on
-purpose.
-
-**The end-to-end suite runs against the production build**, on port 4173, so it runs while the dev
-server does: add `http://localhost:4173` to the backend's `CORS_ORIGIN`
-(`"http://localhost:5173,http://localhost:4173"`). It signs in once per run as the `E2E_ADMIN_*`
-account, deletes every user it created when it finishes, and leaves that account's language in
-English. The backend allows ten sign-ins per account every fifteen minutes, and a run takes two.
-`E2E_BASE_URL=http://localhost:8080 npm run test:e2e` points the same suite at an application served
-elsewhere — the Docker image below — instead of building one.
-
-The first run needs the browser: `npx playwright install chromium`.
+rendering, so a test asserting on the screen would pass.
 
 A pre-commit hook runs the linter on staged files and then a full typecheck — `lint-staged` only
 sees the staged files, so it cannot catch a cross-file type error.
@@ -97,6 +80,12 @@ origin's scripts and styles, requests to the API alone, no framing — and the u
 HSTS is for whatever terminates TLS in front of it.
 
 **Image size: 83 MB** (measured 2026-09-26). Measure it again when the base image changes.
+
+**Before a release, run the image and use it** with the browser's developer tools open: sign in, go
+through the screens the release touches, reload on a deep link. No test runs what ships — the tests
+render the source in jsdom, without the React Compiler and without the Content-Security-Policy — so
+this is where both show: the console stays empty apart from the line Chrome writes for each 4xx a
+flow provokes on purpose, and the Issues panel lists no policy violation.
 
 **Errors the application did not expect go through one port**, `src/common/lib/error-reporter.ts`:
 what an error boundary caught, a query that threw something other than the server's answer, an
@@ -123,7 +112,6 @@ src/
 ├── main.tsx
 └── router.ts
 test/              the Vitest setup, MSW handlers and builders
-e2e/               the Playwright suite
 ```
 
 A feature owns its `api/` (queries, mutations, mappers), `components/`, `pages/`, `schemas/` and
@@ -149,7 +137,7 @@ has a record in [`docs/adr/`](docs/adr/README.md) with what was weighed and what
 | A refresh happens when a request is refused, and once across every tab | [0002](docs/adr/0002-refresh-once-across-tabs.md) |
 | The API's types are generated from its OpenAPI document, and there is one client | [0003](docs/adr/0003-types-generated-from-openapi.md) |
 | Only a write blocks the screen; a read shows a skeleton in place | [0004](docs/adr/0004-only-writes-block-the-screen.md) |
-| The end-to-end suite runs the production build against the real backend | [0008](docs/adr/0008-e2e-against-the-build-and-the-real-backend.md) |
+| The application is tested without an end-to-end suite | [0010](docs/adr/0010-no-end-to-end-suite.md) |
 | The API's address is fixed when the image is built | [0009](docs/adr/0009-api-address-fixed-at-build.md) |
 
 The rest cover the stack: shadcn on Base UI, with the whole catalog in the repository
@@ -169,8 +157,7 @@ shape it produces:
    feature needs.
 3. Its translations under `src/locales/<language>/<name>.json`, registered in
    `src/common/i18n/i18next.d.ts`.
-4. Component tests with MSW for each screen, and an end-to-end spec for the flow that crosses the
-   backend.
+4. Component tests with MSW for each screen.
 
 `users` is the example to read: a paginated list with its filters in the URL, a create form whose
 server errors land on its fields, a detail page and an edit form that mounts already filled.
@@ -186,5 +173,5 @@ server errors land on its fields, a detail page and an edit form that mounts alr
 4. Replace `features/home` with your first screen.
 5. Install an error reporter and a Web Vitals reporter (see "Deploying").
 6. Add continuous integration. There is none here, because a template deploys nothing, and the
-   commands it needs are already the scripts above: `lint`, `typecheck`, `test`, `test:e2e`. Until
+   commands it needs are already the scripts above: `lint`, `typecheck`, `test`. Until
    it exists the only gate is the pre-commit hook, which anyone can skip with `--no-verify`.
