@@ -93,11 +93,5 @@
     "typescript-eslint": "^8.70.1",
     "vite": "^8.3.1",
     "vitest": "^5.0.2"
-  },
-  "//": "overrides: eslint-plugin-jsx-a11y 6.10.2 declares a peer range that stops at ESLint 9, but runs on ESLint 10 unchanged (it uses none of the removed context APIs). Drop the override once a release widens the range.",
-  "overrides": {
-    "eslint-plugin-jsx-a11y": {
-      "eslint": "$eslint"
-    }
   }
 }
