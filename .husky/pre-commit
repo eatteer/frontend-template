@@ -1,7 +1,7 @@
-npx lint-staged
+pnpm exec lint-staged
 
 # lint-staged only sees the staged files, so it cannot catch a cross-file type
 # error — a component gaining a required prop without its callers or its test
 # being updated, for instance. Neither can `vite build` nor vitest, which both
 # transpile each file without type checking.
-npm run typecheck
+pnpm typecheck

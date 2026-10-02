@@ -1,0 +1,14 @@
+peerDependencyRules:
+  # eslint-plugin-jsx-a11y 6.10.2 declares a peer range that stops at ESLint 9, but runs on ESLint 10
+  # unchanged (it uses none of the removed context APIs). Drop the rule once a release widens the range.
+  allowedVersions:
+    eslint-plugin-jsx-a11y>eslint: "10"
+
+# pnpm runs no dependency's install script unless it is allowed here, and fails an install that meets
+# one it was not told about.
+allowBuilds:
+  # Copies its service worker into `msw.workerDirectory`, which the tests never use: they run MSW in
+  # Node, not in a browser.
+  msw: false
+  # Falls back to building its native resolver when no prebuilt binary matches the platform.
+  unrs-resolver: true

@@ -27,3 +27,4 @@ linked rather than repeated.
 | [0008](0008-e2e-against-the-build-and-the-real-backend.md) | The end-to-end suite runs the production build against the real backend | superseded by [0010](0010-no-end-to-end-suite.md) |
 | [0009](0009-api-address-fixed-at-build.md) | The API's address is fixed when the image is built | accepted |
 | [0010](0010-no-end-to-end-suite.md) | The application is tested without an end-to-end suite | accepted |
+| [0011](0011-pnpm-as-the-package-manager.md) | pnpm is the package manager | accepted |

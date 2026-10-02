@@ -22,6 +22,7 @@ cross-site page never sends them. `localhost:5173` calling `localhost:3000` is s
 ## Requirements
 
 - Node — the version in `.nvmrc`
+- pnpm — the version `packageManager` pins in `package.json`; `corepack enable` installs it
 - [backend-template](https://github.com/eatteer/backend-template) running, migrated and seeded, with
   this application's origin in its `CORS_ORIGIN`
 - Docker, only to build the deployable image
@@ -30,8 +31,8 @@ cross-site page never sends them. `localhost:5173` calling `localhost:3000` is s
 
 ```bash
 cp .env.example .env          # VITE_API_URL is where backend-template listens
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Then open `http://localhost:5173` and sign in as the administrator the backend's seed created.
@@ -39,20 +40,20 @@ Then open `http://localhost:5173` and sign in as the administrator the backend's
 After a change to the backend's API, regenerate its types with the backend running:
 
 ```bash
-npm run api:types             # writes src/common/api/schema.gen.ts, which is committed
+pnpm api:types                # writes src/common/api/schema.gen.ts, which is committed
 ```
 
 ## Scripts
 
 | Script | Does | Needs |
 | --- | --- | --- |
-| `npm run dev` | The dev server, with hot reload | the backend |
-| `npm run build` | The production bundle, in `dist/` | |
-| `npm run preview` | Serves `dist/` | `build` |
-| `npm run lint` | ESLint with `--fix`; it owns formatting | |
-| `npm run typecheck` | `tsc -b`, over the application, the tests and the tooling | |
-| `npm test` | Unit and component tests with Vitest, and the coverage floor. The network is MSW; nothing runs | |
-| `npm run api:types` | Regenerates the API's types from its OpenAPI document | the backend |
+| `pnpm dev` | The dev server, with hot reload | the backend |
+| `pnpm build` | The production bundle, in `dist/` | |
+| `pnpm preview` | Serves `dist/` | `build` |
+| `pnpm lint` | ESLint with `--fix`; it owns formatting | |
+| `pnpm typecheck` | `tsc -b`, over the application, the tests and the tooling | |
+| `pnpm test` | Unit and component tests with Vitest, and the coverage floor. The network is MSW; nothing runs | |
+| `pnpm api:types` | Regenerates the API's types from its OpenAPI document | the backend |
 
 **The component tests fail on any console error or warning.** React reports what it considers a bug
 — an input switching from uncontrolled to controlled, a missing key — through the console and keeps
