@@ -34,18 +34,19 @@ function Command({
   );
 }
 
+// Changed from the registry: the palette sits flush in the dialog's frame (`--dialog-gutter` at 0, as
+// the frame pads its content), and it has no close button, so there is no `showCloseButton` to pass on
+// (the dialog would need a translated label for it). Carry both forward on an update.
 function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
   children,
   className,
-  showCloseButton = false,
   ...props
 }: Omit<React.ComponentProps<typeof Dialog>, "children"> & {
   title?: string
   description?: string
   className?: string
-  showCloseButton?: boolean
   children: React.ReactNode
 }): React.JSX.Element {
   return (
@@ -57,10 +58,13 @@ function CommandDialog({
 
       <DialogContent
         className={cn(
-          "top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
+          `
+            top-1/3 bottom-auto overflow-hidden rounded-xl! p-0
+            [--dialog-gutter:0px]
+          `,
           className,
         )}
-        showCloseButton={showCloseButton}
+        showCloseButton={false}
       >
         {children}
       </DialogContent>

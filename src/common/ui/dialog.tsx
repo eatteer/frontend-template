@@ -42,14 +42,33 @@ function DialogOverlay({
   );
 }
 
+// Changed from the registry: the popup no longer scrolls as a whole. It is a fixed frame around a
+// scroller, and inside it the header and the footer are sticky, so a dialog taller than the screen
+// keeps its title, its buttons and the close button in view while only its content moves (a form that
+// wraps them all scrolls the same way). Each one draws a hairline only while content runs beneath it
+// (the `overlay-*` utilities in `styles.css`). The header's bottom padding equals the scroller's gap,
+// and its negative margin takes it back, so the space under the title is the same whether content
+// rests below it or passes under it. The popup is centred by its margins inside the viewport, not by
+// a translate of half its size: a translate lands the frame on a fraction of a pixel whenever its size
+// is odd or the display is scaled, and the sticky header is then rounded apart from the frame once it
+// sticks, so it seems to shift by a pixel as soon as the content scrolls. A call site that places the
+// popup elsewhere sets its own top and `bottom-auto`. `--dialog-gutter` is the frame's padding, which a call site may
+// change; nothing else about the frame is set from outside.
+// Also changed from the registry: `closeLabel` names the close button in the reader's language (the
+// registry hard-codes "Close"), as the toaster's does. It is required whenever the button is shown,
+// with no default, so a dialog cannot ship a close button announced in English. Keep both on an
+// update of the component.
+type DialogCloseButtonProps =
+  | { showCloseButton?: boolean; closeLabel: string }
+  | { showCloseButton: false; closeLabel?: undefined };
+
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  closeLabel,
   ...props
-}: DialogPrimitive.Popup.Props & {
-  showCloseButton?: boolean
-}): React.JSX.Element {
+}: DialogPrimitive.Popup.Props & DialogCloseButtonProps): React.JSX.Element {
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -58,10 +77,11 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           `
-            fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)]
-            -translate-1/2 gap-4 rounded-xl bg-popover p-4 text-sm
-            text-popover-foreground ring-1 ring-foreground/10 duration-100
-            outline-none
+            fixed inset-0 z-50 m-auto flex h-fit max-h-[calc(100dvh-2rem)]
+            w-full max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-xl
+            bg-popover text-sm text-popover-foreground ring-1 ring-foreground/10
+            duration-100 outline-none [--dialog-gutter:--spacing(4)]
+            has-[>[data-slot=dialog-close]]:**:data-[slot=dialog-header]:pr-12
             sm:max-w-sm
             data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95
             data-closed:animate-out data-closed:fade-out-0
@@ -71,7 +91,17 @@ function DialogContent({
         )}
         {...props}
       >
-        {children}
+        <div
+          data-slot="dialog-scroller"
+          className="
+            grid min-h-0 gap-4 overflow-y-auto overscroll-contain
+            px-(--dialog-gutter) pb-(--dialog-gutter) overlay-scroller
+            not-has-data-[slot=dialog-header]:pt-(--dialog-gutter)
+            has-data-[slot=dialog-footer]:pb-0
+          "
+        >
+          {children}
+        </div>
 
         {showCloseButton && (
           <DialogPrimitive.Close
@@ -79,13 +109,13 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 z-20"
                 size="icon-sm"
               />
             }
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{closeLabel}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>
@@ -97,27 +127,32 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">): Rea
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2", className)}
+      className={cn(
+        `
+          sticky top-0 z-10 -mx-(--dialog-gutter) -mb-4 flex overlay-rule-top
+          flex-col gap-2 bg-popover px-(--dialog-gutter) pt-(--dialog-gutter)
+          pb-4
+        `,
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function DialogFooter({
-  className,
-  showCloseButton = false,
-  children,
-  ...props
-}: React.ComponentProps<"div"> & {
-  showCloseButton?: boolean
-}): React.JSX.Element {
+// Changed from the registry, which offers a footer button that closes the dialog labelled "Close" in
+// English: closing is the corner's button, and a footer holds the dialog's own actions. Its top
+// padding equals the scroller's gap, as the header's bottom does. Do not bring the prop back on an
+// update.
+function DialogFooter({ className, children, ...props }: React.ComponentProps<"div">): React.JSX.Element {
   return (
     <div
       data-slot="dialog-footer"
       className={cn(
         `
-          -mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t
-          bg-muted/50 p-4
+          sticky bottom-0 z-10 -mx-(--dialog-gutter) -mt-4 flex
+          overlay-rule-bottom flex-col-reverse gap-2 bg-popover
+          px-(--dialog-gutter) pt-4 pb-(--dialog-gutter)
           sm:flex-row sm:justify-end
         `,
         className,
@@ -125,12 +160,6 @@ function DialogFooter({
       {...props}
     >
       {children}
-
-      {showCloseButton && (
-        <DialogPrimitive.Close render={<Button variant="outline" />}>
-          Close
-        </DialogPrimitive.Close>
-      )}
     </div>
   );
 }

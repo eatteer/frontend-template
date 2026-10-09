@@ -41,9 +41,16 @@ function AlertDialogOverlay({
   );
 }
 
+// Changed from the registry, as the dialog's is: the popup is a fixed frame around a scroller in
+// which the header and the footer are sticky, so a long confirmation keeps its title and its buttons
+// in view and only what lies between them scrolls (the `overlay-*` utilities in `styles.css`). Its
+// header's bottom padding and its footer's top padding equal the scroller's gap, and it is centred by
+// its margins rather than a translate, both for the same reasons as the dialog's. Keep these on an
+// update of the component.
 function AlertDialogContent({
   className,
   size = "default",
+  children,
   ...props
 }: AlertDialogPrimitive.Popup.Props & {
   size?: "default" | "sm"
@@ -57,10 +64,10 @@ function AlertDialogContent({
         data-size={size}
         className={cn(
           `
-            group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full
-            -translate-1/2 gap-4 rounded-xl bg-popover p-4
-            text-popover-foreground ring-1 ring-foreground/10 duration-100
-            outline-none
+            group/alert-dialog-content fixed inset-0 z-50 m-auto flex h-fit
+            max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden rounded-xl
+            bg-popover text-popover-foreground ring-1 ring-foreground/10
+            duration-100 outline-none [--dialog-gutter:--spacing(4)]
             data-[size=default]:max-w-xs
             data-[size=sm]:max-w-xs
             data-[size=default]:sm:max-w-sm
@@ -71,7 +78,19 @@ function AlertDialogContent({
           className,
         )}
         {...props}
-      />
+      >
+        <div
+          data-slot="alert-dialog-scroller"
+          className="
+            grid min-h-0 gap-4 overflow-y-auto overscroll-contain
+            px-(--dialog-gutter) pb-(--dialog-gutter) overlay-scroller
+            not-has-data-[slot=alert-dialog-header]:pt-(--dialog-gutter)
+            has-data-[slot=alert-dialog-footer]:pb-0
+          "
+        >
+          {children}
+        </div>
+      </AlertDialogPrimitive.Popup>
     </AlertDialogPortal>
   );
 }
@@ -85,7 +104,9 @@ function AlertDialogHeader({
       data-slot="alert-dialog-header"
       className={cn(
         `
-          grid grid-rows-[auto_1fr] place-items-center gap-1.5 text-center
+          sticky top-0 z-10 -mx-(--dialog-gutter) -mb-4 grid overlay-rule-top
+          grid-rows-[auto_1fr] place-items-center gap-1.5 bg-popover
+          px-(--dialog-gutter) pt-(--dialog-gutter) pb-4 text-center
           has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr]
           has-data-[slot=alert-dialog-media]:gap-x-4
           sm:group-data-[size=default]/alert-dialog-content:place-items-start
@@ -108,8 +129,9 @@ function AlertDialogFooter({
       data-slot="alert-dialog-footer"
       className={cn(
         `
-          -mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t
-          bg-muted/50 p-4
+          sticky bottom-0 z-10 -mx-(--dialog-gutter) -mt-4 flex
+          overlay-rule-bottom flex-col-reverse gap-2 bg-popover
+          px-(--dialog-gutter) pt-4 pb-(--dialog-gutter)
           group-data-[size=sm]/alert-dialog-content:grid
           group-data-[size=sm]/alert-dialog-content:grid-cols-2
           sm:flex-row sm:justify-end

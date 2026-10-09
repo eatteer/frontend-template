@@ -181,3 +181,53 @@
 .base-ui-disable-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* A dialog scrolls inside its frame: the title and the buttons stay put (they are sticky inside the
+   scroller) and only what lies between them moves. The scroller names its scroll timeline, and the
+   header and footer read it to draw their hairline only when content runs under them: the header's
+   once the reader scrolls past the top, the footer's while there is more below. A dialog that fits
+   has an inactive timeline, so neither rule shows; a browser without scroll-driven animations shows
+   none either, and the dialog still scrolls. */
+@utility overlay-scroller {
+  scroll-timeline: --overlay-scroll y;
+}
+
+@utility overlay-rule-top {
+  border-bottom: 1px solid transparent;
+
+  @supports (animation-timeline: scroll()) {
+    animation: overlay-rule-show linear both;
+    animation-timeline: --overlay-scroll;
+    animation-range: 0 1rem;
+  }
+}
+
+@utility overlay-rule-bottom {
+  border-top: 1px solid transparent;
+
+  @supports (animation-timeline: scroll()) {
+    animation: overlay-rule-hide linear both;
+    animation-timeline: --overlay-scroll;
+    animation-range: calc(100% - 1rem) 100%;
+  }
+}
+
+@keyframes overlay-rule-show {
+  from {
+    border-color: transparent;
+  }
+
+  to {
+    border-color: var(--border);
+  }
+}
+
+@keyframes overlay-rule-hide {
+  from {
+    border-color: var(--border);
+  }
+
+  to {
+    border-color: transparent;
+  }
+}
